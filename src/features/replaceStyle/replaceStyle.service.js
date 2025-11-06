@@ -18,6 +18,8 @@ const STYLE_PRESETS = {
         "Transform to classical oil painting on canvas: visible impasto brushwork, rich color depth, soft edges, realistic lighting. Preserve the original color palette (especially skin tones and key garments) with minimal deviation. Keep the original face, pose and composition.",
     sketches:
         "Transform to a colored pencil sketch: graphite-like hatching with clean linework and subtle shading on paper texture. Preserve the original color palette instead of converting to grayscale. Keep the original face, pose and composition.",
+    cartoon: "Make this a 90s cartoon style. Keep the original face, pose and composition.",
+
 };
 
 // Pre-resize để giảm chi phí/độ trễ

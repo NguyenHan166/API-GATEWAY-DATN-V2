@@ -1,4 +1,4 @@
-const ALLOWED = ["anime", "ghibli", "watercolor", "oil-painting", "sketches"];
+const ALLOWED = ["anime", "ghibli", "watercolor", "oil-painting", "sketches", "cartoon"];
 
 export function validateStyleInput({ style, extra, fileBuffer, mimeType }) {
     if (!fileBuffer)
