@@ -6,6 +6,7 @@ import { errorHandler } from "./middlewares/error.js";
 import { requestId } from "./middlewares/requestId.js";
 import { requestTimeout } from "./middlewares/timeout.js";
 import { PERF } from "./config/perf.js";
+import { getManifestCached } from "./features/manifest/manifest.service.js";
 
 export function createApp() {
     const app = express();
@@ -29,6 +30,10 @@ export function createApp() {
 
     // Routes
     app.use("/api", api);
+
+    getManifestCached({ fresh: true })
+        .then(() => console.log("[startup] manifest warmed"))
+        .catch((e) => console.error("[startup] warm manifest failed:", e));
 
     // Error handler
     app.use(errorHandler);

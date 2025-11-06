@@ -13,8 +13,9 @@ export const PERF = {
     // Timeout (ms)
     timeouts: {
         requestMs: Number(process.env.REQUEST_TIMEOUT_MS || 120_000), // 120s cho mỗi request
-        replicateMs: Number(process.env.REPLICATE_TIMEOUT_MS || 90_000), // 90s cho model call
+        replicateMs: Number(process.env.REPLICATE_TIMEOUT_MS || 180_000), // 180s cho model call
         r2Ms: Number(process.env.R2_TIMEOUT_MS || 30_000), // 30s cho R2
+        httpMs: Number(process.env.HTTP_TIMEOUT_MS || 30_000), // 30s cho các HTTP request thông thường
     },
 
     // Upload/Body size

@@ -28,16 +28,16 @@ export async function replaceBgController(req, res) {
             contentType: "image/png",
             ext: "png",
         });
-        const url = buildPublicUrl(key);
-        const signed = await presignGetUrl(key, q.signTtl ?? 3600);
+        const expiresIn = q.signTtl ?? 3600;
+        const publicUrl = buildPublicUrl(key);
+        const presignedUrl = await presignGetUrl(key, expiresIn);
 
         res.json({
             key,
-            width: W,
-            height: H,
-            url: url || signed,
-            presigned_url: signed,
-            expires_in: q.signTtl ?? 3600,
+            url: publicUrl || presignedUrl,
+            presigned_url: presignedUrl,
+            expires_in: expiresIn,
+            meta: { width: W, height: H },
         });
     };
 

@@ -87,12 +87,46 @@ export async function buildManifest() {
     return manifest;
 }
 
-export async function getManifestCached() {
+// ... phần import & helpers giữ nguyên
+let _refreshing = false;
+
+async function _refreshNow() {
+    if (_refreshing) return;
+    _refreshing = true;
+    try {
+        const m = await buildManifest();
+        _cache_manifest = m;
+        _cache_time = Date.now() / 1000;
+        console.log(`[manifest] refreshed packs=${m.packs.length}`);
+    } finally {
+        _refreshing = false;
+    }
+}
+
+/**
+ * SWR: nếu chưa có cache -> build đồng bộ.
+ * Nếu có cache nhưng đã stale -> trả cache cũ ngay và kick refresh nền.
+ * Nếu callers muốn bắt buộc fresh, set { fresh: true }.
+ */
+export async function getManifestCached({ fresh = false } = {}) {
     const now = Date.now() / 1000;
-    if (!_cache_manifest || now - _cache_time > MANIFEST_CACHE_TTL_SECONDS) {
-        _cache_manifest = await buildManifest();
-        _cache_time = now;
-        console.log(`[manifest] packs=${_cache_manifest.packs.length}`);
+    const stale =
+        !_cache_manifest || now - _cache_time > MANIFEST_CACHE_TTL_SECONDS;
+
+    if (!_cache_manifest) {
+        // lần đầu, phải có dữ liệu -> build đồng bộ
+        await _refreshNow();
+        return _cache_manifest;
+    }
+    if (fresh && stale) {
+        await _refreshNow();
+        return _cache_manifest;
+    }
+    if (stale) {
+        // trả cache cũ, làm mới nền
+        _refreshNow().catch((e) =>
+            console.error("[manifest] bg refresh error:", e)
+        );
     }
     return _cache_manifest;
 }
