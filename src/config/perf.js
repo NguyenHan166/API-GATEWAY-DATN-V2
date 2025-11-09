@@ -10,14 +10,6 @@ export const PERF = {
         defaultHeavy: Number(process.env.CONCURRENCY_DEFAULT_HEAVY || 6),
     },
 
-    // Timeout (ms)
-    timeouts: {
-        requestMs: Number(process.env.REQUEST_TIMEOUT_MS || 120_000), // 120s cho mỗi request
-        replicateMs: Number(process.env.REPLICATE_TIMEOUT_MS || 180_000), // 180s cho model call
-        r2Ms: Number(process.env.R2_TIMEOUT_MS || 30_000), // 30s cho R2
-        httpMs: Number(process.env.HTTP_TIMEOUT_MS || 30_000), // 30s cho các HTTP request thông thường
-    },
-
     // Upload/Body size
     body: {
         jsonLimit: process.env.JSON_LIMIT || "10mb",
@@ -27,5 +19,16 @@ export const PERF = {
     // Resize trước khi xử lý (tiết kiệm CPU/RAM)
     image: {
         maxSidePx: Number(process.env.IMAGE_MAX_SIDE_PX || 2048), // scale long edge ≤ 2048
+        outputQuality: Number(process.env.OUTPUT_QUALITY || 92),
+    },
+
+    retries: {
+        attempts: Number(process.env.AI_RETRIES || 2),
+        baseDelayMs: Number(process.env.AI_RETRY_BASE_MS || 800),
+        factor: Number(process.env.AI_RETRY_FACTOR || 2),
+    },
+
+    r2: {
+        presignExpiresSec: Number(process.env.R2_PRESIGN_EXPIRES || 3600),
     },
 };

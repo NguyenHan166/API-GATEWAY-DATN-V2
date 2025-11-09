@@ -1,9 +1,9 @@
 import sharp from "sharp";
-import { PERF } from "../../config/perf.js";
 import { replicate } from "../../integrations/replicate/client.js";
 import { withRetry } from "../../utils/retry.js";
 import { uploadBufferToR2 } from "../../integrations/r2/storage.service.js";
 import { withReplicateLimiter } from "../../utils/limiters.js";
+import { PERF } from "../../config/perf.js";
 
 // Model FLUX Kontext (dev) — I2I
 const MODEL = "black-forest-labs/flux-kontext-dev";
@@ -18,8 +18,8 @@ const STYLE_PRESETS = {
         "Transform to classical oil painting on canvas: visible impasto brushwork, rich color depth, soft edges, realistic lighting. Preserve the original color palette (especially skin tones and key garments) with minimal deviation. Keep the original face, pose and composition.",
     sketches:
         "Transform to a colored pencil sketch: graphite-like hatching with clean linework and subtle shading on paper texture. Preserve the original color palette instead of converting to grayscale. Keep the original face, pose and composition.",
-    cartoon: "Make this a 90s cartoon style. Keep the original face, pose and composition.",
-
+    cartoon:
+        "Make this a 90s cartoon style. Keep the original face, pose and composition.",
 };
 
 // Pre-resize để giảm chi phí/độ trễ
@@ -47,7 +47,7 @@ function buildPrompt(style, extra) {
 }
 
 // Hỗ trợ cả FileOutput (SDK mới) lẫn URL string
-async function readReplicateOutputToBuffer(out, { signal }) {
+async function readReplicateOutputToBuffer(out) {
     const arr = Array.isArray(out) ? out : [out];
     const first = arr[0];
 
@@ -60,7 +60,7 @@ async function readReplicateOutputToBuffer(out, { signal }) {
     const url =
         typeof first === "string" ? first : first?.url || first?.toString?.();
     if (!url) throw new Error("Không xác định được output từ Replicate");
-    const resp = await fetch(url, { signal });
+    const resp = await fetch(url);
     const ab = await resp.arrayBuffer();
     return Buffer.from(ab);
 }
@@ -72,57 +72,45 @@ export const styleService = {
 
         // Hạn chế đồng thời các job Replicate nặng
         return await withReplicateLimiter(async () => {
-            const controller = new AbortController();
-            const timeoutMs = PERF.timeouts.replicateMs || 180_000;
-            const timer = setTimeout(() => controller.abort(), timeoutMs);
-
-            try {
-                const runOnce = async (signal) => {
-                    const out = await replicate.run(MODEL, {
-                        input: {
-                            input_image: scaled, // buffer — SDK sẽ stream lên
-                            prompt,
-                            // Có thể thêm aspect_ratio nếu muốn ép tỷ lệ, ví dụ "1:1", "3:4", "16:9"
-                            // aspect_ratio: "original",
-                        },
-                        signal,
-                        wait: true,
-                    });
-                    return await readReplicateOutputToBuffer(out, { signal });
-                };
-
-                const outputBuffer = await withRetry(
-                    () => runOnce(controller.signal),
-                    {
-                        retries: 2,
-                        baseDelayMs: 800,
-                        factor: 2,
-                        onRetry: (e, i) => {
-                            // bạn có thể log bằng pino tại đây nếu muốn
-                            if (process.env.NODE_ENV !== "production") {
-                                console.warn(
-                                    `[styleService] retry #${i + 1}`,
-                                    e?.message
-                                );
-                            }
-                        },
-                    }
-                );
-
-                const ext = inputMime?.includes("png") ? "png" : "jpg";
-                const { key } = await uploadBufferToR2(outputBuffer, {
-                    contentType: ext === "png" ? "image/png" : "image/jpeg",
-                    ext,
-                    prefix: `styles/${style}`,
+            const runOnce = async () => {
+                const out = await replicate.run(MODEL, {
+                    input: {
+                        input_image: scaled, // buffer — SDK sẽ stream lên
+                        prompt,
+                        // Có thể thêm aspect_ratio nếu muốn ép tỷ lệ, ví dụ "1:1", "3:4", "16:9"
+                        // aspect_ratio: "original",
+                    },
+                    wait: true,
                 });
+                return await readReplicateOutputToBuffer(out);
+            };
 
-                return {
-                    key,
-                    meta: { style, bytes: outputBuffer.length, requestId },
-                };
-            } finally {
-                clearTimeout(timer);
-            }
+            const outputBuffer = await withRetry(() => runOnce(), {
+                retries: 2,
+                baseDelayMs: 800,
+                factor: 2,
+                onRetry: (e, i) => {
+                    // bạn có thể log bằng pino tại đây nếu muốn
+                    if (process.env.NODE_ENV !== "production") {
+                        console.warn(
+                            `[styleService] retry #${i + 1}`,
+                            e?.message
+                        );
+                    }
+                },
+            });
+
+            const ext = inputMime?.includes("png") ? "png" : "jpg";
+            const { key } = await uploadBufferToR2(outputBuffer, {
+                contentType: ext === "png" ? "image/png" : "image/jpeg",
+                ext,
+                prefix: `styles/${style}`,
+            });
+
+            return {
+                key,
+                meta: { style, bytes: outputBuffer.length, requestId },
+            };
         });
     },
 };

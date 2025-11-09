@@ -6,11 +6,6 @@ import { rateLimitPerRoute } from "../../middlewares/rateLimit.js";
 
 const r = Router();
 
-r.use((req, res, next) => {
-    res.locals.timeoutMs = 180_000;
-    next();
-});
-
 r.use(rateLimitPerRoute({ windowMs: 60_000, max: 60, key: "style" }));
 
 r.post(

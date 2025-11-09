@@ -6,11 +6,6 @@ import { rateLimitPerRoute } from "../../middlewares/rateLimit.js";
 
 const router = Router();
 
-router.use((req, res, next) => {
-    res.locals.timeoutMs = 180_000;
-    next();
-});
-
 // Limit route này: 60 req / 1 phút / IP (tùy chỉnh trong perf hoặc env)
 router.use(rateLimitPerRoute({ windowMs: 60_000, max: 60, key: "style" }));
 

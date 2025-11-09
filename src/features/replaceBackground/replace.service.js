@@ -31,35 +31,26 @@ async function preScale(buffer) {
 async function removeBackgroundToPngRGBA(inputBuffer) {
     const scaled = await preScale(inputBuffer);
 
-    const runOnce = async (signal) => {
+    const runOnce = async () => {
         const out = await replicate.run(MODEL, {
             input: {
                 image: scaled,
                 background_type: "rgba",
                 format: "png",
             },
-            signal,
         });
         const url = Array.isArray(out) ? out[0] : out;
-        const buf = await fetch(url, { signal })
+        const buf = await fetch(url)
             .then((r) => r.arrayBuffer())
             .then((b) => Buffer.from(b));
         return buf;
     };
 
-    const controller = new AbortController();
-    const timeoutMs = PERF.timeouts.replicateMs;
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
-
-    try {
-        return await withRetry(() => runOnce(controller.signal), {
-            retries: 2,
-            baseDelayMs: 800,
-            factor: 2,
-        });
-    } finally {
-        clearTimeout(timer);
-    }
+    return await withRetry(() => runOnce(), {
+        retries: 2,
+        baseDelayMs: 800,
+        factor: 2,
+    });
 }
 
 export async function replaceBackground({

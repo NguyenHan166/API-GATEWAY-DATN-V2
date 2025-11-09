@@ -4,7 +4,6 @@ import compression from "compression";
 import api from "./routes/index.js";
 import { errorHandler } from "./middlewares/error.js";
 import { requestId } from "./middlewares/requestId.js";
-import { requestTimeout } from "./middlewares/timeout.js";
 import { PERF } from "./config/perf.js";
 import { getManifestCached } from "./features/manifest/manifest.service.js";
 
@@ -17,7 +16,6 @@ export function createApp() {
     app.use(helmet({ crossOriginResourcePolicy: false }));
     app.use(compression());
     app.use(requestId);
-    app.use(requestTimeout);
 
     // Body parsers
     app.use(express.json({ limit: PERF.body.jsonLimit }));
