@@ -31,4 +31,8 @@ export const PERF = {
     r2: {
         presignExpiresSec: Number(process.env.R2_PRESIGN_EXPIRES || 3600),
     },
+
+    retry: { retries: 2, factor: 2, minTimeoutMs: 500, maxTimeoutMs: 3000 },
+    ai: { pollIntervalMs: 1500, maxJobMs: 120000 }, // 120s
+    portraits: { inputUploadMode: "replicate" }, // "replicate" | "r2-url"
 };
