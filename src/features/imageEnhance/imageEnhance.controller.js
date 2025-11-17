@@ -1,19 +1,19 @@
-import { clarityService } from "./improveClarity.service.js";
-import { validateClarityInput } from "./improveClarity.schema.js";
+import { enhanceService } from "./imageEnhance.service.js";
+import { validateEnhanceInput } from "./imageEnhance.schema.js";
 import {
     presignGetUrl,
     buildPublicUrl,
 } from "../../integrations/r2/storage.service.js";
 import { successResponse, errorResponse } from "../../utils/response.js";
 
-export const clarityController = {
-    improve: async (req, res) => {
+export const enhanceController = {
+    enhance: async (req, res) => {
         const { file } = req;
-        const { scale, faceEnhance } = req.body || {};
+        const { scale, model } = req.body || {};
 
-        const { ok, value, error } = validateClarityInput({
+        const { ok, value, error } = validateEnhanceInput({
             scale,
-            faceEnhance,
+            model,
             fileBuffer: file?.buffer,
             mimeType: file?.mimetype,
         });
@@ -29,11 +29,11 @@ export const clarityController = {
             );
         }
 
-        const { key, meta } = await clarityService.improveClarity({
+        const { key, meta } = await enhanceService.enhanceImage({
             inputBuffer: value.fileBuffer,
             inputMime: value.mimeType,
             scale: value.scale,
-            faceEnhance: value.faceEnhance,
+            model: value.model,
             requestId: req.id,
         });
 

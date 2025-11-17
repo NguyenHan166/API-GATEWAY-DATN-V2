@@ -3,13 +3,12 @@ import { replicate } from "../../integrations/replicate/client.js";
 import { withRetry } from "../../utils/retry.js";
 import { uploadBufferToR2 } from "../../integrations/r2/storage.service.js";
 import { withReplicateLimiter } from "../../utils/limiters.js";
-import { PERF } from "../../config/perf.js";
 
-// Real-ESRGAN Model
-const MODEL = "nightmareai/real-esrgan";
+// Topaz Labs Image Upscale Model
+const MODEL = "topazlabs/image-upscale";
 
-// Pre-resize để tránh ảnh quá lớn - Real-ESRGAN khuyến nghị max 1440p
-async function preScale(buffer, maxSide = 2560) {
+// Pre-resize để tránh ảnh quá lớn - Topaz Labs có thể xử lý ảnh lớn hơn
+async function preScale(buffer, maxSide = 4096) {
     const meta = await sharp(buffer).metadata();
     if (!meta.width || !meta.height) return buffer;
     const currentMaxSide = Math.max(meta.width, meta.height);
@@ -44,12 +43,12 @@ async function readReplicateOutputToBuffer(out) {
     return Buffer.from(ab);
 }
 
-export const clarityService = {
-    improveClarity: async ({
+export const enhanceService = {
+    enhanceImage: async ({
         inputBuffer,
         inputMime,
         scale,
-        faceEnhance,
+        model,
         requestId,
     }) => {
         // Hạn chế đồng thời các job Replicate nặng
@@ -60,8 +59,8 @@ export const clarityService = {
                 const out = await replicate.run(MODEL, {
                     input: {
                         image: scaled,
-                        scale: scale, // 2 or 4
-                        face_enhance: faceEnhance,
+                        scale: scale, // 2, 4, or 6
+                        model: model, // "standard-v2", "high-fidelity-v2", etc.
                     },
                     wait: true,
                 });
@@ -70,12 +69,12 @@ export const clarityService = {
 
             const outputBuffer = await withRetry(() => runOnce(), {
                 retries: 2,
-                baseDelayMs: 800,
+                baseDelayMs: 1000,
                 factor: 2,
                 onRetry: (e, i) => {
                     if (process.env.NODE_ENV !== "production") {
                         console.warn(
-                            `[improveClarity] retry #${i + 1}`,
+                            `[imageEnhance] retry #${i + 1}`,
                             e?.message
                         );
                     }
@@ -87,15 +86,15 @@ export const clarityService = {
             const { key } = await uploadBufferToR2(outputBuffer, {
                 contentType: ext === "png" ? "image/png" : "image/jpeg",
                 ext,
-                prefix: "clarity",
+                prefix: `enhance/${model}`,
             });
 
             return {
                 key,
                 meta: {
-                    model: "real-esrgan",
+                    provider: "topaz-labs",
+                    model,
                     scale,
-                    faceEnhance,
                     bytes: outputBuffer.length,
                     requestId,
                 },
