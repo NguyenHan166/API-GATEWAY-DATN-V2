@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const replaceQuerySchema = z.object({
+    mode: z.enum(["remove", "replace"]).default("replace"),
     fit: z.enum(["cover", "contain", "fill", "inside", "outside"]).optional(),
     position: z.string().optional(),
     featherPx: z.coerce.number().min(0).max(20).optional(),

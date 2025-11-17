@@ -53,6 +53,17 @@ async function removeBackgroundToPngRGBA(inputBuffer) {
     });
 }
 
+export async function removeBackground({ fgBuf, featherPx = 1 }) {
+    const cutout = await removeBackgroundToPngRGBA(fgBuf);
+    const { width: W, height: H } = await sharp(fgBuf).metadata();
+
+    // Chỉ cần feather alpha nếu cần
+    const finalPng =
+        featherPx > 0 ? await featherAlpha(cutout, featherPx) : cutout;
+
+    return { finalPng, W, H };
+}
+
 export async function replaceBackground({
     fgBuf,
     bgBuf,
@@ -88,4 +99,4 @@ export async function replaceBackground({
     return { finalPng, W, H };
 }
 
-export const replaceBgService = { replaceBackground };
+export const replaceBgService = { removeBackground, replaceBackground };
