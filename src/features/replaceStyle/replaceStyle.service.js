@@ -5,21 +5,21 @@ import { uploadBufferToR2 } from "../../integrations/r2/storage.service.js";
 import { withReplicateLimiter } from "../../utils/limiters.js";
 import { PERF } from "../../config/perf.js";
 
-// Model FLUX Kontext (dev) — I2I
-const MODEL = "black-forest-labs/flux-kontext-dev";
+// Model FLUX Kontext Pro — State-of-the-art text-based image editing
+const MODEL = "black-forest-labs/flux-kontext-pro";
 
-// Preset prompt cho từng style (giữ bố cục/khuôn mặt)
+// Preset prompt cho từng style - Optimized for flux-kontext-pro with specific, detailed language
 const STYLE_PRESETS = {
-    anime: "Convert the whole image to anime cel-shaded style with clean ink outlines and flat 2–3 tone shading. Preserve the original color palette (skin, hair, clothing, background) with only minimal hue shift; keep natural skin tones. Keep the original face, pose and composition; eyes with specular highlights.",
-    ghibli: "Transform to hand-drawn animation in the spirit of Studio Ghibli: soft lighting, gentle brush strokes, film-like texture. Retain the original color palette while applying the painterly look. Keep the original face, expression and composition.",
+    anime: "Change the image to anime cel-shaded art style with clean black ink outlines and flat 2-3 tone shading. Use vibrant colors with slight saturation boost. Keep the exact same facial features, expression, pose, and composition. Add specular highlights to the eyes. Maintain the original lighting direction and background elements in anime style.",
+    ghibli: "Change the image to hand-drawn Studio Ghibli animation style with soft natural lighting, gentle watercolor-like brush strokes, and subtle film grain texture. Keep the exact same facial features, expression, pose, and composition. Preserve warm, earthy tones with painterly quality. Maintain the original background elements in Ghibli style.",
     watercolor:
-        "Transform to watercolor painting: fluid washes, soft edges, paper texture, subtle granulation, light bloom. Preserve the original color palette and overall luminance; avoid strong hue shifts. Keep the original face, pose and composition.",
+        "Change the image to watercolor painting style with fluid transparent washes, soft blended edges, visible paper texture, subtle color granulation, and light bloom effects. Keep the exact same facial features, expression, pose, and composition. Preserve the original color palette and luminance values. Maintain natural skin tones.",
     "oil-painting":
-        "Transform to classical oil painting on canvas: visible impasto brushwork, rich color depth, soft edges, realistic lighting. Preserve the original color palette (especially skin tones and key garments) with minimal deviation. Keep the original face, pose and composition.",
+        "Change the image to classical oil painting on canvas with visible thick impasto brushwork, rich color depth, soft blended edges, and realistic chiaroscuro lighting. Keep the exact same facial features, expression, pose, and composition. Preserve the original color palette especially for skin tones and key garments. Use traditional Renaissance techniques.",
     sketches:
-        "Transform to a colored pencil sketch: graphite-like hatching with clean linework and subtle shading on paper texture. Preserve the original color palette instead of converting to grayscale. Keep the original face, pose and composition.",
+        "Change the image to colored pencil sketch style with fine graphite-like hatching, clean precise linework, subtle cross-hatch shading on textured paper. Keep the exact same facial features, expression, pose, and composition. Preserve the original color palette with pencil-drawn appearance instead of converting to grayscale.",
     cartoon:
-        "Make this a 90s cartoon style. Keep the original face, pose and composition.",
+        "Change the image to 1990s animated cartoon style with bold outlines, simplified features, and vibrant flat colors. Keep the exact same facial features, expression, pose, and composition. Use classic hand-drawn animation techniques with cel-shading.",
 };
 
 // Pre-resize để giảm chi phí/độ trễ

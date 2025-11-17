@@ -1,9 +1,13 @@
 import { parseIcLightBody } from "./portraits.schema.js";
 import { icLightRelight } from "./relight.service.js";
+import {
+    successResponseMultiple,
+    errorResponse,
+} from "../../utils/response.js";
 
 export const portraitsController = {
     icLight: async (req, res) => {
-        const requestId = res.locals?.requestId;
+        const requestId = req.id;
         try {
             // ép số nếu là string (do form-data)
             const coerceNum = (v) => (v === undefined ? undefined : Number(v));
@@ -36,12 +40,27 @@ export const portraitsController = {
                 requestId,
             });
 
-            res.json({ request_id: requestId, status: "success", ...output });
+            // Format lại output để phù hợp với response chuẩn
+            const outputs = output.output_urls.map((url, index) => ({
+                url,
+                index,
+            }));
+
+            res.json(
+                successResponseMultiple({
+                    requestId,
+                    outputs,
+                    meta: output.meta,
+                })
+            );
         } catch (err) {
-            res.status(400).json({
-                request_id: requestId,
-                error: err?.message || "Bad Request",
-            });
+            res.status(400).json(
+                errorResponse({
+                    requestId,
+                    error: err?.message || "Bad Request",
+                    code: "PROCESSING_ERROR",
+                })
+            );
         }
     },
 };

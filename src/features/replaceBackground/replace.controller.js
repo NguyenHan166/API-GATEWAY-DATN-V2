@@ -6,13 +6,22 @@ import {
 import { replaceBackground } from "./replace.service.js";
 import { replaceQuerySchema } from "./replace.schema.js";
 import { limits } from "../../utils/limiters.js";
+import { successResponse, errorResponse } from "../../utils/response.js";
 
 export async function replaceBgController(req, res) {
     const task = async () => {
         const fgBuf = req.files?.fg?.[0]?.buffer;
         const bgBuf = req.files?.bg?.[0]?.buffer;
-        if (!fgBuf || !bgBuf)
-            return res.status(400).json({ error: "Thiếu file fg hoặc bg" });
+        if (!fgBuf || !bgBuf) {
+            return res.status(400).json(
+                errorResponse({
+                    requestId: req.id,
+                    error: "Missing required files",
+                    code: "MISSING_FILES",
+                    details: "Both fg and bg files are required",
+                })
+            );
+        }
 
         const q = replaceQuerySchema.parse(req.body);
         const { finalPng, W, H } = await replaceBackground({
@@ -32,13 +41,16 @@ export async function replaceBgController(req, res) {
         const publicUrl = buildPublicUrl(key);
         const presignedUrl = await presignGetUrl(key, expiresIn);
 
-        res.json({
-            key,
-            url: publicUrl || presignedUrl,
-            presigned_url: presignedUrl,
-            expires_in: expiresIn,
-            meta: { width: W, height: H },
-        });
+        res.json(
+            successResponse({
+                requestId: req.id,
+                key,
+                url: publicUrl,
+                presignedUrl,
+                expiresIn,
+                meta: { width: W, height: H },
+            })
+        );
     };
 
     // Hạn chế đồng thời theo p-limit, các request dư sẽ xếp hàng ngắn trong process
