@@ -135,9 +135,9 @@ Quản lý danh sách resource packs (styles, backgrounds, etc.)
                 "count": 15,
                 "files": [
                     {
-                        "key": "styles/anime/01.jpg",
-                        "size": 245678,
-                        "etag": "abc123def456",
+                        "key": "ON1_BW_LUTs/For_Other_Programs/BW1.cube",
+                        "size": 885033,
+                        "etag": "a70b6f392f7ef8850c02ed1065f8674b",
                         "content_type": "application/octet-stream"
                     }
                 ]
