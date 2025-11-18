@@ -10,7 +10,7 @@ import { getManifestCached } from "./features/manifest/manifest.service.js";
 export function createApp() {
     const app = express();
     app.disable("x-powered-by");
-    // app.set("trust proxy", true);
+    app.set("trust proxy", true);
 
     // Bảo mật & hiệu năng
     app.use(helmet({ crossOriginResourcePolicy: false }));
