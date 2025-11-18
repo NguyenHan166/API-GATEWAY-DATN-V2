@@ -1,0 +1,44 @@
+{
+    "story_id": "hanoi-loneliness-story",
+    "characters": [
+        {
+            "name": "Minh",
+            "role": "main",
+            "description_en": "young man, short black hair, casual clothes, white t-shirt, jeans"
+        }
+    ],
+    "panels": [
+        {
+            "id": 1,
+            "description_vi": "Minh tươi cười an ủi một cô gái buồn trên phố Hà Nội tấp nập, ánh sáng ban ngày rực rỡ.",
+            "prompt_tags": "masterpiece, best quality, anime style, vibrant colors, high quality, detailed background, no text, no speech bubble, young man, short black hair, white t-shirt, jeans, comforting, sad girl, long black hair, school uniform, busy Hanoi street, motorbikes, old buildings, green trees, bright daylight, warm lighting, soft shadows, eye level shot, medium shot, city life, empathy, cheerful expression",
+            "dialogue": "Đừng buồn nữa, mọi chuyện sẽ ổn thôi.",
+            "speaker": "Minh",
+            "emotion": "happy"
+        },
+        {
+            "id": 2,
+            "description_vi": "Minh vui vẻ giúp một bà cụ xách đồ trên vỉa hè Hà Nội, ánh nắng chiều vàng ấm áp.",
+            "prompt_tags": "masterpiece, best quality, anime style, vibrant colors, high quality, detailed background, no text, no speech bubble, young man, short black hair, white t-shirt, jeans, helping, elderly woman, traditional Vietnamese conical hat, ao dai, carrying groceries, Hanoi sidewalk, street vendors, bicycles, old trees, warm afternoon light, golden hour, soft lighting, wide shot, dynamic angle, kindness, happy expression",
+            "dialogue": "Cháu giúp bà một tay nhé!",
+            "speaker": "Minh",
+            "emotion": "happy"
+        },
+        {
+            "id": 3,
+            "description_vi": "Minh bước vào căn hộ nhỏ của mình ở Hà Nội khi màn đêm buông xuống, ánh sáng yếu ớt.",
+            "prompt_tags": "masterpiece, best quality, anime style, vibrant colors, high quality, detailed background, no text, no speech bubble, young man, short black hair, white t-shirt, jeans, opening door, entering apartment, small room, simple furniture, Hanoi cityscape visible through window, evening light, dim lighting, cool tones, soft shadows, eye level shot, medium shot, transition, thoughtful expression",
+            "dialogue": "...",
+            "speaker": "Minh",
+            "emotion": "neutral"
+        },
+        {
+            "id": 4,
+            "description_vi": "Minh ngồi một mình trong căn phòng tối, nhìn ra khung cảnh Hà Nội về đêm, ánh trăng buồn bã.",
+            "prompt_tags": "masterpiece, best quality, anime style, vibrant colors, high quality, detailed background, no text, no speech bubble, young man, short black hair, white t-shirt, jeans, sitting alone, looking out window, night view, Hanoi cityscape, city lights, dark room, sparse furniture, cool moonlight, moody lighting, deep shadows, close up, melancholic expression, sad, lonely",
+            "dialogue": "Lại một mình rồi...",
+            "speaker": "Minh",
+            "emotion": "sad"
+        }
+    ]
+}

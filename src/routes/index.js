@@ -7,6 +7,7 @@ import portraitsRoutes from "../features/portraits/portraits.routes.js";
 import clarityRoutes from "../features/improveClarity/improveClarity.routes.js";
 import enhanceRoutes from "../features/imageEnhance/imageEnhance.routes.js";
 import aiBeautifyRoutes from "../features/aiBeautify/aiBeautify.routes.js";
+import comicRoutes from "../features/comic/comic.routes.js";
 
 const api = Router();
 api.use(manifestRoutes);
@@ -17,5 +18,6 @@ api.use("/portraits", portraitsRoutes);
 api.use("/clarity", clarityRoutes);
 api.use("/enhance", enhanceRoutes);
 api.use("/ai-beautify", aiBeautifyRoutes);
+api.use(comicRoutes);
 
 export default api;
