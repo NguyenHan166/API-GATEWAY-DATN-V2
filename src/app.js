@@ -10,7 +10,8 @@ import { getManifestCached } from "./features/manifest/manifest.service.js";
 export function createApp() {
     const app = express();
     app.disable("x-powered-by");
-    app.set("trust proxy", true);
+    // Behind Railway's single proxy; trust only the first hop (safer than `true`)
+    app.set("trust proxy", 1);
 
     // Bảo mật & hiệu năng
     app.use(helmet({ crossOriginResourcePolicy: false }));
