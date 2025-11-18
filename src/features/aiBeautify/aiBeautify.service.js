@@ -12,6 +12,7 @@ import { PERF } from "../../config/perf.js";
 const GFPGAN_MODEL =
     "tencentarc/gfpgan:297a243ce8643961d52f745f9b6c8c1bd96850a51c92be5f43628a0d3e08321a";
 const REAL_ESRGAN_MODEL = "nightmareai/real-esrgan";
+const MAX_REPLICATE_PIXELS = 2_096_704; // Hardware limit reported by Replicate error
 
 /**
  * Pre-scale image - GFPGAN max: ~1536px, safe limit: 1440px
@@ -72,7 +73,7 @@ async function runGFPGAN(inputBuffer, requestId) {
                 version: GFPGAN_MODEL,
                 input: {
                     img: inputSignedUrl,
-                    scale: 2, // Standard scale for GFPGAN
+                    scale: 1, // Avoid doubling size before Real-ESRGAN to keep within GPU pixel budget
                     version: "v1.4", // GFPGAN version
                 },
                 wait: true,
@@ -115,6 +116,29 @@ async function runGFPGAN(inputBuffer, requestId) {
  * Note: Real-ESRGAN typically only supports scale 2 or 4, so we'll use scale=2 then resize back
  */
 async function runRealESRGAN(inputBuffer) {
+    // Ensure we never exceed the GPU pixel budget even if the upstream step outputs a larger image
+    let targetWidth;
+    let targetHeight;
+    const meta = await sharp(inputBuffer).metadata();
+    if (meta.width && meta.height) {
+        const pixels = meta.width * meta.height;
+        let width = meta.width;
+        let height = meta.height;
+
+        if (pixels > MAX_REPLICATE_PIXELS) {
+            const scale = Math.sqrt(MAX_REPLICATE_PIXELS / pixels);
+            width = Math.max(1, Math.floor(meta.width * scale));
+            height = Math.max(1, Math.floor(meta.height * scale));
+            inputBuffer = await sharp(inputBuffer)
+                .resize(width, height, { fit: "inside" })
+                .jpeg({ quality: 92 })
+                .toBuffer();
+        }
+
+        targetWidth = width;
+        targetHeight = height;
+    }
+
     return await withReplicateLimiter(async () => {
         const runOnce = async () => {
             const out = await replicate.run(REAL_ESRGAN_MODEL, {
@@ -135,10 +159,9 @@ async function runRealESRGAN(inputBuffer) {
         });
 
         // Resize back to original size (since we used scale=2)
-        const meta = await sharp(inputBuffer).metadata();
-        if (meta.width && meta.height) {
+        if (targetWidth && targetHeight) {
             return await sharp(outputBuffer)
-                .resize(meta.width, meta.height, { fit: "fill" })
+                .resize(targetWidth, targetHeight, { fit: "fill" })
                 .toBuffer();
         }
 
