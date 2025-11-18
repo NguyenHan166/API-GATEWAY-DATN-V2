@@ -655,16 +655,14 @@ Tạo truyện tranh anime tự động từ prompt văn bản
 
 **Chức năng**: Tạo một trang comic hoàn chỉnh với AI (storyboard + images + speech bubbles)
 
-**Content-Type**: `application/json`
+**Content-Type**: `multipart/form-data`
 
-**Request Body**:
+**Request Body (form-data fields)**:
 
-```json
-{
-    "prompt": "Một cô gái phát hiện ra cổng thần bí trong khu rừng",
-    "panels": 4,
-    "style": "anime_color"
-}
+```
+prompt=Một cô gái phát hiện ra cổng thần bí trong khu rừng
+panels=4
+style=anime_color
 ```
 
 **Request Parameters**:
@@ -740,7 +738,7 @@ Tạo truyện tranh anime tự động từ prompt văn bản
 | AI Beautify    | POST /ai-beautify         | Image file    | Multi-step portrait enhancement | 30-90s          |
 | Replace BG     | POST /replace-bg          | Image file(s) | Remove/replace background       | 20-60s          |
 | Style Transfer | POST /style/replace-style | Image file    | Artistic style transformation   | 30-150s         |
-| Comic Generate | POST /comic/generate      | JSON prompt   | Auto comic generation           | 60-240s         |
+| Comic Generate | POST /comic/generate      | Form-data (text) | Auto comic generation           | 60-240s         |
 
 ---
 

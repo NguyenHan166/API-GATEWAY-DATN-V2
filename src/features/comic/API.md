@@ -24,10 +24,10 @@ Tạo một trang comic anime từ prompt văn bản. AI sẽ tự động tạo
 ### Headers
 
 ```
-Content-Type: application/json
+Content-Type: multipart/form-data
 ```
 
-### Body Parameters
+### Body Parameters (form-data fields)
 
 | Parameter | Type   | Required | Description                  | Default         |
 | --------- | ------ | -------- | ---------------------------- | --------------- |
@@ -140,23 +140,18 @@ Content-Type: application/json
 
 ```bash
 curl -X POST http://localhost:3000/api/comic/generate \
-  -H "Content-Type: application/json" \
-  -d '{
-    "prompt": "Một cô gái phát hiện ra cổng thần bí trong khu rừng"
-  }'
+  -F "prompt=Một cô gái phát hiện ra cổng thần bí trong khu rừng"
 ```
 
 #### JavaScript (Fetch)
 
 ```javascript
+const form = new FormData();
+form.append("prompt", "Một cô gái phát hiện ra cổng thần bí trong khu rừng");
+
 const response = await fetch("http://localhost:3000/api/comic/generate", {
     method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-        prompt: "Một cô gái phát hiện ra cổng thần bí trong khu rừng",
-    }),
+    body: form,
 });
 
 const result = await response.json();
@@ -169,12 +164,12 @@ console.log("Story ID:", result.meta.story_id);
 ```python
 import requests
 
-response = requests.post(
-    'http://localhost:3000/api/comic/generate',
-    json={
-        'prompt': 'Một cô gái phát hiện ra cổng thần bí trong khu rừng'
-    }
-)
+url = "http://localhost:3000/api/comic/generate"
+form = {
+    "prompt": (None, "Một cô gái phát hiện ra cổng thần bí trong khu rừng")
+}
+
+response = requests.post(url, files=form)
 
 result = response.json()
 print(f"Comic page: {result['page_url']}")
@@ -187,25 +182,20 @@ print(f"Panels: {len(result['meta']['panels'])}")
 
 ```bash
 curl -X POST http://localhost:3000/api/comic/generate \
-  -H "Content-Type: application/json" \
-  -d '{
-    "prompt": "Anh hùng đối mặt với quái vật khổng lồ",
-    "panels": 2
-  }'
+  -F "prompt=Anh hùng đối mặt với quái vật khổng lồ" \
+  -F "panels=2"
 ```
 
 #### JavaScript
 
 ```javascript
+const form = new FormData();
+form.append("prompt", "Anh hùng đối mặt với quái vật khổng lồ");
+form.append("panels", "2");
+
 const response = await fetch("http://localhost:3000/api/comic/generate", {
     method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-        prompt: "Anh hùng đối mặt với quái vật khổng lồ",
-        panels: 2,
-    }),
+    body: form,
 });
 
 const result = await response.json();
@@ -217,27 +207,22 @@ const result = await response.json();
 
 ```bash
 curl -X POST http://localhost:3000/api/comic/generate \
-  -H "Content-Type: application/json" \
-  -d '{
-    "prompt": "Hành trình tìm kiếm kho báu bị mất trong hang động",
-    "panels": 6,
-    "style": "anime_color"
-  }'
+  -F "prompt=Hành trình tìm kiếm kho báu bị mất trong hang động" \
+  -F "panels=6" \
+  -F "style=anime_color"
 ```
 
 #### JavaScript
 
 ```javascript
+const form = new FormData();
+form.append("prompt", "Hành trình tìm kiếm kho báu bị mất trong hang động");
+form.append("panels", "6");
+form.append("style", "anime_color");
+
 const response = await fetch("http://localhost:3000/api/comic/generate", {
     method: "POST",
-    headers: {
-        "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-        prompt: "Hành trình tìm kiếm kho báu bị mất trong hang động",
-        panels: 6,
-        style: "anime_color",
-    }),
+    body: form,
 });
 
 const result = await response.json();
@@ -254,15 +239,13 @@ result.meta.panels.forEach((panel) => {
 import fetch from "node-fetch";
 
 async function generateComic() {
+    const form = new FormData();
+    form.append("prompt", "Câu chuyện về một ninja trẻ học võ thuật");
+    form.append("panels", "4");
+
     const response = await fetch("http://localhost:3000/api/comic/generate", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            prompt: "Câu chuyện về một ninja trẻ học võ thuật",
-            panels: 4,
-        }),
+        body: form,
     });
 
     const result = await response.json();
