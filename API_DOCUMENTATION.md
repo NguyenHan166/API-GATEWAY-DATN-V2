@@ -15,7 +15,7 @@
     -   [Image Upscaling (GFPGAN)](#2-image-upscaling-gfpgan)
     -   [Portrait Relighting (IC-Light)](#3-portrait-relighting-ic-light)
     -   [Clarity Improvement (Real-ESRGAN)](#4-clarity-improvement-real-esrgan)
-    -   [Image Enhancement (Topaz Labs)](#5-image-enhancement-topaz-labs)
+    -   [Image Enhancement (Real-ESRGAN)](#5-image-enhancement-real-esrgan)
     -   [AI Beautify](#6-ai-beautify)
     -   [Background Replacement](#7-background-replacement)
     -   [Style Transfer](#8-style-transfer)
@@ -385,33 +385,23 @@ Super-resolution và tăng độ sắc nét cho ảnh
 
 ---
 
-## 5. Image Enhancement (Topaz Labs)
+## 5. Image Enhancement (Real-ESRGAN)
 
-Professional image enhancement với nhiều models chuyên biệt
+Tăng độ phân giải và sắc nét với model `nightmareai/real-esrgan`.
 
 ### 5.1 Enhance Image
 
 **Endpoint**: `POST /enhance`
 
-**Chức năng**: Tăng chất lượng ảnh với AI models chuyên nghiệp
-
 **Content-Type**: `multipart/form-data`
 
 **Request Parameters**:
 | Parameter | Type | Required | Description | Default |
-| --------- | ------ | -------- | ------------------------------------------------------------------------ | --------------- |
+| --------- | ---- | -------- | ------------------------------------------ | ------- |
 | `image` | File | ✅ | File ảnh (JPEG, PNG, WebP) | - |
-| `scale` | Number | ❌ | Hệ số scale: `2`, `4`, `6` | `2` |
-| `model` | String | ❌ | Enhancement model (xem bảng dưới) | `"standard-v2"` |
-
-**Enhancement Models**:
-| Model | Best For |
-| ------------------ | ---------------------------------- |
-| `standard-v2` | General purpose, most photos |
-| `low-res-v2` | Very small/pixelated images |
-| `cgi` | Digital art, 3D renders, game art |
-| `high-fidelity-v2` | High-quality photos, print work |
-| `text-refine` | Screenshots, documents with text |
+| `scale` | Number | ❌ | Hệ số scale: `2` hoặc `4` | `2` |
+| `face_enhance` | Boolean | ❌ | Bật bổ trợ khuôn mặt (alias: `faceEnhance`) | `false` |
+| `model` | String | ❌ | Giữ cho tương thích cũ, chỉ nhận `real-esrgan` | `real-esrgan` |
 
 **Response Success (200)**:
 
@@ -420,34 +410,27 @@ Professional image enhancement với nhiều models chuyên biệt
     "request_id": "req_abc123xyz",
     "status": "success",
     "data": {
-        "key": "enhance/2025-11-18/550e8400-e29b-41d4-a716-446655440000.jpg",
-        "url": "https://pub-xxxx.r2.dev/enhance/2025-11-18/550e8400-e29b-41d4-a716-446655440000.jpg",
+        "key": "enhance/real-esrgan/2025-11-18/550e8400-e29b-41d4-a716-446655440000.jpg",
+        "url": "https://pub-xxxx.r2.dev/enhance/real-esrgan/2025-11-18/550e8400-e29b-41d4-a716-446655440000.jpg",
         "presigned_url": "https://pub-xxxx.r2.dev/enhance/...?X-Amz-Algorithm=...",
         "expires_in": 3600
     },
     "meta": {
-        "model": "topaz-labs/standard-v2",
-        "scale": 2,
-        "input_size": {
-            "width": 1920,
-            "height": 1080
-        },
-        "output_size": {
-            "width": 3840,
-            "height": 2160
-        }
+        "model": "nightmareai/real-esrgan",
+        "scale": 4,
+        "faceEnhance": true
     }
 }
 ```
 
-**Processing Time**: 30-180 seconds (tùy scale và model)
+**Processing Time**: 15-60 seconds (tùy scale và kích thước input)
 
 **Use Cases**:
 
--   Upscale for large prints
--   Enhance digital artwork
--   Improve document screenshots
--   Professional photography enhancement
+-   Upscale ảnh sản phẩm / marketing
+-   Cải thiện ảnh chân dung (bật `face_enhance`)
+-   Chuẩn bị ảnh in ấn (scale 4x)
+-   Nâng độ rõ nét cho ảnh cũ/quét
 
 ---
 

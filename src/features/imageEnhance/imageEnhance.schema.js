@@ -1,16 +1,22 @@
-// Topaz Labs supports scale 2, 4, or 6
-const SCALE_OPTIONS = [2, 4, 6];
+// Real-ESRGAN chỉ hỗ trợ scale 2 hoặc 4
+const SCALE_OPTIONS = [2, 4];
+const MODEL_OPTIONS = ["real-esrgan", "nightmareai/real-esrgan"];
 
-// Topaz Labs enhancement models
-const ENHANCEMENT_MODELS = {
-    "standard-v2": "Standard V2 - General purpose",
-    "low-res-v2": "Low Resolution V2 - For low-res images",
-    cgi: "CGI - For digital art",
-    "high-fidelity-v2": "High Fidelity V2 - Preserves details",
-    "text-refine": "Text Refine - Optimized for text",
-};
+function parseBoolean(value) {
+    if (typeof value === "boolean") return value;
+    if (typeof value === "string") {
+        return ["1", "true", "yes", "on"].includes(value.toLowerCase());
+    }
+    return false;
+}
 
-export function validateEnhanceInput({ scale, model, fileBuffer, mimeType }) {
+export function validateEnhanceInput({
+    scale,
+    model,
+    faceEnhance,
+    fileBuffer,
+    mimeType,
+}) {
     if (!fileBuffer)
         return { ok: false, error: "Thiếu file 'image' (form-data)" };
     if (!mimeType?.startsWith("image/"))
@@ -25,22 +31,23 @@ export function validateEnhanceInput({ scale, model, fileBuffer, mimeType }) {
         };
     }
 
-    // Validate enhancement model
-    const m = String(model || "standard-v2").toLowerCase();
-    if (!ENHANCEMENT_MODELS[m]) {
+    // Validate enhancement model (giữ field để backward compatibility)
+    const m = String(model || "real-esrgan").toLowerCase();
+    if (m && !MODEL_OPTIONS.includes(m)) {
         return {
             ok: false,
-            error: `model không hợp lệ. Hỗ trợ: ${Object.keys(
-                ENHANCEMENT_MODELS
-            ).join(", ")}`,
+            error: `model không hợp lệ. Hỗ trợ: ${MODEL_OPTIONS.join(", ")}`,
         };
     }
+
+    const fe = parseBoolean(faceEnhance);
 
     return {
         ok: true,
         value: {
             scale: s,
-            model: m,
+            model: "real-esrgan",
+            faceEnhance: fe,
             fileBuffer,
             mimeType,
         },
@@ -48,4 +55,4 @@ export function validateEnhanceInput({ scale, model, fileBuffer, mimeType }) {
 }
 
 export const ALLOWED_SCALES = SCALE_OPTIONS;
-export const ALLOWED_MODELS = ENHANCEMENT_MODELS;
+export const ALLOWED_MODELS = MODEL_OPTIONS;

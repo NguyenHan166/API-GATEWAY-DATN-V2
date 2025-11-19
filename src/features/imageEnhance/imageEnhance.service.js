@@ -4,11 +4,11 @@ import { withRetry } from "../../utils/retry.js";
 import { uploadBufferToR2 } from "../../integrations/r2/storage.service.js";
 import { withReplicateLimiter } from "../../utils/limiters.js";
 
-// Topaz Labs Image Upscale Model
-const MODEL = "topazlabs/image-upscale";
+// Real-ESRGAN Image Upscale Model
+const MODEL = "nightmareai/real-esrgan";
 
-// Pre-resize để tránh ảnh quá lớn - Topaz Labs có thể xử lý ảnh lớn hơn
-async function preScale(buffer, maxSide = 4096) {
+// Pre-resize để tránh ảnh quá lớn - Real-ESRGAN hoạt động tốt nhất <~1440p
+async function preScale(buffer, maxSide = 2560) {
     const meta = await sharp(buffer).metadata();
     if (!meta.width || !meta.height) return buffer;
     const currentMaxSide = Math.max(meta.width, meta.height);
@@ -48,7 +48,7 @@ export const enhanceService = {
         inputBuffer,
         inputMime,
         scale,
-        model,
+        faceEnhance,
         requestId,
     }) => {
         // Hạn chế đồng thời các job Replicate nặng
@@ -59,8 +59,8 @@ export const enhanceService = {
                 const out = await replicate.run(MODEL, {
                     input: {
                         image: scaled,
-                        scale: scale, // 2, 4, or 6
-                        model: model, // "standard-v2", "high-fidelity-v2", etc.
+                        scale, // 2 hoặc 4
+                        face_enhance: faceEnhance,
                     },
                     wait: true,
                 });
@@ -86,15 +86,16 @@ export const enhanceService = {
             const { key } = await uploadBufferToR2(outputBuffer, {
                 contentType: ext === "png" ? "image/png" : "image/jpeg",
                 ext,
-                prefix: `enhance/${model}`,
+                prefix: "enhance/real-esrgan",
             });
 
             return {
                 key,
                 meta: {
-                    provider: "topaz-labs",
-                    model,
+                    provider: "nightmareai",
+                    model: "real-esrgan",
                     scale,
+                    faceEnhance,
                     bytes: outputBuffer.length,
                     requestId,
                 },

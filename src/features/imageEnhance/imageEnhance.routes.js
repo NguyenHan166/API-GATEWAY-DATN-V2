@@ -12,8 +12,9 @@ router.use(rateLimitPerRoute({ windowMs: 60_000, max: 60, key: "enhance" }));
 // POST /api/enhance
 // form-data:
 //   - image (file) - required
-//   - scale (number) - 2 | 4 | 6, default: 2
-//   - model (string) - "standard-v2" | "low-res-v2" | "cgi" | "high-fidelity-v2" | "text-refine", default: "standard-v2"
+//   - scale (number) - 2 | 4, default: 2
+//   - face_enhance (boolean) - optional, improve faces when true
+//   - model (string) - optional, only "real-esrgan" (backward compatibility)
 router.post(
     "/",
     upload.single("image"),

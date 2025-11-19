@@ -6,17 +6,17 @@ Hệ thống cung cấp hai API riêng biệt để nâng cao chất lượng �
 
 ## 📊 So Sánh Tổng Quan
 
-| Feature          | Improve Clarity           | Image Enhance                 |
-| ---------------- | ------------------------- | ----------------------------- |
-| **Endpoint**     | `/api/clarity`            | `/api/enhance`                |
-| **Model**        | Real-ESRGAN (NightmareAI) | Topaz Labs Image Upscale      |
-| **Chi phí**      | ✅ Miễn phí               | 💰 Có phí (theo megapixels)   |
-| **Max Scale**    | 4x                        | 6x                            |
-| **Tốc độ**       | ⚡ Nhanh (5-15s)          | 🐢 Trung bình (10-30s)        |
-| **Chất lượng**   | ⭐⭐⭐⭐ Tốt              | ⭐⭐⭐⭐⭐ Chuyên nghiệp      |
-| **Models**       | 1 model                   | 5 models chuyên biệt          |
-| **Face Enhance** | ✅ Có                     | ❌ Không                      |
-| **Use Case**     | Hàng ngày, nhanh gọn      | Chuyên nghiệp, chất lượng cao |
+| Feature          | Improve Clarity                     | Image Enhance                         |
+| ---------------- | ----------------------------------- | ------------------------------------- |
+| **Endpoint**     | `/api/clarity`                      | `/api/enhance`                        |
+| **Model**        | Real-ESRGAN (NightmareAI)           | Real-ESRGAN (NightmareAI)             |
+| **Chi phí**      | Theo compute Replicate (thấp)       | Theo compute Replicate (thấp)         |
+| **Max Scale**    | 4x                                  | 4x                                    |
+| **Tốc độ**       | ⚡ Nhanh (15-45s)                    | ⚡ Nhanh (15-60s)                      |
+| **Chất lượng**   | ⭐⭐⭐⭐ Tối ưu độ rõ              | ⭐⭐⭐⭐ Tối ưu sắc nét + URL công khai |
+| **Models**       | 1 (real-esrgan)                     | 1 (real-esrgan)                       |
+| **Face Enhance** | ✅ Có (tùy chọn)                    | ✅ Có (tùy chọn)                      |
+| **Use Case**     | Cải thiện nhanh, ít cấu hình        | Upscale + chia sẻ qua R2 URL          |
 
 ---
 
@@ -71,102 +71,58 @@ curl -X POST http://localhost:3000/api/clarity \
 
 ---
 
-## 💎 Image Enhance (Topaz Labs)
+## 💎 Image Enhance (Real-ESRGAN)
 
 ### Thông tin cơ bản
 
 -   **Endpoint**: `POST /api/enhance`
--   **Model**: `topazlabs/image-upscale`
--   **Chi phí**: Có phí (tính theo output megapixels)
--   **Max input**: 4096px
+-   **Model**: `nightmareai/real-esrgan`
+-   **Chi phí**: Theo compute Replicate (tương tự Improve Clarity)
+-   **Max input**: 2560px (pre-scale trước khi gọi model)
 
 ### Parameters
 
 ```bash
 image: File (required)
-scale: 2 | 4 | 6 (default: 2)
-model: string (default: "standard-v2")
+scale: 2 | 4 (default: 2)
+face_enhance: boolean (default: false)
+model: string (default: "real-esrgan")
 ```
-
-### Enhancement Models
-
-| Model              | Mô tả                            | Sử dụng cho                      |
-| ------------------ | -------------------------------- | -------------------------------- |
-| `standard-v2`      | Mục đích chung                   | Hầu hết các loại ảnh             |
-| `low-res-v2`       | Tối ưu cho ảnh độ phân giải thấp | Ảnh cũ, ảnh chất lượng thấp      |
-| `cgi`              | Tối ưu cho nghệ thuật số         | Digital art, CGI, renders        |
-| `high-fidelity-v2` | Bảo toàn chi tiết tốt nhất       | Phong cảnh, kiến trúc, chân dung |
-| `text-refine`      | Tối ưu cho văn bản               | Screenshots, documents           |
 
 ### Ví dụ sử dụng
 
 ```bash
-# Standard V2 - General purpose
+# Basic 2x
 curl -X POST http://localhost:3000/api/enhance \
-  -F "image=@photo.jpg" \
-  -F "scale=2" \
-  -F "model=standard-v2"
+  -F "image=@photo.jpg"
 
-# High Fidelity - Best quality
+# 4x + Face enhance
 curl -X POST http://localhost:3000/api/enhance \
-  -F "image=@landscape.jpg" \
+  -F "image=@portrait.jpg" \
   -F "scale=4" \
-  -F "model=high-fidelity-v2"
-
-# Low Resolution - For old photos
-curl -X POST http://localhost:3000/api/enhance \
-  -F "image=@old-photo.jpg" \
-  -F "scale=6" \
-  -F "model=low-res-v2"
-
-# CGI - For digital art
-curl -X POST http://localhost:3000/api/enhance \
-  -F "image=@digital-art.jpg" \
-  -F "scale=4" \
-  -F "model=cgi"
-
-# Text Refine - For screenshots
-curl -X POST http://localhost:3000/api/enhance \
-  -F "image=@screenshot.png" \
-  -F "scale=2" \
-  -F "model=text-refine"
+  -F "face_enhance=true"
 ```
 
 ### Khi nào sử dụng?
 
 ✅ **Nên dùng khi:**
 
--   Cần chất lượng chuyên nghiệp cao
--   Ảnh quan trọng (marketing, portfolio, print)
--   Cần upscale lên 6x
--   Có ảnh đặc thù (CGI, low-res, text)
--   Sẵn sàng chi phí cho chất lượng
+-   Cần kết quả upscale và URL/presigned từ R2
+-   Muốn bật `face_enhance` cho chân dung
+-   Cần 2x/4x nhanh, sắc nét
+-   Cần endpoint /api/enhance cho compatibility cũ
 
 ❌ **Không nên dùng khi:**
 
--   Ngân sách hạn chế
--   Chỉ cần xử lý nhanh
--   Ảnh không quan trọng
--   Scale 2x-4x là đủ với Real-ESRGAN
+-   Muốn giữ nguyên kích thước >2560px (sẽ bị pre-scale)
+-   Ảnh đã bị sharpen quá nhiều (có thể tạo artifact)
 
 ---
 
-## 💰 Chi Phí (Topaz Labs)
+## 💰 Chi Phí
 
-| Output Megapixels | Units | Giá (USD) |
-| ----------------- | ----- | --------- |
-| 12 MP             | 1     | $0.05     |
-| 24 MP             | 1     | $0.05     |
-| 36 MP             | 2     | $0.10     |
-| 48 MP             | 2     | $0.10     |
-| 60 MP             | 3     | $0.15     |
-| 96 MP             | 4     | $0.20     |
-| 132 MP            | 5     | $0.24     |
-| 168 MP            | 6     | $0.29     |
-| 336 MP            | 11    | $0.53     |
-| 512 MP            | 17    | $0.82     |
-
-_Note: Topaz Labs sẽ tăng giá từ $0.05 lên $0.08/unit vào 30/11/2025_
+-   Cả hai endpoint dùng chung Real-ESRGAN trên Replicate, chi phí phụ thuộc thời gian chạy (thấp, tương đương nhau).
+-   Không còn pricing theo megapixel như Topaz Labs; không cần chọn model phụ.
 
 ---
 
@@ -174,83 +130,50 @@ _Note: Topaz Labs sẽ tăng giá từ $0.05 lên $0.08/unit vào 30/11/2025_
 
 ### Social Media Posts (Instagram, Facebook)
 
-**Recommend**: Improve Clarity
+**Recommend**: Improve Clarity (scale 2x)
 
--   Chi phí: Free ✅
--   Tốc độ: Nhanh
--   Scale 2x là đủ
--   Chất lượng đủ cho web/social
+-   Nhanh, nhẹ, đủ tốt cho web/social
+-   Face enhance tùy chọn nếu có chân dung
 
-### Professional Photography (Portfolio, Client Work)
+### Professional Photography / Marketing
 
-**Recommend**: Image Enhance (high-fidelity-v2)
+**Recommend**: Image Enhance (scale 4x, face_enhance khi cần)
 
--   Chất lượng tốt nhất
--   Bảo toàn chi tiết
--   Phù hợp cho in ấn
--   Đáng để đầu tư
+-   Trả về URL/presigned R2 sẵn dùng
+-   Thích hợp cho in ấn/portfolio
 
 ### E-commerce Product Photos
 
-**Recommend**: Image Enhance (standard-v2)
+**Recommend**: Image Enhance (scale 2x hoặc 4x)
 
--   Chất lượng ổn định
--   Không quá đắt
--   Phù hợp cho web
+-   Upscale và lấy URL public ngay
+-   Giữ chi tiết tốt, giảm noise
 
 ### Portrait Photography
 
-**Option 1**: Improve Clarity (với faceEnhance)
-
--   Miễn phí
--   Face enhancement tích hợp
--   Đủ cho hầu hết trường hợp
-
-**Option 2**: Image Enhance (high-fidelity-v2)
-
--   Cho ảnh chân dung cao cấp
--   Print lớn
--   Portfolio chuyên nghiệp
+-   **Nhanh**: Improve Clarity với `faceEnhance=true`
+-   **Hoàn thiện**: Image Enhance với `face_enhance=true` để lấy link chia sẻ
 
 ### Old/Vintage Photos
 
-**Recommend**: Image Enhance (low-res-v2)
+**Recommend**: Image Enhance (scale 4x, `face_enhance=true` nếu có người)
 
--   Tối ưu cho ảnh cũ
--   Xử lý ảnh chất lượng thấp tốt
--   Có thể upscale lên 6x
+-   Làm nét + phóng to cùng lúc
+-   Pre-scale giúp giảm artifact khi ảnh quá lớn
 
-### Digital Art/CGI
+### Digital Art / Screenshots / Documents
 
-**Recommend**: Image Enhance (cgi)
+**Recommend**: Image Enhance (scale 2x, `face_enhance=false`)
 
--   Model chuyên biệt
--   Giữ được màu sắc và style
--   Không làm mất chi tiết digital
-
-### Screenshots/Documents
-
-**Recommend**: Image Enhance (text-refine)
-
--   Tối ưu cho văn bản
--   Giữ chữ sắc nét
--   Không làm mờ text
-
-### Landscape Photography
-
-**Recommend**: Image Enhance (high-fidelity-v2)
-
--   Bảo toàn chi tiết tốt nhất
--   Tốt cho in lớn
--   Phong cảnh đòi hỏi chi tiết cao
+-   Giữ viền và text sắc nét
+-   Không cần chọn model riêng lẻ
 
 ### Everyday Photos (Personal Use)
 
-**Recommend**: Improve Clarity
+**Recommend**: Improve Clarity (scale 2x)
 
--   Miễn phí
--   Nhanh
--   Đủ tốt cho lưu trữ cá nhân
+-   Đơn giản, ít tham số
+-   Lưu trữ nhanh cho ảnh cá nhân
 
 ---
 
@@ -266,10 +189,10 @@ _Note: Topaz Labs sẽ tăng giá từ $0.05 lên $0.08/unit vào 30/11/2025_
         "presignedUrl": "https://...",
         "expiresIn": 3600,
         "meta": {
-            "model": "real-esrgan", // hoặc "topaz-labs"
+            "model": "nightmareai/real-esrgan",
             "scale": 4,
-            "faceEnhance": true, // chỉ có trong Improve Clarity
-            "provider": "topaz-labs", // chỉ có trong Image Enhance
+            "faceEnhance": true,
+            "provider": "nightmareai",
             "bytes": 2456789,
             "requestId": "abc-123"
         }
@@ -288,17 +211,14 @@ _Note: Topaz Labs sẽ tăng giá từ $0.05 lên $0.08/unit vào 30/11/2025_
 
 ### Processing
 
--   **Improve Clarity**: max 2560px prescale
--   **Image Enhance**: max 4096px prescale
--   Cả 2 đều có retry logic (2 lần)
--   Concurrent job limiting via `withReplicateLimiter`
+-   Cả hai endpoint prescale ảnh về tối đa 2560px trước khi gửi model
+-   Retry logic (2 lần) và limiter `withReplicateLimiter`
 
 ### Storage
 
 -   **Improve Clarity**: prefix `clarity/`
--   **Image Enhance**: prefix `enhance/{model}/`
--   Upload to R2 storage
--   Support cả PNG và JPG
+-   **Image Enhance**: prefix `enhance/real-esrgan/`
+-   Upload lên R2, hỗ trợ PNG/JPG
 
 ---
 
@@ -307,17 +227,15 @@ _Note: Topaz Labs sẽ tăng giá từ $0.05 lên $0.08/unit vào 30/11/2025_
 ```
 Bạn cần upscale ảnh?
 │
-├─ Ảnh quan trọng (marketing, portfolio)?
-│  └─ YES → Image Enhance
-│     ├─ Phong cảnh/kiến trúc → high-fidelity-v2
-│     ├─ Ảnh cũ → low-res-v2
-│     ├─ Digital art → cgi
-│     └─ Screenshot/doc → text-refine
+├─ Muốn lấy URL/presigned để chia sẻ?
+│  └─ YES → Image Enhance (/api/enhance)
+│       ├─ Ảnh có mặt → face_enhance=true
+│       └─ Ảnh thường → face_enhance=false
 │
-└─ Ảnh thông thường hoặc giới hạn ngân sách?
-   └─ YES → Improve Clarity
-      ├─ Có khuôn mặt → faceEnhance=true
-      └─ Không có khuôn mặt → faceEnhance=false
+└─ Cần xử lý nhanh, ít cấu hình?
+   └─ YES → Improve Clarity (/api/clarity)
+        ├─ Ảnh có mặt → faceEnhance=true
+        └─ Ảnh thường → faceEnhance=false
 ```
 
 ---
@@ -327,4 +245,3 @@ Bạn cần upscale ảnh?
 -   [Improve Clarity README](./improveClarity/README.md)
 -   [Image Enhance README](./imageEnhance/README.md)
 -   [Real-ESRGAN on Replicate](https://replicate.com/nightmareai/real-esrgan)
--   [Topaz Labs on Replicate](https://replicate.com/topazlabs/image-upscale)

@@ -9,11 +9,12 @@ import { successResponse, errorResponse } from "../../utils/response.js";
 export const enhanceController = {
     enhance: async (req, res) => {
         const { file } = req;
-        const { scale, model } = req.body || {};
+        const { scale, model, face_enhance, faceEnhance } = req.body || {};
 
         const { ok, value, error } = validateEnhanceInput({
             scale,
             model,
+            faceEnhance: face_enhance ?? faceEnhance,
             fileBuffer: file?.buffer,
             mimeType: file?.mimetype,
         });
@@ -33,7 +34,7 @@ export const enhanceController = {
             inputBuffer: value.fileBuffer,
             inputMime: value.mimeType,
             scale: value.scale,
-            model: value.model,
+            faceEnhance: value.faceEnhance,
             requestId: req.id,
         });
 
