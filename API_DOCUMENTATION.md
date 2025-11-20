@@ -402,6 +402,7 @@ Tăng độ phân giải và sắc nét với model `nightmareai/real-esrgan`.
 | `scale` | Number | ❌ | Hệ số scale: `2` hoặc `4` | `2` |
 | `face_enhance` | Boolean | ❌ | Bật bổ trợ khuôn mặt (alias: `faceEnhance`) | `false` |
 | `model` | String | ❌ | Giữ cho tương thích cũ, chỉ nhận `real-esrgan` | `real-esrgan` |
+| _Note_ | - | - | Ảnh được prescale xuống tối đa 2560px **hoặc ~2MP** để tránh lỗi GPU | - |
 
 **Response Success (200)**:
 

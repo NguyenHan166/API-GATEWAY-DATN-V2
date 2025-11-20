@@ -31,7 +31,7 @@ Content-Type: multipart/form-data
 
 -   **Max file size**: 10MB (theo upload middleware)
 -   **Supported formats**: JPEG, PNG, WebP…
--   **Pre-scaling**: Resize xuống tối đa 2560px trước khi gọi Replicate
+-   **Pre-scaling**: Resize xuống tối đa 2560px hoặc ~2MP trước khi gọi Replicate
 
 ## Response
 

@@ -6,17 +6,28 @@ import { withReplicateLimiter } from "../../utils/limiters.js";
 
 // Real-ESRGAN Image Upscale Model
 const MODEL = "nightmareai/real-esrgan";
+const MAX_SIDE = 2560;
+const MAX_PIXELS = 2_000_000; // guard GPU memory limit (~2.096MP)
 
-// Pre-resize để tránh ảnh quá lớn - Real-ESRGAN hoạt động tốt nhất <~1440p
-async function preScale(buffer, maxSide = 2560) {
+// Pre-resize để tránh ảnh quá lớn và vượt giới hạn GPU của Real-ESRGAN
+async function preScale(buffer, maxSide = MAX_SIDE, maxPixels = MAX_PIXELS) {
     const meta = await sharp(buffer).metadata();
     if (!meta.width || !meta.height) return buffer;
-    const currentMaxSide = Math.max(meta.width, meta.height);
-    if (currentMaxSide <= maxSide) return buffer;
 
-    const scale = maxSide / currentMaxSide;
-    const W = Math.round((meta.width || 0) * scale);
-    const H = Math.round((meta.height || 0) * scale);
+    const { width, height } = meta;
+    const currentMaxSide = Math.max(width, height);
+    const currentPixels = width * height;
+
+    // Tính scale theo cả chiều dài max và tổng pixel, lấy giá trị nhỏ nhất
+    const scaleBySide = maxSide ? maxSide / currentMaxSide : 1;
+    const scaleByPixels = maxPixels
+        ? Math.sqrt(maxPixels / currentPixels)
+        : 1;
+    const scale = Math.min(1, scaleBySide, scaleByPixels);
+    if (!isFinite(scale) || scale >= 1) return buffer;
+
+    const W = Math.max(1, Math.round(width * scale));
+    const H = Math.max(1, Math.round(height * scale));
 
     return await sharp(buffer)
         .resize(W, H, { fit: "inside" })

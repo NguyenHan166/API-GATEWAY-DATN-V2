@@ -7,7 +7,7 @@ Nâng cấp chất lượng ảnh bằng **Real-ESRGAN** (`nightmareai/real-esrg
 -   **Model**: `nightmareai/real-esrgan`
 -   **Scale**: 2x hoặc 4x
 -   **Face enhance**: Tùy chọn `face_enhance`
--   **Pre-scaling**: Resize xuống tối đa 2560px trước khi gọi Replicate
+-   **Pre-scaling**: Resize xuống tối đa 2560px hoặc ~2MP để tránh lỗi GPU
 
 ## API Endpoint
 
@@ -82,7 +82,7 @@ console.log(result.data.url);
 
 1. **Rate Limit**: 60 requests / phút / IP
 2. **Processing Time**: ~15-60s (tùy scale và tải Replicate)
-3. **Pre-scaling**: Ảnh được resize xuống max 2560px để tối ưu chi phí/thời gian
+3. **Pre-scaling**: Ảnh được resize xuống max 2560px hoặc ~2MP để tránh lỗi GPU/timeout
 4. **Model**: [Real-ESRGAN trên Replicate](https://replicate.com/nightmareai/real-esrgan)
 
 ## Khuyến nghị

@@ -211,7 +211,7 @@ curl -X POST http://localhost:3000/api/enhance \
 
 ### Processing
 
--   Cả hai endpoint prescale ảnh về tối đa 2560px trước khi gửi model
+-   Cả hai endpoint prescale ảnh về tối đa 2560px **hoặc ~2MP** trước khi gửi model
 -   Retry logic (2 lần) và limiter `withReplicateLimiter`
 
 ### Storage
