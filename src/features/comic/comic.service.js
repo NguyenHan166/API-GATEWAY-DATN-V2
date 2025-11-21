@@ -10,6 +10,7 @@ import {
 } from "../../integrations/r2/storage.service.js";
 import { PERF } from "../../config/perf.js";
 import { logger } from "../../config/logger.js";
+import { renderComicPage } from "../story-comic/storyComic.renderer.js";
 
 const GEMINI_MODEL = process.env.GEMINI_MODEL_ID || "google/gemini-2.5-flash";
 const ANIMAGINE_MODEL =
@@ -21,12 +22,45 @@ const DEFAULT_NEGATIVE_PROMPT =
 const POSITIVE_SUFFIX =
     "anime style, vibrant colors, high quality, detailed background, no text, no speech bubble";
 
-const PAGE_WIDTH = 1080;
-const PAGE_HEIGHT = 1620;
-const GAP = 18;
 const FETCH_TIMEOUT_MS = Number(process.env.HTTP_TIMEOUT_MS || 20000);
 
-function buildSystemPrompt({ panels }) {
+function detectMainGender(text) {
+    const t = (text || "").toLowerCase();
+    const maleKeywords = [
+        "chàng trai",
+        "anh ",
+        "anh ấy",
+        "anh ay",
+        "người đàn ông",
+        "nguoi dan ong",
+        "chàng thanh niên",
+        "chang thanh nien",
+        "nam chính",
+        "nam chinh",
+        "cậu bé",
+        "cau be",
+        "chàng",
+    ];
+    const femaleKeywords = [
+        "cô gái",
+        "co gai",
+        "cô bé",
+        "co be",
+        "người phụ nữ",
+        "nguoi phu nu",
+        "nữ chính",
+        "nu chinh",
+        "cô nàng",
+        "co nang",
+        "chị ",
+        "chi ",
+    ];
+    if (maleKeywords.some((k) => t.includes(k))) return "male";
+    if (femaleKeywords.some((k) => t.includes(k))) return "female";
+    return null;
+}
+
+function buildSystemPrompt({ panels, characterHint }) {
     return `
 Bạn là trợ lý tạo storyboard comic anime màu (không manga).
 - Trả về đúng 1 object JSON, không markdown, không giải thích, không kèm text thừa.
@@ -52,6 +86,9 @@ Bạn là trợ lý tạo storyboard comic anime màu (không manga).
     }
   ]
 }
+- Giữ 1 nhân vật chính xuyên suốt, cùng giới tính${
+        characterHint ? ` (${characterHint})` : ""
+    }, trang phục và kiểu tóc nhất quán ở mọi panel.
     `.trim();
 }
 
@@ -134,9 +171,34 @@ function normalizePanels(panels, requested, fallbackPrompt) {
     return filled.map((p, idx) => ({ ...p, id: p.id || idx + 1 }));
 }
 
-function buildPanelPrompt(panel) {
+function applyGenderTags(tags, gender) {
+    if (!gender) return tags;
+    const lower = tags.toLowerCase();
+    if (gender === "male") {
+        if (
+            !lower.includes("male") &&
+            !lower.includes("1boy") &&
+            !lower.includes("man")
+        ) {
+            return `${tags}, male, 1boy, masculine face, short hair`;
+        }
+    }
+    if (gender === "female") {
+        if (
+            !lower.includes("female") &&
+            !lower.includes("1girl") &&
+            !lower.includes("woman")
+        ) {
+            return `${tags}, female, 1girl, feminine face`;
+        }
+    }
+    return tags;
+}
+
+function buildPanelPrompt(panel, mainGender) {
     const tags = panel.prompt_tags || "";
-    const trimmed = [tags, POSITIVE_SUFFIX]
+    const gendered = applyGenderTags(tags, mainGender);
+    const trimmed = [gendered, POSITIVE_SUFFIX]
         .filter(Boolean)
         .join(", ")
         .replace(/\s+,/g, ",")
@@ -161,8 +223,16 @@ async function fetchBuffer(url, timeoutMs = FETCH_TIMEOUT_MS) {
     }
 }
 
-async function runGeminiStoryboard({ prompt, panels, style, requestId }) {
-    const systemPrompt = buildSystemPrompt({ panels });
+async function runGeminiStoryboard({
+    prompt,
+    panels,
+    style,
+    requestId,
+    mainGender,
+}) {
+    const genderHint =
+        mainGender === "male" ? "nam" : mainGender === "female" ? "nữ" : null;
+    const systemPrompt = buildSystemPrompt({ panels, characterHint: genderHint });
     const userPrompt = buildUserPrompt({ userPrompt: prompt, style });
     const finalPrompt = `
 ${systemPrompt}
@@ -260,9 +330,9 @@ async function runAnimagine({ prompt, requestId }) {
     );
 }
 
-async function generatePanelsImages(panels, requestId) {
+async function generatePanelsImages(panels, requestId, mainGender) {
     const tasks = panels.map(async (panel) => {
-        const prompt = buildPanelPrompt(panel);
+        const prompt = buildPanelPrompt(panel, mainGender);
         const output = await runAnimagine({ prompt, requestId });
         const first =
             Array.isArray(output) && output.length > 0
@@ -292,175 +362,12 @@ async function generatePanelsImages(panels, requestId) {
     return await Promise.all(tasks);
 }
 
-function wrapText(text, maxChars) {
-    if (!text) return [""];
-    const words = text.split(/\s+/);
-    const lines = [];
-    let current = "";
-    for (const w of words) {
-        if ((current + " " + w).trim().length > maxChars) {
-            if (current) lines.push(current.trim());
-            current = w;
-        } else {
-            current = `${current} ${w}`.trim();
-        }
-    }
-    if (current) lines.push(current.trim());
-    return lines.length ? lines : [""];
-}
-
-function makeSpeechBubble({
-    dialogue,
-    speaker,
-    maxWidth,
-    maxHeight,
-    fontSize = 18,
-}) {
-    const combined = speaker ? `${speaker}: ${dialogue || ""}` : dialogue || "";
-    const safeWidth = Math.max(220, Math.min(maxWidth - 12, 520));
-    const lineHeight = fontSize + 6;
-    const maxChars = Math.max(14, Math.floor(safeWidth / 9));
-    const potentialLines = wrapText(combined, maxChars);
-    const maxLines = Math.max(2, Math.floor(maxHeight / lineHeight) - 1);
-    const lines =
-        potentialLines.length > maxLines
-            ? [
-                  ...potentialLines.slice(0, maxLines - 1),
-                  `${potentialLines[maxLines - 1]}...`,
-              ]
-            : potentialLines;
-
-    const padding = 12;
-    const tailHeight = 14;
-    const bodyHeight = padding * 2 + lines.length * lineHeight;
-    const bubbleHeight = Math.min(bodyHeight + tailHeight, maxHeight);
-
-    const textYStart = padding + fontSize;
-    const text = lines
-        .map(
-            (line, idx) =>
-                `<text x="${padding}" y="${
-                    textYStart + idx * lineHeight
-                }" font-size="${fontSize}" font-family="Arial, sans-serif" fill="#000">${line.replace(
-                    /&/g,
-                    "&amp;"
-                )}</text>`
-        )
-        .join("");
-
-    const svg = `
-<svg xmlns="http://www.w3.org/2000/svg" width="${safeWidth}" height="${bubbleHeight}">
-  <path d="M8 8 h ${safeWidth - 16} a8 8 0 0 1 8 8 v ${
-        bubbleHeight - tailHeight - 16
-    } a8 8 0 0 1 -8 8 h -${safeWidth - 16} a8 8 0 0 1 -8 -8 v -${
-        bubbleHeight - tailHeight - 16
-    } a8 8 0 0 1 8 -8 z" fill="white" stroke="black" stroke-width="2" />
-  <path d="M${safeWidth * 0.15} ${bubbleHeight - tailHeight} l 18 ${
-        tailHeight - 2
-    } l -8 -${tailHeight}" fill="white" stroke="black" stroke-width="2" />
-  ${text}
-</svg>
-    `.trim();
-
-    return Buffer.from(svg);
-}
-
-function buildLayout(count) {
-    if (count <= 0) return [];
-    // Simple grid layout; keeps ratio pleasant for 1-6 panels
-    if (count === 1)
-        return [
-            {
-                x: GAP,
-                y: GAP,
-                width: PAGE_WIDTH - 2 * GAP,
-                height: PAGE_HEIGHT - 2 * GAP,
-            },
-        ];
-    if (count === 2)
-        return [
-            {
-                x: GAP,
-                y: GAP,
-                width: (PAGE_WIDTH - 3 * GAP) / 2,
-                height: PAGE_HEIGHT - 2 * GAP,
-            },
-            {
-                x: GAP * 2 + (PAGE_WIDTH - 3 * GAP) / 2,
-                y: GAP,
-                width: (PAGE_WIDTH - 3 * GAP) / 2,
-                height: PAGE_HEIGHT - 2 * GAP,
-            },
-        ];
-    const rows = Math.ceil(Math.sqrt(count));
-    const cols = Math.ceil(count / rows);
-    const cellW = Math.floor((PAGE_WIDTH - GAP * (cols + 1)) / cols);
-    const cellH = Math.floor((PAGE_HEIGHT - GAP * (rows + 1)) / rows);
-
-    const rects = [];
-    let idx = 0;
-    for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-            if (idx >= count) break;
-            const x = GAP + c * (cellW + GAP);
-            const y = GAP + r * (cellH + GAP);
-            rects.push({ x, y, width: cellW, height: cellH });
-            idx++;
-        }
-    }
-    return rects;
-}
-
 async function composePage({ storyId, renderedPanels }) {
-    const layout = buildLayout(renderedPanels.length);
-    const composites = [];
-
-    renderedPanels.forEach((p, idx) => {
-        const cell = layout[idx] || layout[layout.length - 1];
-        composites.push({
-            input: sharp(p.imageBuffer)
-                .resize(cell.width, cell.height, { fit: "cover" })
-                .png()
-                .toBuffer(),
-            left: Math.round(cell.x),
-            top: Math.round(cell.y),
-        });
-
-        const hasDialogue = (p.dialogue || "").trim().length > 0;
-        if (hasDialogue) {
-            const bubble = makeSpeechBubble({
-                dialogue: p.dialogue,
-                speaker: p.speaker,
-                maxWidth: cell.width,
-                maxHeight: Math.floor(cell.height * 0.45),
-            });
-            composites.push({
-                input: bubble,
-                left: Math.round(cell.x + 8),
-                top: Math.round(cell.y + 8),
-            });
-        }
+    const pageBuffer = await renderComicPage({
+        storyId,
+        pageIndex: 0,
+        panels: renderedPanels,
     });
-
-    const resolvedComposites = await Promise.all(
-        composites.map(async (c) => ({
-            input: await c.input,
-            left: c.left,
-            top: c.top,
-        }))
-    );
-
-    const pageBuffer = await sharp({
-        create: {
-            width: PAGE_WIDTH,
-            height: PAGE_HEIGHT,
-            channels: 4,
-            background: { r: 28, g: 28, b: 28, alpha: 1 },
-        },
-    })
-        .composite(resolvedComposites)
-        .png()
-        .toBuffer();
 
     const key = `comics/${storyId}/page-0.png`;
     await uploadBufferToR2(pageBuffer, {
@@ -480,13 +387,19 @@ async function composePage({ storyId, renderedPanels }) {
 }
 
 export async function generateComic({ prompt, panels, style, requestId }) {
+    const mainGender = detectMainGender(prompt);
     const story = await runGeminiStoryboard({
         prompt,
         panels,
         style,
         requestId,
+        mainGender,
     });
-    const renderedPanels = await generatePanelsImages(story.panels, requestId);
+    const renderedPanels = await generatePanelsImages(
+        story.panels,
+        requestId,
+        mainGender
+    );
     const page = await composePage({
         storyId: story.story_id,
         renderedPanels,

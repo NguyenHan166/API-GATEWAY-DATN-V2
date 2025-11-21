@@ -15,6 +15,7 @@
     "dependencies": {
         "@aws-sdk/client-s3": "^3.922.0",
         "@aws-sdk/s3-request-presigner": "^3.922.0",
+        "@napi-rs/canvas": "^0.1.63",
         "compression": "^1.8.1",
         "cors": "^2.8.5",
         "dotenv": "^17.2.3",

@@ -16,10 +16,11 @@
     -   [Portrait Relighting (IC-Light)](#3-portrait-relighting-ic-light)
     -   [Clarity Improvement (Real-ESRGAN)](#4-clarity-improvement-real-esrgan)
     -   [Image Enhancement (Real-ESRGAN)](#5-image-enhancement-real-esrgan)
-    -   [AI Beautify](#6-ai-beautify)
-    -   [Background Replacement](#7-background-replacement)
-    -   [Style Transfer](#8-style-transfer)
-    -   [Comic Generation](#9-comic-generation)
+-   [AI Beautify](#6-ai-beautify)
+-   [Background Replacement](#7-background-replacement)
+-   [Style Transfer](#8-style-transfer)
+-   [Comic Generation](#9-comic-generation)
+-   [Story Comic (Multi-page)](#10-story-comic-multi-page)
 
 ---
 
@@ -710,19 +711,95 @@ style=anime_color
 
 ---
 
+## 10. Story Comic (Multi-page)
+
+Tạo truyện tranh anime màu nhiều trang (2–3 trang), mỗi trang 3–4 panel với thoại tiếng Việt và bong bóng lời.
+
+### 10.1 Generate Story Comic
+
+**Endpoint**: `POST /story-comic/generate`
+
+**Chức năng**: Từ một prompt duy nhất, sinh outline → storyboard từng trang → ảnh panel (Animagine) → ghép trang và trả URL từng page.
+
+**Content-Type**: `application/json` (hỗ trợ cả `multipart/form-data` dạng text)
+
+**Request Body**:
+
+```
+{
+  "prompt": "Một nữ sinh nhút nhát gặp mèo phép thuật trong đêm mưa ở Tokyo.",
+  "pages": 3,
+  "panels_per_page": 4
+}
+```
+
+**Request Parameters**:
+| Parameter | Type | Required | Description | Default |
+| --------- | ---- | -------- | ----------- | ------- |
+| `prompt` | String | ✅ | Mô tả câu chuyện (≥ 8 ký tự) | - |
+| `pages` | Number | ❌ | 2 hoặc 3 trang | `3` |
+| `panels_per_page` | Number | ❌ | 3 hoặc 4 panel mỗi trang | `4` |
+
+**Response Success (200)**:
+
+```json
+{
+  "request_id": "req_abc123xyz",
+  "status": "success",
+  "story_id": "story-nu-sinh-meo-phep",
+  "pages": [
+    {
+      "page_index": 0,
+      "page_url": "https://pub-xxxx.r2.dev/comics/story-nu-sinh-meo-phep/page-0.png",
+      "key": "comics/story-nu-sinh-meo-phep/page-0.png",
+      "presigned_url": "https://pub-xxxx.r2.dev/comics/.../page-0.png?...",
+      "panels": [
+        { "id": 1, "dialogue": "Trời mưa mãi...", "speaker": "Yuki", "emotion": "sad" }
+      ]
+    },
+    {...}
+  ],
+  "meta": {
+    "outline": [{ "id": 1, "summary_vi": "Yuki đi bộ dưới mưa", "main_emotion": "sad" }],
+    "pages": [{ "page_index": 0, "beats": [1, 2, 3, 4], "panel_count": 4 }],
+    "model": { "llm": "google/gemini-2.5-flash", "image": "cjwbw/animagine-xl-3.1" }
+  }
+}
+```
+
+**Processing Pipeline**:
+
+1. Gemini 2.5 Flash tạo outline 9–12 beat, ép JSON sạch.
+2. Chia beat theo số trang (3–4 beat/trang).
+3. Gemini storyboard từng trang (panel description + prompt_tags Danbooru + dialogue tiếng Việt).
+4. Animagine XL 3.1 sinh ảnh panel (anime màu, không manga).
+5. Render trang (layout 3–4 panel, speech bubbles), upload R2.
+
+**Processing Time**: ~90–240s cho 3 trang x 4 panel (phụ thuộc số trang/panel).
+
+**Use Cases**:
+
+-   Mini story nhiều trang
+-   Social content dài hơi
+-   Pitch/outline truyện kèm hình ảnh
+-   Giáo dục minh họa nhiều bước
+
+---
+
 ## 📊 Quick Comparison Table
 
-| Feature        | Endpoint                  | Input         | Main Function                   | Processing Time |
-| -------------- | ------------------------- | ------------- | ------------------------------- | --------------- |
-| Manifest       | GET /manifest             | Query params  | List resource packs             | < 1s            |
-| GFPGAN         | POST /upscale             | Image file    | Face restoration & upscaling    | 15-90s          |
-| IC-Light       | POST /portraits/ic-light  | Image file    | Portrait relighting             | 30-120s         |
-| Clarity        | POST /clarity             | Image file    | Super-resolution                | 20-120s         |
-| Enhance        | POST /enhance             | Image file    | Professional enhancement        | 30-180s         |
-| AI Beautify    | POST /ai-beautify         | Image file    | Multi-step portrait enhancement | 30-90s          |
-| Replace BG     | POST /replace-bg          | Image file(s) | Remove/replace background       | 20-60s          |
-| Style Transfer | POST /style/replace-style | Image file    | Artistic style transformation   | 30-150s         |
-| Comic Generate | POST /comic/generate      | Form-data (text) | Auto comic generation           | 60-240s         |
+| Feature        | Endpoint                   | Input            | Main Function                     | Processing Time |
+| -------------- | -------------------------- | ---------------- | --------------------------------- | --------------- |
+| Manifest       | GET /manifest              | Query params     | List resource packs               | < 1s            |
+| GFPGAN         | POST /upscale              | Image file       | Face restoration & upscaling      | 15-90s          |
+| IC-Light       | POST /portraits/ic-light   | Image file       | Portrait relighting               | 30-120s         |
+| Clarity        | POST /clarity              | Image file       | Super-resolution                  | 20-120s         |
+| Enhance        | POST /enhance              | Image file       | Professional enhancement          | 30-180s         |
+| AI Beautify    | POST /ai-beautify          | Image file       | Multi-step portrait enhancement   | 30-90s          |
+| Replace BG     | POST /replace-bg           | Image file(s)    | Remove/replace background         | 20-60s          |
+| Style Transfer | POST /style/replace-style  | Image file       | Artistic style transformation     | 30-150s         |
+| Comic Generate | POST /comic/generate       | Form-data (text) | Auto comic generation             | 60-240s         |
+| Story Comic    | POST /story-comic/generate | JSON/form (text) | Multi-page anime comic w/ bubbles | 90-240s         |
 
 ---
 

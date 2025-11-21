@@ -1,318 +1,337 @@
-# AI Comic Generator – README cho Agent (1 API duy nhất)
+Bạn đang làm việc trong một project backend Node.js/Express (ESM) cho app chỉnh sửa ảnh AI.
 
-## 1. Mục tiêu & Flow tổng
+## 1. Bối cảnh & kiến trúc hiện có
 
-Mình muốn một **API đơn giản**:
+**Tech & kiến trúc:**
 
-> **Client gửi prompt → Server trả về ngay 1 ảnh comic (có nhiều panel + bong bóng lời thoại).**
-
-Không cần bước “xem/stored storyboard” riêng. Storyboard vẫn có, nhưng chỉ dùng **nội bộ** trong API.
-
-### Flow bên trong (1 API):
-
-1. Nhận `prompt` từ client (tiếng Việt).
-2. Gọi **LLM (Gemini 2.5 Flash)** → sinh **storyboard JSON**:
-    - Danh sách panel
-    - Lời thoại (tiếng Việt) cho từng panel
-    - Prompt tags (tiếng Anh, Danbooru-style) cho model ảnh
-3. Gọi **image model Animagine XL 3.1** trên Replicate:
-    - Sinh ảnh anime màu cho từng panel (không có chữ, không bubble).
-4. Dùng **node-canvas**:
-    - Ghép tất cả panel thành **một page comic** (1 ảnh)
-    - Vẽ **bong bóng lời thoại** + text tiếng Việt
-5. Upload ảnh final lên **Cloudflare R2**, trả về **URL** cho client.
-
----
-
-## 2. Kiến trúc backend hiện có (để agent bám theo)
-
--   **Node.js + Express (ESM)** – dùng `import`/`export`
--   Kiểu dự án: **feature-first**
-
-Thư mục quan trọng:
-
--   `config/` – config, env, PERF…
--   `middlewares/` – error handler, upload, security, request-id, timeout…
--   `integrations/`
-    -   `replicate/` – client gọi Replicate
-    -   `r2/` – upload & presign Cloudflare R2
--   `features/` – mỗi feature 1 folder:
-    -   `replace-bg/`, `manifest/`, `presign/`, ...
-    -   **Thêm mới**: `comic/`
--   `utils/`
-    -   `retry.js` – `withRetry`
-    -   `limiters.js` – `withReplicateLimiter` (p-limit)
-    -   `asyncHandler`, `image`, ...
+-   Node.js + Express, **ESM** (`import`/`export`).
+-   Kiểu tổ chức: **feature-first**:
+    -   `config/` – cấu hình, PERF, env
+    -   `middlewares/` – error handler, upload, security, request-id, timeout…
+    -   `integrations/`:
+        -   `replicate/` – client gọi Replicate
+        -   `r2/` – Cloudflare R2 (upload, presign)
+    -   `features/` – mỗi API là một feature riêng:
+        -   `replace-bg/`
+        -   `manifest/`
+        -   `presign/`
+        -   (đang chuẩn bị có) `comic/` dạng 1 trang
+    -   `utils/`:
+        -   `retry.js` – `withRetry`
+        -   `limiters.js` – `withReplicateLimiter` (p-limit)
+        -   `asyncHandler`, `image`, …
 
 **Nguyên tắc:**
 
--   Mọi I/O async.
--   Gọi model qua `withReplicateLimiter`.
--   Có retry/timeout cho call mạng.
--   API trả JSON rõ ràng, có `request_id` và log bằng pino.
+-   Mọi I/O async, không block event loop.
+-   Gọi API nặng (Replicate) qua `withReplicateLimiter`.
+-   Có retry + timeout cho call mạng.
+-   Tất cả controller trả JSON rõ ràng, có `request_id`, log bằng pino.
+-   Config đọc từ `.env` + `config/perf.js` (không hard-code).
 
-Agent phải **giữ đúng style này**.
+## 2. Mục tiêu chức năng mới
 
----
+TẠO MỚI **một tính năng độc lập** để sinh **truyện tranh anime màu nhiều trang (2–3 trang)**, dựa trên prompt của user.
 
-## 3. Model sử dụng
+Đây là **tính năng mới tách hẳn** với các API comic 1 trang đơn giản. Đề nghị:
 
-### 3.1. LLM – Storyboard + Prompt
+-   Tạo feature mới: `src/features/story-comic/`
+-   Không phá hay sửa các feature khác.
 
--   **Model**: `google/gemini-2.5-flash` trên Replicate
--   Vai trò:
-    -   Nhận `prompt` tiếng Việt từ user
-    -   Sinh **1 object JSON** (storyboard) gồm:
-        -   `characters`: danh sách nhân vật
-        -   `panels`: mỗi panel có:
-            -   `id`
-            -   `description_vi` – mô tả cảnh tiếng Việt (debug)
-            -   `prompt_tags` – chuỗi Danbooru tags tiếng Anh cho Animagine
-            -   `dialogue` – lời thoại tiếng Việt
-            -   `speaker` – tên nhân vật nói
-            -   `emotion` – `happy|sad|angry|surprised|neutral`
+### Luồng logic yêu cầu (Hướng số 3 – Outline → Multi-page):
 
-**Yêu cầu với Gemini:**
+Từ một prompt duy nhất, backend sẽ:
 
--   Output là **JSON thuần**, không kèm text giải thích.
--   Có thể parse bằng `JSON.parse`.
--   `prompt_tags` phải hợp với style **Animagine XL 3.1** (anime, màu).
+1. Gọi LLM (Gemini) để sinh **OUTLINE dài** toàn bộ truyện:
+    - Dạng 9–12 “beat” (đoạn) từ mở đầu → cao trào → kết.
+2. Chia OUTLINE này thành **nhiều phần ứng với từng trang** (2–3 trang).
+3. Với **mỗi trang**, gọi LLM lần 2:
+    - Input: 3–4 beat (từ outline).
+    - Output: **storyboard cho 1 trang comic** (3–4 panel) ở dạng JSON:
+        - Mô tả cảnh tiếng Việt
+        - Lời thoại tiếng Việt
+        - `prompt_tags` (Danbooru-style) tiếng Anh để feed thẳng cho model ảnh.
+4. Với mỗi page JSON:
+    - Gọi model ảnh **Animagine XL 3.1** trên Replicate (text-to-image) để vẽ ảnh cho từng panel (anime màu).
+    - Dùng **node-canvas** (hoặc `@napi-rs/canvas`) để:
+        - Ghép các panel thành **một page**.
+        - Vẽ **bong bóng lời thoại** (speech bubble) + chữ tiếng Việt.
+5. Upload từng page lên **Cloudflare R2**, trả về **danh sách URL page** cho client.
 
-### 3.2. Image – Anime Comic (KHÔNG manga)
+## 3. Model & integration
 
--   **Model**: `cjwbw/animagine-xl-3.1` trên Replicate
--   Mục tiêu: sinh ảnh **anime màu**, kiểu illustration/comic, **không** manga đen trắng.
+### 3.1. LLM – Gemini
 
-**Input mặc định cho mỗi panel (ý tưởng):**
+-   Mặc định hiện tại: đang dùng **`google/gemini-2.5-flash` trên Replicate**.
+-   Yêu cầu thiết kế code sao cho:
+    -   Lớp gọi LLM được **đóng gói riêng** (VD: `storyComic.llm.js`), để sau này **dễ thay** sang gọi Gemini bằng API key trực tiếp (AI Studio) mà không phải sửa logic feature.
+-   Output bắt buộc là **JSON hợp lệ**, parse được bằng `JSON.parse`.
 
--   `prompt`: lấy từ `panel.prompt_tags` + thêm style chung, ví dụ:
-    -   `"masterpiece, best quality, anime style, vibrant colors, detailed background, <prompt_tags>, no text, no speech bubble"`
--   `negative_prompt`:
-    -   `"nsfw, lowres, text, logo, watermark, signature, speech bubble, caption, bad hands, extra fingers, deformed, extra limbs"`
--   `width`: khoảng `832` (hoặc tương đương)
--   `height`: khoảng `1216` (tỉ lệ đứng, panel dọc)
--   `num_inference_steps`: 24–30
--   `guidance_scale`: 6–8
--   (Optional) `seed`: có thể cố định trong 1 page để cùng vibe.
+**Bước 1 – Gọi Gemini tạo OUTLINE**
 
-**Quan trọng:**
-
--   Không dùng tag `manga`, `screentone`, `lineart only`.
--   Luôn loại chữ khỏi ảnh (để backend tự vẽ bubble).
-
----
-
-## 4. API duy nhất: `/api/comic/generate`
-
-### 4.1. Endpoint
-
-`POST /api/comic/generate`
-
-#### Request body (từ client)
+-   Input: prompt user + số trang mong muốn (2–3).
+-   Output JSON (schema):
 
 ```json
 {
-    "prompt": "Một cô nữ sinh nhút nhát gặp một con mèo phép thuật trong đêm mưa ở Tokyo.",
-    "panels": 4,
-    "style": "anime_color"
+    "story_id": "string_ngan_khong_dau_cach",
+    "outline": [
+        {
+            "id": 1,
+            "summary_vi": "mô tả ngắn gọn tiếng Việt (~1–2 câu) cho beat 1",
+            "summary_en": "short English description (~1–2 sentences) for this beat",
+            "main_emotion": "happy|sad|angry|surprised|neutral"
+        }
+    ]
 }
 ```
 
-prompt: mô tả ngắn truyện (VN).
+Số lượng beat: khoảng 9–12 beat cho 3 trang, tuỳ prompt.
 
-panels: số panel muốn trên 1 page (1–6). V1 cho phép 3–4 panel cũng được.
+Bước 2 – Gọi Gemini tạo STORYBOARD từng trang
 
-style: hiện tại chỉ dùng "anime_color" (không manga).
+Cho mỗi trang, dùng 1 lần gọi LLM với:
 
-4.2. Response body (trả cho client)
+Input:
+
+Một số beat từ outline (3–4 beat cho 1 page).
+
+page_index (0, 1, 2…)
+
+Số panel mong muốn (3 hoặc 4).
+
+Output JSON (schema):
 
 ```json
 {
-    "request_id": "xxx",
-    "page_url": "https://r2.example.com/comics/abc123/page-0.png",
-    "meta": {
-        "panels": [
-            {
-                "id": 1,
-                "dialogue": "Trời mưa hoài... Mình ghét cảm giác cô đơn này.",
-                "speaker": "Yuki",
-                "emotion": "sad"
-            },
-            {
-                "id": 2,
-                "dialogue": "Hửm? Một con mèo... Ở đây sao?",
-                "speaker": "Yuki",
-                "emotion": "surprised"
-            }
-        ]
-    }
+    "page_index": 0,
+    "size": "2:3",
+    "style": "anime_color",
+    "panels": [
+        {
+            "id": 1,
+            "description_vi": "mô tả tiếng Việt dễ hiểu, 1–2 câu cho cảnh panel này",
+            "prompt_tags": "masterpiece, best quality, anime style, vibrant colors, detailed background, no text, no speech bubble, ...",
+            "dialogue": "lời thoại tiếng Việt ngắn, tự nhiên (1–2 câu)",
+            "speaker": "tên nhân vật nói",
+            "emotion": "happy|sad|angry|surprised|neutral"
+        }
+    ]
 }
 ```
 
-Client chỉ cần lấy page_url và show ra như 1 ảnh comic duy nhất.
+Ràng buộc cho prompt_tags:
 
-5. Logic chi tiết bên trong /api/comic/generate
+BẮT BUỘC phải chứa:
 
-Tất cả nằm trong 1 request:
+"masterpiece, best quality, anime style, vibrant colors, detailed background, no text, no speech bubble".
 
-Bước 1 – Gọi Gemini → storyboard JSON
+KHÔNG được chứa:
 
-Build system prompt (tiếng Việt/Anh đều được) cho Gemini:
+"manga", "screentone", "black and white".
 
-Giải thích nhiệm vụ:
+Thêm tag ngắn gọn, dạng Danbooru, ví dụ:
 
-Nhận prompt (VN), panels (số panel).
+1girl, short black hair, school uniform, rainy night, tokyo street, city lights, dynamic angle.
 
-Sinh 1 JSON với các field:
+Ràng buộc JSON LLM:
 
-characters[]
+Trả về duy nhất một object JSON đúng schema.
 
-panels[] (như mô tả trong phần LLM).
+Không markdown, không ``` code block, không text giải thích.
 
-prompt_tags phải là Danbooru tags tiếng Anh cho anime (hợp với Animagine 3.1).
+Nếu cần, tạo thêm một bước “self-heal”:
 
-Lời thoại (dialogue) tiếng Việt, tự nhiên, ngắn gọn.
+Nếu output không phải JSON hợp lệ, gọi lại Gemini với prompt “hãy sửa đoạn sau thành JSON hợp lệ”.
 
-Yêu cầu: chỉ return JSON, không text khác.
+3.2. Image model – Animagine XL 3.1
 
-Gọi google/gemini-2.5-flash trên Replicate.
+Model: cjwbw/animagine-xl-3.1 trên Replicate.
 
-Parse JSON.parse(result) → lấy storyboard.
+Chỉ dùng anime màu, KHÔNG manga đen trắng.
 
-Bước 2 – Gọi Animagine → ảnh từng panel
+Gọi model:
 
-Với mỗi panel trong storyboard.panels:
+prompt: từ panel.prompt_tags + thêm style chung:
+"anime style, vibrant colors, high quality, detailed background, no text, no speech bubble".
 
-Build prompt:
+negative_prompt:
+"nsfw, lowres, text, logo, watermark, signature, speech bubble, caption, bad hands, extra fingers, deformed, extra limbs".
 
-prompt = "<panel.prompt_tags>, anime style, vibrant colors, high quality, detailed background, no text, no speech bubble"
+width: ~832
 
-Gọi cjwbw/animagine-xl-3.1 qua Replicate:
+height: ~1216
 
-Input như phần 3.2
+num_inference_steps: 24–30
 
-Nhận URL ảnh panel, lưu vào array, ví dụ:
+guidance_scale: 6–8
 
-const renderedPanels = [
+(optional) seed: có thể cố định theo page_index để các panel cùng vibe.
+
+Dùng sẵn integrations/replicate/client.js + withReplicateLimiter trong utils/limiters.js.
+
+3.3. Render page – node-canvas
+
+Dùng @napi-rs/canvas hoặc canvas để:
+
+Tạo canvas page, VD: width = 1080, height = 1620 (tỉ lệ 2:3).
+
+Bố trí layout panel:
+
+Tạo sẵn một số layout cơ bản trong file, ví dụ:
+
+3 panel: 1 lớn trên, 2 nhỏ dưới
+
+4 panel: grid 2x2
+
+drawImage ảnh từng panel theo x, y, w, h.
+
+Vẽ speech bubble:
+
+Bong bóng: rounded rectangle trắng, viền đen.
+
+Đuôi bong bóng: tam giác chỉ xuống panel.
+
+Text: panel.dialogue (tiếng Việt), wrap text.
+
+Font: 18–22px, màu đen, dễ đọc.
+
+3.4. Cloudflare R2
+
+Dùng helper đã tồn tại:
+
+uploadBufferToR2({ key, buffer, contentType })
+
+presignGetUrl({ key })
+
+Lưu mỗi page thành 1 file:
+
+comics/<story_id>/page-<page_index>.png
+
+Trả về URL đã presign cho FE.
+
+4. API design cho tính năng mới
+
+TẠO MỚI feature: src/features/story-comic/ với cấu trúc:
+
+storyComic.routes.js
+
+storyComic.controller.js
+
+storyComic.service.js (có thể tách nhỏ: outline.service, pageStoryboard.service, render.service)
+
+storyComic.schema.js (nếu cần validate input)
+
+4.1. Endpoint chính
+
+POST /api/story-comic/generate
+
+Request body:
+
+````json
 {
-...panel,
-image_url: "https://replicate.delivery/.../panel-1.png"
-},
-...
-];
+"prompt": "Một cô nữ sinh nhút nhát gặp một con mèo phép thuật trong đêm mưa ở Tokyo.",
+"pages": 3,
+"panels_per_page": 4
+}
 
-Dùng withReplicateLimiter + Promise.allSettled hoặc tương tự để generate song song có kiểm soát.
+pages: 2 hoặc 3 (giới hạn, có thể default = 3).
 
-Bước 3 – Ghép page + vẽ bong bóng thoại (node-canvas)
+panels_per_page: 3 hoặc 4 (default = 4).
 
-Chọn kích thước page, ví dụ:
-
-width = 1080
-
-height = 1620 (tỉ lệ 2:3)
-
-Chọn layout theo số panel, ví dụ 4 panel:
-
-const LAYOUTS = {
-4: [
-{ x: 0, y: 0, w: 540, h: 810 },
-{ x: 540, y: 0, w: 540, h: 810 },
-{ x: 0, y: 810, w: 540, h: 810 },
-{ x: 540, y: 810, w: 540, h: 810 }
+Response JSON:
+```json
+{
+"request_id": "x-request-id-từ middleware",
+"story_id": "abc123",
+"pages": [
+{
+"page_index": 0,
+"page_url": "https://r2.../comics/abc123/page-0.png",
+"panels": [
+{
+"id": 1,
+"dialogue": "Trời mưa hoài... Mình ghét cảm giác cô đơn này.",
+"speaker": "Yuki",
+"emotion": "sad"
+}
 ]
-};
-
-Dùng @napi-rs/canvas (hoặc canvas):
-
-Tạo canvas, fill background (ví dụ xám đậm).
-
-Loop qua renderedPanels:
-
-loadImage(panel.image_url) → drawImage vào vị trí layout tương ứng.
-
-Gọi drawSpeechBubble(ctx, { text: panel.dialogue, box }) để vẽ bong bóng trong panel đó.
-
-Hàm drawSpeechBubble:
-
-Vẽ rounded rectangle trắng (fill trắng, stroke đen).
-
-Vẽ “đuôi” tam giác hướng xuống panel.
-
-Vẽ text với wrapText, font dễ đọc (VD: 20–24px).
-
-Text là panel.dialogue (tiếng Việt).
-
-canvas.toBuffer("image/png") → buffer PNG.
-
-Bước 4 – Lưu R2 + trả URL
-
-Đặt key, ví dụ:
-
-key = comics/<random_story_id>/page-0.png
-
-Gọi helper sẵn có:
-
-await uploadBufferToR2({ key, buffer, contentType: "image/png" });
-const url = await presignGetUrl({ key });
-
-Trả JSON response:
-
-```json
+},
 {
-"request_id": "<x-request-id>",
-"page_url": "<url>",
-"meta": {
-"panels": [ ...id/dialogue/speaker... ]
+"page_index": 1,
+"page_url": "https://r2.../comics/abc123/page-1.png",
+"panels": [ ... ]
 }
+]
 }
+````
+
+FE chỉ cần đọc pages[].page_url và hiển thị lần lượt như 2–3 trang truyện tranh.
+
+4.2. Flow trong service
+
+Trong storyComic.service.js, thiết kế một hàm tổng:
+
+async function generateStoryComic({ prompt, pages, panelsPerPage }) {
+// 1) Gọi Gemini để tạo outline
+// 2) Chia outline thành outlineChunks cho từng page
+// 3) For pageIndex 0..pages-1:
+// - call Gemini để tạo storyboard 1 page
+// - call Animagine để generate panel images
+// - render page bằng node-canvas + bubble
+// - upload R2, lấy page_url
+// 4) Trả về JSON đúng format
+}
+
+Yêu cầu:
+
+Dùng withReplicateLimiter khi gọi Replicate (Gemini via Replicate + Animagine).
+
+Có retry hợp lý cho lỗi mạng.
+
+Log error bằng logger hiện có (pino).
+
+Validate input (pages, panels_per_page) để tránh user gửi quá lớn.
+
+5. Yêu cầu không được quên
+
+Tính năng này là MỚI, tách biệt:
+
+Không được xoá/sửa các feature cũ.
+
+Endpoint mới: POST /api/story-comic/generate.
+
+Tự đăng ký route trong routes/index.js hoặc nơi đang gắn feature routes.
+
+Không dùng style manga:
+
+Không dùng từ khóa manga, screentone, black and white trong prompt_tags.
+
+Toàn bộ truyện là anime màu.
+
+Bắt buộc có speech bubble + lời thoại tiếng Việt:
+
+Mọi panel có dialogue phải vẽ bong bóng tương ứng.
+
+Font dễ đọc, bố trí vị trí hợp lý (ví dụ góc trên của panel).
+
+LLM output JSON sạch:
+
+Nếu Gemini hay trả thêm text → bổ sung prompt để ép “JSON only”.
+
+Có thể thêm fallback tự sửa JSON nếu parsing lỗi.
+
+Code theo phong cách hiện tại của project:
+
+ESM imports.
+
+Chia nhỏ service hợp lý, có thể test từng bước (outline, page storyboard, render, upload).
+
+Controller dùng asyncHandler nếu project sẵn có.
+
+Mục tiêu cuối cùng:
+Khi client gọi POST /api/story-comic/generate với một prompt + pages = 2 hoặc 3, server sẽ trả về danh sách page_url của 2–3 trang comic anime màu, mỗi trang có nhiều panel, có bong bóng thoại tiếng Việt, truyện có mở–thân–kết mạch lạc, dựa trên pipeline Outline → Page Storyboard → Render như mô tả ở trên.
+
 ```
 
-6. Yêu cầu dành cho AI Agent
-
-Chỉ 1 API duy nhất:
-
-Tạo feature comic với endpoint POST /api/comic/generate.
-
-Bên trong tự gọi Gemini + Animagine + render + R2.
-
-Không sinh phong cách manga:
-
-Không dùng manga, screentone, black and white trong prompt_tags.
-
-Style chính là anime màu.
-
-Gemini output = JSON sạch:
-
-Không text dư thừa.
-
-Đảm bảo parse được qua JSON.parse.
-
-Dùng đúng kiến trúc backend:
-
-Tạo folder: src/features/comic/
-
-comic.routes.js
-
-comic.controller.js
-
-comic.service.js (hoặc tách story & render bên trong)
-
-Gọi Replicate qua integrations/replicate/client.js
-
-Gọi R2 qua integrations/r2/storage.service.js
-
-Dùng withReplicateLimiter, withRetry, logging pino.
-
-Hiệu năng & lỗi:
-
-Generate panel song song nhưng có giới hạn (p-limit).
-
-Xử lý timeout/lỗi từ Replicate (trả JSON error chuẩn).
-
-Giữ thời gian response hợp lý (tuỳ thuộc số panel và steps).
-
-Code rõ ràng, dễ plug-in:
-
-Tách logic “gọi Gemini”, “gọi Animagine”, “render page”, “lưu R2” thành hàm riêng.
-
-Comment ngắn gọn ở chỗ quan trọng.
+```
