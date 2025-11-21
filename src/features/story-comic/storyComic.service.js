@@ -34,7 +34,7 @@ const REQUIRED_TAGS = [
 ];
 const BANNED_TAGS = ["manga", "screentone", "black and white"];
 
-const FETCH_TIMEOUT_MS = Number(process.env.HTTP_TIMEOUT_MS || 20000);
+const FETCH_TIMEOUT_MS = Number(process.env.HTTP_TIMEOUT_MS || 30000);
 
 function makeStoryId(prompt) {
     const slug = (prompt || "")
@@ -231,17 +231,47 @@ async function runAnimagine({ prompt, seed, requestId }) {
 }
 
 async function generatePanelsImages(panels, { pageIndex, requestId }) {
+    const retryOpts = {
+        retries: 2,
+        baseDelayMs: 800,
+        factor: 2,
+    };
+
     const tasks = panels.map(async (panel, idx) => {
         const prompt = buildImagePrompt(panel);
         const seed = Number.isFinite(pageIndex)
             ? pageIndex * 100 + idx
             : undefined;
-        const output = await runAnimagine({ prompt, seed, requestId });
-        const buffer = await resolveOutputBuffer(output);
-        return {
-            ...panel,
-            imageBuffer: buffer,
+
+        const buildPanel = async () => {
+            const output = await runAnimagine({ prompt, seed, requestId });
+            const buffer = await resolveOutputBuffer(output);
+            return {
+                ...panel,
+                imageBuffer: buffer,
+            };
         };
+
+        try {
+            return await withRetry(buildPanel, {
+                ...retryOpts,
+                beforeRetry: ({ attempt, err }) =>
+                    logger.warn(
+                        {
+                            attempt,
+                            panel: panel.id || idx + 1,
+                            pageIndex,
+                            requestId,
+                            err: err?.message,
+                        },
+                        "Retrying panel render (Animagine/fetch)"
+                    ),
+            });
+        } catch (err) {
+            throw new Error(
+                `Panel ${panel.id || idx + 1} failed: ${err?.message || err}`
+            );
+        }
     });
 
     return Promise.all(tasks);

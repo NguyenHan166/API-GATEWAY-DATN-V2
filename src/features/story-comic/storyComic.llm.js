@@ -145,8 +145,9 @@ Bạn là biên kịch storyboard cho truyện tranh anime màu, không phải m
         pageIndex + 1
     } của truyện ${storyId}.
 - Trang có ${panels} panel, kiểu anime màu, tỉ lệ 2:3.
+- Nhân vật chính phải nhất quán giữa các panel (giới tính, trang phục, mái tóc); nếu có mèo phép thuật thì giữ đúng là mèo phép thuật, không đổi loài/giới tính.
 - prompt_tags phải ở dạng Danbooru tiếng Anh, ngắn gọn, chứa bắt buộc: "masterpiece, best quality, anime style, vibrant colors, detailed background, no text, no speech bubble". Không được chứa: "manga", "screentone", "black and white".
-- Mỗi dialogue tiếng Việt 1-2 câu, tự nhiên, ≤ 80 ký tự, speaker là tên nhân vật.
+- Mỗi dialogue tiếng Việt 1-2 câu, tự nhiên, ≤ 70 ký tự, speaker là tên nhân vật (giữ tên lặp lại nhất quán), bám sát cảm xúc trong beat và bối cảnh.
 - Chỉ trả về JSON, không markdown, không giải thích.
 
 Context từ outline:
