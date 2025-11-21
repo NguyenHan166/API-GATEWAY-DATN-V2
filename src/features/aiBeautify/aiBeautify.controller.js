@@ -14,6 +14,7 @@ export const aiBeautifyController = {
         const { ok, value, error } = validateBeautifyInput({
             fileBuffer: file?.buffer,
             mimeType: file?.mimetype,
+            body: req.body,
         });
 
         if (!ok) {
@@ -30,6 +31,8 @@ export const aiBeautifyController = {
         const { key, meta } = await aiBeautifyService.beautify({
             inputBuffer: value.fileBuffer,
             inputMime: value.mimeType,
+            scale: value.scale,
+            faceEnhance: value.faceEnhance,
             requestId: req.id,
         });
 

@@ -8,12 +8,7 @@ POST /api/ai-beautify
 
 ## Description
 
-Advanced portrait enhancement pipeline that combines multiple AI models:
-
-1. **GFPGAN** - Face restoration and detail enhancement
-2. **Real-ESRGAN** - Super-resolution and face enhancement
-3. **Skin Retouch** - Intelligent skin smoothing
-4. **Tone Enhancement** - Professional color grading
+Face-focused upscaling and restoration powered by `alexgenovese/upscaler` (GFPGAN-based) on Replicate. Defaults to 4x upscale with face enhancement enabled; override `scale` (1-10) and `face_enhance` as needed.
 
 ## Request
 
@@ -25,16 +20,18 @@ Content-Type: multipart/form-data
 
 ### Body Parameters
 
-| Parameter | Type | Required | Description                  |
-| --------- | ---- | -------- | ---------------------------- |
-| `image`   | File | Yes      | Image file (JPEG, PNG, WebP) |
+| Parameter      | Type   | Required | Description                                   |
+| -------------- | ------ | -------- | --------------------------------------------- |
+| `image`        | File   | Yes      | Image file (JPEG, PNG, WebP)                  |
+| `scale`        | Number | No       | 1-10, defaults to 4                           |
+| `face_enhance` | Bool   | No       | `true`/`false`, defaults to `true`            |
 
 ### Constraints
 
 -   **Max file size**: 10MB
 -   **Supported formats**: JPEG, PNG, WebP
 -   **Recommended**: Portrait photos with visible faces
--   **Auto pre-scaling**: Images larger than 2048px will be scaled down
+-   Scale > 6 may increase processing time
 
 ## Response
 
@@ -47,18 +44,17 @@ Content-Type: multipart/form-data
     "data": {
         "key": "aiBeautify/2025-11-18/550e8400-e29b-41d4-a716-446655440000.jpg",
         "url": "https://your-public-url.com/aiBeautify/...",
+        "presigned_url": "https://pub-xxxx.r2.dev/aiBeautify/...",
         "expires_in": 3600
     },
     "meta": {
+        "model": "alexgenovese/upscaler",
+        "version": "4f7eb3da655b5182e559d50a0437440f242992d47e5e20bd82829a79dee61ff3",
+        "scale": 4,
+        "faceEnhance": true,
         "bytes": 245678,
         "requestId": "req_abc123xyz",
-        "pipeline": [
-            "pre-scale",
-            "gfpgan",
-            "real-esrgan",
-            "skin-retouch",
-            "tone-enhance"
-        ]
+        "pipeline": ["alexgenovese/upscaler"]
     }
 }
 ```
@@ -72,7 +68,7 @@ Content-Type: multipart/form-data
     "error": {
         "message": "Invalid input",
         "code": "VALIDATION_ERROR",
-        "details": "Thiếu file 'image' (form-data)"
+        "details": "scale phải nằm trong khoảng 1-10"
     }
 }
 ```
@@ -92,15 +88,20 @@ Content-Type: multipart/form-data
 
 ## Response Fields
 
-| Field             | Type   | Description                                    |
-| ----------------- | ------ | ---------------------------------------------- |
-| `request_id`      | String | Unique request identifier for tracking         |
-| `status`          | String | "success" or "error"                           |
-| `data.key`        | String | R2 storage key for the enhanced image          |
-| `data.url`        | String | Public URL or presigned URL                    |
-| `data.expires_in` | Number | URL expiration time in seconds (3600 = 1 hour) |
-| `meta.bytes`      | Number | Output file size in bytes                      |
-| `meta.pipeline`   | Array  | List of processing steps applied               |
+| Field               | Type   | Description                                    |
+| ------------------- | ------ | ---------------------------------------------- |
+| `request_id`        | String | Unique request identifier for tracking         |
+| `status`            | String | "success" or "error"                           |
+| `data.key`          | String | R2 storage key for the enhanced image          |
+| `data.url`          | String | Public URL or presigned URL                    |
+| `data.presigned_url`| String | Presigned URL when returned                    |
+| `data.expires_in`   | Number | URL expiration time in seconds (3600 = 1 hour) |
+| `meta.model`        | String | `alexgenovese/upscaler`                        |
+| `meta.version`      | String | Pinned model version hash                      |
+| `meta.scale`        | Number | Scale passed to the model                      |
+| `meta.faceEnhance`  | Bool   | Whether face enhancement was enabled           |
+| `meta.bytes`        | Number | Output file size in bytes                      |
+| `meta.pipeline`     | Array  | Processing steps (single model)                |
 
 ## Rate Limiting
 
@@ -119,54 +120,12 @@ Content-Type: multipart/form-data
 
 ## Processing Pipeline
 
-### 1. Pre-Scale (Automatic)
-
--   Max dimension: 1440px (safe for GFPGAN GPU limit)
--   Preserves aspect ratio
--   Quality: 92% JPEG
--   **Purpose**: Optimize processing time and stay within GPU memory limits
--   **Note**: GFPGAN has ~2.09M pixel limit (1440x1440 fits safely)
-
-### 2. GFPGAN Face Restoration
-
--   **Model**: tencentarc/gfpgan v1.4
--   **Scale**: 2x
--   **Features**:
-    -   Restores facial details
-    -   Fixes blur and compression artifacts
-    -   Enhances facial features
-    -   Removes minor blemishes
-
-### 3. Real-ESRGAN Enhancement
-
--   **Model**: nightmareai/real-esrgan
--   **Scale**: 2x (then resized to original)
--   **Face Enhance**: Enabled
--   **Features**:
-    -   Overall image enhancement
-    -   Face-aware processing
-    -   Detail preservation
-    -   Noise reduction
-
-### 4. Skin Retouch
-
--   **Method**: Color-based segmentation + selective blur
--   **Blur Sigma**: 1.4
--   **Features**:
-    -   Detects skin tones using HSV analysis
-    -   Applies gentle blur only to skin
-    -   Preserves eyes, hair, clothing details
-    -   Natural-looking results
-
-### 5. Tone Enhancement
-
--   **Brightness**: +3%
--   **Saturation**: +5%
--   **Features**:
-    -   Subtle color boost
-    -   Professional color grading
-    -   Enhanced vibrancy
-    -   Balanced exposure
+1. Validate input (mime, size, `scale`, `face_enhance`)
+2. Run `alexgenovese/upscaler:4f7eb3...` on Replicate
+    - `scale`: 1-10 (default 4)
+    - `face_enhance`: boolean (default true)
+3. Upload to Cloudflare R2 (`aiBeautify/YYYY-MM-DD/uuid.ext`)
+4. Return presigned & public URLs
 
 ## Examples
 
@@ -175,6 +134,8 @@ Content-Type: multipart/form-data
 ```bash
 curl -X POST http://localhost:3000/api/ai-beautify \
   -F "image=@./portrait.jpg" \
+  -F "scale=4" \
+  -F "face_enhance=true" \
   -H "Accept: application/json"
 ```
 
@@ -183,6 +144,8 @@ curl -X POST http://localhost:3000/api/ai-beautify \
 ```javascript
 const formData = new FormData();
 formData.append("image", fileInput.files[0]);
+formData.append("scale", "4");
+formData.append("face_enhance", "true");
 
 const response = await fetch("http://localhost:3000/api/ai-beautify", {
     method: "POST",
@@ -200,8 +163,9 @@ import requests
 
 url = "http://localhost:3000/api/ai-beautify"
 files = {'image': open('portrait.jpg', 'rb')}
+data = {'scale': '3', 'face_enhance': 'true'}
 
-response = requests.post(url, files=files)
+response = requests.post(url, files=files, data=data)
 result = response.json()
 
 print(f"Enhanced image: {result['data']['url']}")
@@ -216,6 +180,8 @@ import fetch from "node-fetch";
 
 const form = new FormData();
 form.append("image", fs.createReadStream("./portrait.jpg"));
+form.append("scale", "4");
+form.append("face_enhance", "true");
 
 const response = await fetch("http://localhost:3000/api/ai-beautify", {
     method: "POST",
@@ -230,24 +196,22 @@ console.log(result);
 
 ### Expected Processing Time
 
--   **Small images** (< 1MP): 30-45 seconds
--   **Medium images** (1-4MP): 45-60 seconds
--   **Large images** (> 4MP): 60-90 seconds
+-   **Typical**: ~4-12 seconds (depends on input size and scale)
+-   Higher `scale` or large inputs can add a few extra seconds
 
-_Note: Processing time depends on Replicate API load and image complexity_
+_Note: Processing time depends on Replicate API load_
 
 ### Optimization Tips
 
-1. Pre-resize images client-side to ~1080p for faster processing
-2. Use JPEG format instead of PNG when possible
-3. Compress images before upload (quality 90-95%)
-4. Batch process multiple images during off-peak hours
+1. Keep `scale` at 4-6 for balanced quality & speed
+2. Use JPEG format for photos with good lighting
+3. Run heavier jobs during off-peak hours to reduce queueing
 
 ## Error Codes
 
 | Code                  | HTTP Status | Description                | Solution                            |
 | --------------------- | ----------- | -------------------------- | ----------------------------------- |
-| `VALIDATION_ERROR`    | 400         | Invalid input parameters   | Check file format and size          |
+| `VALIDATION_ERROR`    | 400         | Invalid input parameters   | Check file format/size and params   |
 | `RATE_LIMIT_EXCEEDED` | 429         | Too many requests          | Wait and retry after specified time |
 | `INTERNAL_ERROR`      | 500         | Server processing error    | Retry or contact support            |
 | `REPLICATE_ERROR`     | 500         | AI model processing failed | Retry with different image          |
@@ -258,19 +222,17 @@ _Note: Processing time depends on Replicate API load and image complexity_
 
 ✅ **DO:**
 
--   Use high-quality source images (at least 512x512px)
--   Ensure good lighting in original photo
+-   Use high-quality source images (≥512px on the short side)
+-   Ensure good lighting and a clear face
 -   Use JPEG format for photos
--   Center the face in the frame
--   Images will auto-scale to max 1440px
+-   Keep `scale` in the 4-6 range for best fidelity
 
 ❌ **DON'T:**
 
--   Upload extremely low-resolution images (< 256px)
--   Use heavily compressed JPEGs
--   Process images with multiple faces (optimized for single portraits)
--   Upload images with extreme aspect ratios
--   Expect images > 1440px to maintain original resolution
+-   Upload extremely low-resolution images (<256px)
+-   Expect sharp results with motion blur or heavy noise
+-   Send unrealistic `scale` values (>10 is rejected)
+-   Ignore rate limit responses
 
 ### API Usage
 
@@ -318,8 +280,7 @@ _Note: Processing time depends on Replicate API load and image complexity_
 ### Concurrency
 
 -   Processing uses `withReplicateLimiter` to prevent API overload
--   Sequential pipeline ensures quality
--   Background processing recommended for batch operations
+-   Each request runs a single Replicate prediction
 
 ### Storage
 
@@ -331,7 +292,7 @@ _Note: Processing time depends on Replicate API load and image complexity_
 ### Monitoring
 
 -   All requests include unique `requestId`
--   Pipeline steps tracked in metadata
+-   Model version + params tracked in metadata
 -   Error context preserved for debugging
 
 ## Support
@@ -345,11 +306,14 @@ For issues or questions:
 
 ## Changelog
 
+### v2.0.0 (2025-xx-xx)
+
+-   Switched pipeline to `alexgenovese/upscaler` (GFPGAN) on Replicate
+-   Added `scale` and `face_enhance` controls
+-   Simplified single-model pipeline with version pinning
+
 ### v1.0.0 (2025-11-18)
 
 -   Initial release
--   GFPGAN + Real-ESRGAN pipeline
--   Skin retouch with color-based segmentation
--   Tone enhancement
--   R2 storage integration
--   Rate limiting (30 req/min)
+-   GFPGAN + Real-ESRGAN pipeline with skin retouch
+-   R2 storage integration and rate limiting (30 req/min)

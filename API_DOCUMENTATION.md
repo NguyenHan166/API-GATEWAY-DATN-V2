@@ -437,13 +437,13 @@ Tăng độ phân giải và sắc nét với model `nightmareai/real-esrgan`.
 
 ## 6. AI Beautify
 
-Pipeline chuyên nghiệp kết hợp nhiều AI models cho portrait enhancement
+Upscale + phục hồi khuôn mặt bằng model `alexgenovese/upscaler` (GFPGAN-based) trên Replicate
 
 ### 6.1 Beautify Portrait
 
 **Endpoint**: `POST /ai-beautify`
 
-**Chức năng**: Enhance chân dung với pipeline 4 bước: GFPGAN → Real-ESRGAN → Skin Retouch → Tone Enhancement
+**Chức năng**: Face-focused upscale/restoration với tùy chọn `scale` (1-10, mặc định 4) và `face_enhance` (mặc định true)
 
 **Content-Type**: `multipart/form-data`
 
@@ -451,12 +451,14 @@ Pipeline chuyên nghiệp kết hợp nhiều AI models cho portrait enhancement
 | Parameter | Type | Required | Description | Default |
 | --------- | ---- | -------- | -------------------------- | ------- |
 | `image` | File | ✅ | File ảnh (JPEG, PNG, WebP) | - |
+| `scale` | Number | ❌ | 1-10, hệ số upscale | 4 |
+| `face_enhance` | Boolean | ❌ | Bật/tắt hỗ trợ khuôn mặt | true |
 
 **Constraints**:
 
 -   Max file size: 10MB
--   Auto pre-scaling: Images > 2048px sẽ được scale xuống
--   Recommended: Portrait photos với visible faces
+-   Recommended: Ảnh chân dung, khuôn mặt rõ
+-   Scale cao (>6) sẽ tốn thời gian hơn
 
 **Response Success (200)**:
 
@@ -467,31 +469,29 @@ Pipeline chuyên nghiệp kết hợp nhiều AI models cho portrait enhancement
     "data": {
         "key": "aiBeautify/2025-11-18/550e8400-e29b-41d4-a716-446655440000.jpg",
         "url": "https://your-public-url.com/aiBeautify/...",
+        "presigned_url": "https://pub-xxxx.r2.dev/aiBeautify/...",
         "expires_in": 3600
     },
     "meta": {
+        "model": "alexgenovese/upscaler",
+        "version": "4f7eb3da655b5182e559d50a0437440f242992d47e5e20bd82829a79dee61ff3",
+        "scale": 4,
+        "faceEnhance": true,
         "bytes": 245678,
         "requestId": "req_abc123xyz",
-        "pipeline": [
-            "pre-scale",
-            "gfpgan",
-            "real-esrgan",
-            "skin-retouch",
-            "tone-enhance"
-        ]
+        "pipeline": ["alexgenovese/upscaler"]
     }
 }
 ```
 
 **Processing Pipeline**:
 
-1. **Pre-Scale**: Max 1440px (optimize GPU memory)
-2. **GFPGAN**: Face restoration (2x scale)
-3. **Real-ESRGAN**: Overall enhancement (2x then resize to original)
-4. **Skin Retouch**: Color-based segmentation + selective blur
-5. **Tone Enhancement**: +3% brightness, +5% saturation
+1. Validate input (mime, size, scale/face_enhance)
+2. Run `alexgenovese/upscaler` (GFPGAN-based) trên Replicate
+3. Upload output lên R2 (`aiBeautify/` prefix)
+4. Trả presigned + public URL
 
-**Processing Time**: 30-90 seconds
+**Processing Time**: ~4-12 seconds (phụ thuộc scale/kích thước input)
 
 **Use Cases**:
 

@@ -14,6 +14,8 @@ router.use(rateLimitPerRoute({ windowMs: 60_000, max: 30, key: "aiBeautify" }));
  * POST /api/ai-beautify
  * form-data:
  *   - image (file) - required
+ *   - scale (number, optional, default 4)
+ *   - face_enhance (boolean, optional, default true)
  *
  * Response: Presigned URL to enhanced image
  */
