@@ -32,7 +32,6 @@ export const aiBeautifyController = {
             inputBuffer: value.fileBuffer,
             inputMime: value.mimeType,
             scale: value.scale,
-            faceEnhance: value.faceEnhance,
             requestId: req.id,
         });
 

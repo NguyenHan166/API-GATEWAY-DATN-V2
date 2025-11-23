@@ -4,9 +4,9 @@ import { withRetry } from "../../utils/retry.js";
 import { uploadBufferToR2 } from "../../integrations/r2/storage.service.js";
 import { withReplicateLimiter } from "../../utils/limiters.js";
 
-// alexgenovese/upscaler (GFPGAN-based) – pinned version for stability
-const UPSCALER_MODEL =
-    "alexgenovese/upscaler:4f7eb3da655b5182e559d50a0437440f242992d47e5e20bd82829a79dee61ff3";
+// cjwbw/real-esrgan – Real-ESRGAN for high-quality image super-resolution
+const REAL_ESRGAN_MODEL =
+    "cjwbw/real-esrgan:42fed1c4974146d4d2414e2be2c5277c7fcf05fcc3a73abf41610695738c1d7b";
 
 /**
  * Read Replicate output to buffer (supports both FileOutput and URL string)
@@ -30,24 +30,17 @@ async function readReplicateOutputToBuffer(out) {
 }
 
 /**
- * Main AI Beautify service using alexgenovese/upscaler
+ * Main AI Beautify service using cjwbw/real-esrgan
  */
 export const aiBeautifyService = {
-    beautify: async ({
-        inputBuffer,
-        inputMime,
-        requestId,
-        scale = 4,
-        faceEnhance = true,
-    }) => {
+    beautify: async ({ inputBuffer, inputMime, requestId, scale = 2 }) => {
         try {
             const outputBuffer = await withReplicateLimiter(async () => {
                 const runOnce = async () => {
-                    const out = await replicate.run(UPSCALER_MODEL, {
+                    const out = await replicate.run(REAL_ESRGAN_MODEL, {
                         input: {
                             image: inputBuffer,
                             scale,
-                            face_enhance: faceEnhance,
                         },
                         wait: true,
                     });
@@ -80,15 +73,12 @@ export const aiBeautifyService = {
             return {
                 key,
                 meta: {
-                    model: "alexgenovese/upscaler",
-                    version: UPSCALER_MODEL.split(":")[1],
+                    model: "cjwbw/real-esrgan",
+                    version: REAL_ESRGAN_MODEL.split(":")[1],
                     scale,
-                    faceEnhance,
                     bytes: outputBuffer.length,
                     requestId,
-                    pipeline: [
-                        "alexgenovese/upscaler",
-                    ],
+                    pipeline: ["cjwbw/real-esrgan"],
                 },
             };
         } catch (error) {

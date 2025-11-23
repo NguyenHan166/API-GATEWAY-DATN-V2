@@ -8,7 +8,7 @@ POST /api/ai-beautify
 
 ## Description
 
-Face-focused upscaling and restoration powered by `alexgenovese/upscaler` (GFPGAN-based) on Replicate. Defaults to 4x upscale with face enhancement enabled; override `scale` (1-10) and `face_enhance` as needed.
+High-quality image super-resolution powered by `cjwbw/real-esrgan` on Replicate. Real-ESRGAN enhances image quality and details while removing artifacts. Defaults to 2x upscale; supports scale factors of 2-4.
 
 ## Request
 
@@ -20,18 +20,18 @@ Content-Type: multipart/form-data
 
 ### Body Parameters
 
-| Parameter      | Type   | Required | Description                                   |
-| -------------- | ------ | -------- | --------------------------------------------- |
-| `image`        | File   | Yes      | Image file (JPEG, PNG, WebP)                  |
-| `scale`        | Number | No       | 1-10, defaults to 4                           |
-| `face_enhance` | Bool   | No       | `true`/`false`, defaults to `true`            |
+| Parameter      | Type   | Required | Description                         |
+| -------------- | ------ | -------- | ----------------------------------- |
+| `image`        | File   | Yes      | Image file (JPEG, PNG, WebP)        |
+| `scale`        | Number | No       | 2-4, defaults to 2                  |
+| `face_enhance` | Bool   | No       | `true`/`false`, defaults to `false` |
 
 ### Constraints
 
 -   **Max file size**: 10MB
 -   **Supported formats**: JPEG, PNG, WebP
--   **Recommended**: Portrait photos with visible faces
--   Scale > 6 may increase processing time
+-   **Scale factors**: 2, 3, or 4 only
+-   Scale 4 may increase processing time significantly
 
 ## Response
 
@@ -48,13 +48,12 @@ Content-Type: multipart/form-data
         "expires_in": 3600
     },
     "meta": {
-        "model": "alexgenovese/upscaler",
-        "version": "4f7eb3da655b5182e559d50a0437440f242992d47e5e20bd82829a79dee61ff3",
-        "scale": 4,
-        "faceEnhance": true,
+        "model": "cjwbw/real-esrgan",
+        "version": "42fed1c4974146d4d2414e2be2c5277c7fcf05fcc3a73abf41610695738c1d7b",
+        "scale": 2,
         "bytes": 245678,
         "requestId": "req_abc123xyz",
-        "pipeline": ["alexgenovese/upscaler"]
+        "pipeline": ["cjwbw/real-esrgan"]
     }
 }
 ```
@@ -68,7 +67,7 @@ Content-Type: multipart/form-data
     "error": {
         "message": "Invalid input",
         "code": "VALIDATION_ERROR",
-        "details": "scale phải nằm trong khoảng 1-10"
+        "details": "scale phải nằm trong khoảng 2-4"
     }
 }
 ```
@@ -88,20 +87,19 @@ Content-Type: multipart/form-data
 
 ## Response Fields
 
-| Field               | Type   | Description                                    |
-| ------------------- | ------ | ---------------------------------------------- |
-| `request_id`        | String | Unique request identifier for tracking         |
-| `status`            | String | "success" or "error"                           |
-| `data.key`          | String | R2 storage key for the enhanced image          |
-| `data.url`          | String | Public URL or presigned URL                    |
-| `data.presigned_url`| String | Presigned URL when returned                    |
-| `data.expires_in`   | Number | URL expiration time in seconds (3600 = 1 hour) |
-| `meta.model`        | String | `alexgenovese/upscaler`                        |
-| `meta.version`      | String | Pinned model version hash                      |
-| `meta.scale`        | Number | Scale passed to the model                      |
-| `meta.faceEnhance`  | Bool   | Whether face enhancement was enabled           |
-| `meta.bytes`        | Number | Output file size in bytes                      |
-| `meta.pipeline`     | Array  | Processing steps (single model)                |
+| Field                | Type   | Description                                    |
+| -------------------- | ------ | ---------------------------------------------- |
+| `request_id`         | String | Unique request identifier for tracking         |
+| `status`             | String | "success" or "error"                           |
+| `data.key`           | String | R2 storage key for the enhanced image          |
+| `data.url`           | String | Public URL or presigned URL                    |
+| `data.presigned_url` | String | Presigned URL when returned                    |
+| `data.expires_in`    | Number | URL expiration time in seconds (3600 = 1 hour) |
+| `meta.model`         | String | `cjwbw/real-esrgan`                            |
+| `meta.version`       | String | Pinned model version hash                      |
+| `meta.scale`         | Number | Scale passed to the model                      |
+| `meta.bytes`         | Number | Output file size in bytes                      |
+| `meta.pipeline`      | Array  | Processing steps (single model)                |
 
 ## Rate Limiting
 
@@ -120,10 +118,9 @@ Content-Type: multipart/form-data
 
 ## Processing Pipeline
 
-1. Validate input (mime, size, `scale`, `face_enhance`)
-2. Run `alexgenovese/upscaler:4f7eb3...` on Replicate
-    - `scale`: 1-10 (default 4)
-    - `face_enhance`: boolean (default true)
+1. Validate input (mime, size, `scale`)
+2. Run `cjwbw/real-esrgan:42fed1c...` on Replicate
+    - `scale`: 2-4 (default 2)
 3. Upload to Cloudflare R2 (`aiBeautify/YYYY-MM-DD/uuid.ext`)
 4. Return presigned & public URLs
 
@@ -134,8 +131,7 @@ Content-Type: multipart/form-data
 ```bash
 curl -X POST http://localhost:3000/api/ai-beautify \
   -F "image=@./portrait.jpg" \
-  -F "scale=4" \
-  -F "face_enhance=true" \
+  -F "scale=2" \
   -H "Accept: application/json"
 ```
 
@@ -144,8 +140,7 @@ curl -X POST http://localhost:3000/api/ai-beautify \
 ```javascript
 const formData = new FormData();
 formData.append("image", fileInput.files[0]);
-formData.append("scale", "4");
-formData.append("face_enhance", "true");
+formData.append("scale", "2");
 
 const response = await fetch("http://localhost:3000/api/ai-beautify", {
     method: "POST",
@@ -163,7 +158,7 @@ import requests
 
 url = "http://localhost:3000/api/ai-beautify"
 files = {'image': open('portrait.jpg', 'rb')}
-data = {'scale': '3', 'face_enhance': 'true'}
+data = {'scale': '2'}
 
 response = requests.post(url, files=files, data=data)
 result = response.json()
@@ -180,8 +175,7 @@ import fetch from "node-fetch";
 
 const form = new FormData();
 form.append("image", fs.createReadStream("./portrait.jpg"));
-form.append("scale", "4");
-form.append("face_enhance", "true");
+form.append("scale", "2");
 
 const response = await fetch("http://localhost:3000/api/ai-beautify", {
     method: "POST",
@@ -196,16 +190,18 @@ console.log(result);
 
 ### Expected Processing Time
 
--   **Typical**: ~4-12 seconds (depends on input size and scale)
--   Higher `scale` or large inputs can add a few extra seconds
+-   **Typical**: ~10-15 seconds (depends on input size and scale)
+-   Scale 4 processing may take longer than scale 2
+-   Real-ESRGAN is optimized for real-world images
 
 _Note: Processing time depends on Replicate API load_
 
 ### Optimization Tips
 
-1. Keep `scale` at 4-6 for balanced quality & speed
-2. Use JPEG format for photos with good lighting
-3. Run heavier jobs during off-peak hours to reduce queueing
+1. Use scale 2 for faster processing, scale 4 for maximum quality
+2. Use JPEG format for photos to reduce upload time
+3. Consider input image resolution - very large images take longer
+4. Run during off-peak hours to reduce queueing
 
 ## Error Codes
 
@@ -223,16 +219,15 @@ _Note: Processing time depends on Replicate API load_
 ✅ **DO:**
 
 -   Use high-quality source images (≥512px on the short side)
--   Ensure good lighting and a clear face
 -   Use JPEG format for photos
--   Keep `scale` in the 4-6 range for best fidelity
+-   Start with scale 2, increase to 4 if needed for maximum quality
 
 ❌ **DON'T:**
 
 -   Upload extremely low-resolution images (<256px)
--   Expect sharp results with motion blur or heavy noise
--   Send unrealistic `scale` values (>10 is rejected)
+-   Use scale values outside 2-4 range (will be rejected)
 -   Ignore rate limit responses
+-   Expect miracles from heavily compressed/damaged images
 
 ### API Usage
 
@@ -252,30 +247,40 @@ _Note: Processing time depends on Replicate API load_
 
 ## Use Cases
 
-1. **Profile Pictures**
+1. **Image Enhancement**
 
-    - Social media avatars
-    - Professional networking photos
-    - Dating app profiles
+    - Upscale low-resolution photos
+    - Restore old/degraded images
+    - Improve social media images
+    - Enhance digital art
 
 2. **E-commerce**
 
-    - Model photography enhancement
-    - Product photos with people
-    - Lifestyle images
+    - Product photography enhancement
+    - Catalog image upscaling
+    - Detail improvement for zoom views
 
-3. **Event Photography**
+3. **Content Creation**
 
-    - Wedding photos
-    - Corporate headshots
-    - Party/celebration photos
-
-4. **Content Creation**
     - YouTube thumbnails
-    - Blog author photos
-    - Podcast cover art
+    - Blog images
+    - Marketing materials
+    - Print preparation
+
+4. **Photography**
+    - Portrait enhancement (with face_enhance)
+    - Landscape upscaling
+    - Event photography improvement
 
 ## Technical Notes
+
+### Model Information
+
+-   **Model**: `cjwbw/real-esrgan`
+-   **Version**: `42fed1c4974146d4d2414e2be2c5277c7fcf05fcc3a73abf41610695738c1d7b`
+-   **Hardware**: Nvidia T4 GPU
+-   **Cost**: ~$0.0032 per run
+-   **Base Algorithm**: Real-ESRGAN (Real-World Blind Super-Resolution)
 
 ### Concurrency
 
@@ -305,6 +310,14 @@ For issues or questions:
 4. Verify R2 storage credentials
 
 ## Changelog
+
+### v3.0.0 (2025-11-23)
+
+-   Migrated to `cjwbw/real-esrgan` for improved super-resolution quality
+-   Changed scale range to 2-4 (from 1-10)
+-   Changed default scale to 2 (from 4)
+-   Changed face_enhance default to false (from true)
+-   Real-ESRGAN optimized for real-world images with better artifact handling
 
 ### v2.0.0 (2025-xx-xx)
 

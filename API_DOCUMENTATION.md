@@ -438,13 +438,13 @@ Tăng độ phân giải và sắc nét với model `nightmareai/real-esrgan`.
 
 ## 6. AI Beautify
 
-Upscale + phục hồi khuôn mặt bằng model `alexgenovese/upscaler` (GFPGAN-based) trên Replicate
+High-quality image super-resolution bằng model `cjwbw/real-esrgan` trên Replicate
 
 ### 6.1 Beautify Portrait
 
 **Endpoint**: `POST /ai-beautify`
 
-**Chức năng**: Face-focused upscale/restoration với tùy chọn `scale` (1-10, mặc định 4) và `face_enhance` (mặc định true)
+**Chức năng**: Real-ESRGAN super-resolution với tùy chọn `scale` (2-4, mặc định 2)
 
 **Content-Type**: `multipart/form-data`
 
@@ -452,14 +452,13 @@ Upscale + phục hồi khuôn mặt bằng model `alexgenovese/upscaler` (GFPGAN
 | Parameter | Type | Required | Description | Default |
 | --------- | ---- | -------- | -------------------------- | ------- |
 | `image` | File | ✅ | File ảnh (JPEG, PNG, WebP) | - |
-| `scale` | Number | ❌ | 1-10, hệ số upscale | 4 |
-| `face_enhance` | Boolean | ❌ | Bật/tắt hỗ trợ khuôn mặt | true |
+| `scale` | Number | ❌ | 2-4, hệ số upscale | 2 |
 
 **Constraints**:
 
 -   Max file size: 10MB
--   Recommended: Ảnh chân dung, khuôn mặt rõ
--   Scale cao (>6) sẽ tốn thời gian hơn
+-   Supported formats: JPEG, PNG, WebP
+-   Scale 4 có thể tốn thời gian hơn scale 2
 
 **Response Success (200)**:
 
@@ -474,32 +473,31 @@ Upscale + phục hồi khuôn mặt bằng model `alexgenovese/upscaler` (GFPGAN
         "expires_in": 3600
     },
     "meta": {
-        "model": "alexgenovese/upscaler",
-        "version": "4f7eb3da655b5182e559d50a0437440f242992d47e5e20bd82829a79dee61ff3",
-        "scale": 4,
-        "faceEnhance": true,
+        "model": "cjwbw/real-esrgan",
+        "version": "42fed1c4974146d4d2414e2be2c5277c7fcf05fcc3a73abf41610695738c1d7b",
+        "scale": 2,
         "bytes": 245678,
         "requestId": "req_abc123xyz",
-        "pipeline": ["alexgenovese/upscaler"]
+        "pipeline": ["cjwbw/real-esrgan"]
     }
 }
 ```
 
 **Processing Pipeline**:
 
-1. Validate input (mime, size, scale/face_enhance)
-2. Run `alexgenovese/upscaler` (GFPGAN-based) trên Replicate
+1. Validate input (mime, size, scale)
+2. Run `cjwbw/real-esrgan` (Real-World Blind Super-Resolution) trên Replicate
 3. Upload output lên R2 (`aiBeautify/` prefix)
 4. Trả presigned + public URL
 
-**Processing Time**: ~4-12 seconds (phụ thuộc scale/kích thước input)
+**Processing Time**: ~10-15 seconds (phụ thuộc scale/kích thước input)
 
 **Use Cases**:
 
--   Profile pictures (social media, dating apps)
--   E-commerce model photography
--   Event photography enhancement
--   Content creation (YouTube thumbnails)
+-   Image super-resolution và upscaling
+-   Cải thiện ảnh chất lượng thấp
+-   E-commerce product photography
+-   Print preparation (scale 4)
 
 ---
 
@@ -795,7 +793,7 @@ Tạo truyện tranh anime màu nhiều trang (2–3 trang), mỗi trang 3–4 p
 | IC-Light       | POST /portraits/ic-light   | Image file       | Portrait relighting               | 30-120s         |
 | Clarity        | POST /clarity              | Image file       | Super-resolution                  | 20-120s         |
 | Enhance        | POST /enhance              | Image file       | Professional enhancement          | 30-180s         |
-| AI Beautify    | POST /ai-beautify          | Image file       | Multi-step portrait enhancement   | 30-90s          |
+| AI Beautify    | POST /ai-beautify          | Image file       | Real-ESRGAN super-resolution      | 10-15s          |
 | Replace BG     | POST /replace-bg           | Image file(s)    | Remove/replace background         | 20-60s          |
 | Style Transfer | POST /style/replace-style  | Image file       | Artistic style transformation     | 30-150s         |
 | Comic Generate | POST /comic/generate       | Form-data (text) | Auto comic generation             | 60-240s         |

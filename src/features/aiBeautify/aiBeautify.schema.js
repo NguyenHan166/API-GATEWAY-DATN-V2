@@ -1,21 +1,8 @@
 // src/features/aiBeautify/aiBeautify.schema.js
 
-const DEFAULT_SCALE = 4;
-const MIN_SCALE = 1;
-const MAX_SCALE = 10;
-
-function parseBoolean(raw) {
-    if (raw === undefined || raw === null) return { ok: true, value: undefined };
-    if (typeof raw === "boolean") return { ok: true, value: raw };
-
-    const norm = String(raw).trim().toLowerCase();
-    if (["1", "true", "yes", "y", "on"].includes(norm))
-        return { ok: true, value: true };
-    if (["0", "false", "no", "n", "off"].includes(norm))
-        return { ok: true, value: false };
-
-    return { ok: false, error: "face_enhance phải là boolean (true/false)" };
-}
+const DEFAULT_SCALE = 2;
+const MIN_SCALE = 2;
+const MAX_SCALE = 4;
 
 export function validateBeautifyInput({ fileBuffer, mimeType, body = {} }) {
     if (!fileBuffer) {
@@ -52,23 +39,12 @@ export function validateBeautifyInput({ fileBuffer, mimeType, body = {} }) {
         scale = n;
     }
 
-    const faceEnhanceRaw = body.face_enhance ?? body.faceEnhance;
-    const parsedFaceEnhance = parseBoolean(faceEnhanceRaw);
-    if (!parsedFaceEnhance.ok) {
-        return parsedFaceEnhance;
-    }
-    const faceEnhance =
-        parsedFaceEnhance.value === undefined
-            ? true // default
-            : parsedFaceEnhance.value;
-
     return {
         ok: true,
         value: {
             fileBuffer,
             mimeType,
             scale,
-            faceEnhance,
         },
     };
 }
