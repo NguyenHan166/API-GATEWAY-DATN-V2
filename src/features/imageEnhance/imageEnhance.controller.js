@@ -39,7 +39,7 @@ export const enhanceController = {
         });
 
         const expiresIn = 3600;
-        const presignedUrl = await presignGetUrl(key, expiresIn);
+        const presignedUrl = await getImageUrl(key, expiresIn);
         const publicUrl = buildPublicUrl(key);
 
         return res.json(

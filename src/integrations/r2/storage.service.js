@@ -69,6 +69,25 @@ export async function uploadMaybeStreamToR2(maybeStreamOrBuffer, options) {
     return uploadBufferToR2(buf, options);
 }
 
+/**
+ * Get URL cho image - ưu tiên public URL, fallback presigned nếu không có
+ * Đây là function chính nên dùng để trả URL về FE
+ */
+export async function getImageUrl(key, expiresIn = 3600) {
+    // Ưu tiên public URL nếu có cấu hình
+    const publicUrl = buildPublicUrl(key);
+    if (publicUrl) {
+        return publicUrl;
+    }
+
+    // Fallback: presigned URL cho private bucket
+    return await presignGetUrl(key, expiresIn);
+}
+
+/**
+ * Tạo presigned URL (chỉ dùng khi cần temporary access cho private bucket)
+ * Thông thường nên dùng getImageUrl() thay vì function này
+ */
 export async function presignGetUrl(key, expiresIn = 3600) {
     // getSignedUrl đã internal call 1 lần; ta vẫn bọc retry cho chắc
     return await withRetry(

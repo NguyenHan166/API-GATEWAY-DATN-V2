@@ -38,7 +38,7 @@ export const gfpganController = {
         });
 
         const expiresIn = 3600; // 1h
-        const presignedUrl = await presignGetUrl(key, expiresIn);
+        const presignedUrl = await getImageUrl(key, expiresIn);
         const publicUrl = buildPublicUrl(key);
 
         return res.json(

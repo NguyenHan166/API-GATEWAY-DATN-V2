@@ -69,7 +69,7 @@ export async function replaceBgController(req, res) {
         });
         const expiresIn = q.signTtl ?? 3600;
         const publicUrl = buildPublicUrl(key);
-        const presignedUrl = await presignGetUrl(key, expiresIn);
+        const presignedUrl = await getImageUrl(key, expiresIn);
 
         res.json(
             successResponse({

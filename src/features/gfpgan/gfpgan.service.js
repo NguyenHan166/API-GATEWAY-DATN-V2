@@ -5,6 +5,7 @@ import { withRetry } from "../../utils/retry.js";
 import {
     uploadBufferToR2,
     presignGetUrl,
+    getImageUrl,
 } from "../../integrations/r2/storage.service.js";
 import { withReplicateLimiter } from "../../utils/limiters.js";
 import { PERF } from "../../config/perf.js";

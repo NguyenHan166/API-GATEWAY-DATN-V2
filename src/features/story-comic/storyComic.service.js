@@ -327,7 +327,7 @@ export async function generateStoryComic({
             contentType: "image/png",
         });
         const expiresIn = PERF.r2.presignExpiresSec || 3600;
-        const presignedUrl = await presignGetUrl(key, expiresIn);
+        const presignedUrl = await getImageUrl(key, expiresIn);
         const publicUrl = buildPublicUrl(key);
 
         results.push({

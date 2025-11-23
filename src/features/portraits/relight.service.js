@@ -4,6 +4,7 @@ import { withRetry } from "../../utils/retry.js";
 import { withReplicateLimiter } from "../../utils/limiters.js";
 import {
     uploadBufferToR2,
+    getImageUrl,
     // presignGetUrl, // <- KHÔNG CẦN cho input nữa
 } from "../../integrations/r2/storage.service.js";
 import { PERF } from "../../config/perf.js";
@@ -166,11 +167,8 @@ export async function icLightRelight(p) {
             cacheControl: "public, max-age=31536000, immutable",
         });
 
-        // Bạn đang có sẵn hàm presign cho OUTPUT (cái này vẫn nên giữ)
-        const { presignGetUrl } = await import(
-            "../../integrations/r2/storage.service.js"
-        );
-        const signed = await presignGetUrl(uploaded.key, 3600);
+        // Trả public URL cho FE
+        const signed = await getImageUrl(uploaded.key, 3600);
         afterUrls.push(signed);
     }
 

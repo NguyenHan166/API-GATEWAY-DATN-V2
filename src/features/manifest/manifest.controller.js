@@ -4,7 +4,7 @@ import {
     paginate,
 } from "./manifest.service.js";
 import { manifestQuerySchema, presignReqSchema } from "./manifest.schema.js";
-import { presignGetUrl } from "../../integrations/r2/storage.service.js";
+import { getImageUrl } from "../../integrations/r2/storage.service.js";
 import { paginatedResponse, errorResponse } from "../../utils/response.js";
 
 export async function getManifestController(req, res) {
@@ -58,7 +58,7 @@ export async function presignController(req, res) {
     }
 
     const EXPIRES = 3600;
-    const url = await presignGetUrl(body.key, EXPIRES);
+    const url = await getImageUrl(body.key, EXPIRES);
 
     res.json({
         request_id: req.id,
