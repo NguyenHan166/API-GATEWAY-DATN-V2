@@ -31,6 +31,7 @@ Content-Type: multipart/form-data
 -   **Max file size**: 10MB
 -   **Supported formats**: JPEG, PNG, WebP
 -   **Scale factors**: 2, 3, or 4 only
+-   **Auto-resize**: Images larger than ~2MP (~1414x1414) will be automatically resized to fit GPU memory
 -   Scale 4 may increase processing time significantly
 
 ## Response
@@ -53,7 +54,8 @@ Content-Type: multipart/form-data
         "scale": 2,
         "bytes": 245678,
         "requestId": "req_abc123xyz",
-        "pipeline": ["cjwbw/real-esrgan"]
+        "pipeline": ["cjwbw/real-esrgan"],
+        "prescaled": false
     }
 }
 ```
@@ -100,6 +102,9 @@ Content-Type: multipart/form-data
 | `meta.scale`         | Number | Scale passed to the model                      |
 | `meta.bytes`         | Number | Output file size in bytes                      |
 | `meta.pipeline`      | Array  | Processing steps (single model)                |
+| `meta.prescaled`     | Bool   | Whether input was auto-resized to fit GPU      |
+| `meta.originalSize`  | Object | Original dimensions (if prescaled)             |
+| `meta.prescaledSize` | Object | Resized dimensions (if prescaled)              |
 
 ## Rate Limiting
 
@@ -119,10 +124,11 @@ Content-Type: multipart/form-data
 ## Processing Pipeline
 
 1. Validate input (mime, size, `scale`)
-2. Run `cjwbw/real-esrgan:42fed1c...` on Replicate
+2. Auto-resize if image > ~2MP to fit GPU memory (~1414x1414 max)
+3. Run `cjwbw/real-esrgan:42fed1c...` on Replicate
     - `scale`: 2-4 (default 2)
-3. Upload to Cloudflare R2 (`aiBeautify/YYYY-MM-DD/uuid.ext`)
-4. Return presigned & public URLs
+4. Upload to Cloudflare R2 (`aiBeautify/YYYY-MM-DD/uuid.ext`)
+5. Return presigned & public URLs
 
 ## Examples
 
@@ -200,8 +206,9 @@ _Note: Processing time depends on Replicate API load_
 
 1. Use scale 2 for faster processing, scale 4 for maximum quality
 2. Use JPEG format for photos to reduce upload time
-3. Consider input image resolution - very large images take longer
-4. Run during off-peak hours to reduce queueing
+3. Images larger than ~2MP will be auto-resized - for best results, resize before uploading
+4. Recommended max input: 1400x1400 pixels to avoid prescaling
+5. Run during off-peak hours to reduce queueing
 
 ## Error Codes
 
@@ -281,6 +288,7 @@ _Note: Processing time depends on Replicate API load_
 -   **Hardware**: Nvidia T4 GPU
 -   **Cost**: ~$0.0032 per run
 -   **Base Algorithm**: Real-ESRGAN (Real-World Blind Super-Resolution)
+-   **GPU Memory Limit**: ~2MP input (images auto-resized if larger)
 
 ### Concurrency
 

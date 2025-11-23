@@ -11,9 +11,10 @@
 ## Pipeline
 
 1. Validate input (mime, size)
-2. Run `cjwbw/real-esrgan:42fed1c4...` with:
+2. Auto-resize if image > ~2MP (~1414x1414 max) to fit GPU memory
+3. Run `cjwbw/real-esrgan:42fed1c4...` with:
     - `scale`: 2-4 (default `2`)
-3. Upload result to R2 and return presigned/public URLs
+4. Upload result to R2 and return presigned/public URLs
 
 ## API Endpoint
 

@@ -458,6 +458,7 @@ High-quality image super-resolution bằng model `cjwbw/real-esrgan` trên Repli
 
 -   Max file size: 10MB
 -   Supported formats: JPEG, PNG, WebP
+-   Images > ~2MP will be auto-resized to fit GPU memory
 -   Scale 4 có thể tốn thời gian hơn scale 2
 
 **Response Success (200)**:
