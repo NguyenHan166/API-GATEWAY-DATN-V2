@@ -7,6 +7,7 @@ import {
     uploadBufferToR2,
     presignGetUrl,
     buildPublicUrl,
+    getImageUrl,
 } from "../../integrations/r2/storage.service.js";
 import { PERF } from "../../config/perf.js";
 import { logger } from "../../config/logger.js";
@@ -232,7 +233,10 @@ async function runGeminiStoryboard({
 }) {
     const genderHint =
         mainGender === "male" ? "nam" : mainGender === "female" ? "nữ" : null;
-    const systemPrompt = buildSystemPrompt({ panels, characterHint: genderHint });
+    const systemPrompt = buildSystemPrompt({
+        panels,
+        characterHint: genderHint,
+    });
     const userPrompt = buildUserPrompt({ userPrompt: prompt, style });
     const finalPrompt = `
 ${systemPrompt}
@@ -375,7 +379,7 @@ async function composePage({ storyId, renderedPanels }) {
         contentType: "image/png",
     });
     const expiresIn = PERF.r2.presignExpiresSec || 3600;
-    const presigned = await presignGetUrl(key, expiresIn);
+    const presigned = await getImageUrl(key, expiresIn);
     const publicUrl = buildPublicUrl(key);
 
     return {

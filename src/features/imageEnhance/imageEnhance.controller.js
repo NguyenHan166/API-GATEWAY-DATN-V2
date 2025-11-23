@@ -3,6 +3,7 @@ import { validateEnhanceInput } from "./imageEnhance.schema.js";
 import {
     presignGetUrl,
     buildPublicUrl,
+    getImageUrl,
 } from "../../integrations/r2/storage.service.js";
 import { successResponse, errorResponse } from "../../utils/response.js";
 

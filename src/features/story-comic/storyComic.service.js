@@ -6,6 +6,7 @@ import {
     uploadBufferToR2,
     presignGetUrl,
     buildPublicUrl,
+    getImageUrl,
 } from "../../integrations/r2/storage.service.js";
 import {
     generateOutlineWithGemini,

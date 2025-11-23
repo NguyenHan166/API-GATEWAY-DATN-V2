@@ -2,6 +2,7 @@ import {
     uploadBufferToR2,
     presignGetUrl,
     buildPublicUrl,
+    getImageUrl,
 } from "../../integrations/r2/storage.service.js";
 import { removeBackground, replaceBackground } from "./replace.service.js";
 import { replaceQuerySchema } from "./replace.schema.js";
