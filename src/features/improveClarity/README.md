@@ -9,7 +9,7 @@ Nâng cao độ rõ nét và chất lượng ảnh với **Real-ESRGAN**.
 -   **Scale**: Hỗ trợ 2x hoặc 4x
 -   **Face Enhance**: Có thể bật/tắt tính năng cải thiện khuôn mặt
 -   **Chi phí**: Miễn phí
--   **Khuyến nghị**: Ảnh đầu vào tối đa 1440p
+-   **Auto-resize**: Ảnh > ~2MP tự động resize để tránh lỗi GPU memory
 
 ## API Endpoint
 
@@ -79,7 +79,7 @@ curl -X POST http://localhost:3000/api/clarity \
 1. **Rate Limit**: 60 requests / phút / IP
 2. **Processing Time**: ~5-15s
 3. **Cost**: Miễn phí
-4. **Pre-scaling**: Ảnh được resize xuống max 2560px (khuyến nghị 1440p)
+4. **Auto-resize**: Ảnh > ~2MP (~1414x1414) tự động resize xuống để tránh lỗi GPU memory
 5. **Face Enhance**: Bật khi ảnh có khuôn mặt bị mờ hoặc không rõ
 
 ## Khuyến nghị
@@ -120,7 +120,8 @@ curl -X POST http://localhost:3000/api/clarity \
 
 ## Implementation Details
 
--   **Pre-scaling**: Ảnh được resize xuống max 2560px
+-   **Auto-resize**: Ảnh > ~2MP tự động resize giữ nguyên aspect ratio
+-   **GPU Limit**: Max ~2,000,000 pixels (~1414x1414 or 2000x1000)
 -   **Retry Logic**: Tự động retry 2 lần nếu API call thất bại
 -   **Rate Limiting**: Giới hạn concurrent Replicate jobs
 -   **Output Format**: Giữ nguyên format PNG/JPG của input

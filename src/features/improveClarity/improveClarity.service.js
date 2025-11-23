@@ -8,21 +8,49 @@ import { PERF } from "../../config/perf.js";
 // Real-ESRGAN Model
 const MODEL = "nightmareai/real-esrgan";
 
-// Pre-resize để tránh ảnh quá lớn - Real-ESRGAN khuyến nghị max 1440p
-async function preScale(buffer, maxSide = 2560) {
+// Max pixels supported by GPU (based on error: max 2096704 pixels)
+// Use conservative limit to be safe
+const MAX_INPUT_PIXELS = 2000000; // ~2MP (e.g., 1414x1414 or 2000x1000)
+
+/**
+ * Pre-resize để tránh ảnh quá lớn vượt GPU memory limit
+ * Giới hạn theo tổng số pixels thay vì chiều dài cạnh
+ */
+async function preScale(buffer) {
     const meta = await sharp(buffer).metadata();
-    if (!meta.width || !meta.height) return buffer;
-    const currentMaxSide = Math.max(meta.width, meta.height);
-    if (currentMaxSide <= maxSide) return buffer;
+    if (!meta.width || !meta.height) return { buffer, prescaled: false };
 
-    const scale = maxSide / currentMaxSide;
-    const W = Math.round((meta.width || 0) * scale);
-    const H = Math.round((meta.height || 0) * scale);
+    const totalPixels = meta.width * meta.height;
 
-    return await sharp(buffer)
-        .resize(W, H, { fit: "inside" })
+    if (totalPixels <= MAX_INPUT_PIXELS) {
+        return {
+            buffer,
+            prescaled: false,
+            originalSize: { width: meta.width, height: meta.height },
+        };
+    }
+
+    // Calculate new dimensions maintaining aspect ratio
+    const scaleFactor = Math.sqrt(MAX_INPUT_PIXELS / totalPixels);
+    const newWidth = Math.floor(meta.width * scaleFactor);
+    const newHeight = Math.floor(meta.height * scaleFactor);
+
+    console.log(
+        `[improveClarity] Prescaling image from ${meta.width}x${meta.height} (${totalPixels} pixels) ` +
+            `to ${newWidth}x${newHeight} (${newWidth * newHeight} pixels)`
+    );
+
+    const resizedBuffer = await sharp(buffer)
+        .resize(newWidth, newHeight, { fit: "inside" })
         .jpeg({ quality: 92 })
         .toBuffer();
+
+    return {
+        buffer: resizedBuffer,
+        prescaled: true,
+        originalSize: { width: meta.width, height: meta.height },
+        prescaledSize: { width: newWidth, height: newHeight },
+    };
 }
 
 // Hỗ trợ cả FileOutput (SDK mới) lẫn URL string
@@ -54,7 +82,12 @@ export const clarityService = {
     }) => {
         // Hạn chế đồng thời các job Replicate nặng
         return await withReplicateLimiter(async () => {
-            const scaled = await preScale(inputBuffer);
+            const {
+                buffer: scaled,
+                prescaled,
+                originalSize,
+                prescaledSize,
+            } = await preScale(inputBuffer);
 
             const runOnce = async () => {
                 const out = await replicate.run(MODEL, {
@@ -90,16 +123,22 @@ export const clarityService = {
                 prefix: "clarity",
             });
 
-            return {
-                key,
-                meta: {
-                    model: "real-esrgan",
-                    scale,
-                    faceEnhance,
-                    bytes: outputBuffer.length,
-                    requestId,
-                },
+            const meta = {
+                model: "real-esrgan",
+                scale,
+                faceEnhance,
+                bytes: outputBuffer.length,
+                requestId,
             };
+
+            // Add prescale info if image was resized
+            if (prescaled) {
+                meta.prescaled = true;
+                meta.originalSize = originalSize;
+                meta.prescaledSize = prescaledSize;
+            }
+
+            return { key, meta };
         });
     },
 };

@@ -39,6 +39,7 @@ Content-Type: multipart/form-data
 
 -   **Max file size**: 10MB (theo config upload middleware)
 -   **Supported formats**: JPEG, PNG, WebP và hầu hết các format ảnh
+-   **Auto-resize**: Images larger than ~2MP (~1414x1414) will be automatically resized to fit GPU memory
 -   **Scale options**:
     -   `2`: Tăng 2x kích thước (recommended)
     -   `4`: Tăng 4x kích thước
@@ -61,6 +62,7 @@ Content-Type: multipart/form-data
         "model": "nightmareai/real-esrgan",
         "scale": 2,
         "face_enhance": false,
+        "prescaled": false,
         "input_size": {
             "width": 1024,
             "height": 768
@@ -116,6 +118,9 @@ Content-Type: multipart/form-data
 | `meta.model`         | String  | AI model used                        |
 | `meta.scale`         | Number  | Scale factor applied                 |
 | `meta.face_enhance`  | Boolean | Whether face enhancement was enabled |
+| `meta.prescaled`     | Boolean | Whether input was auto-resized       |
+| `meta.originalSize`  | Object  | Original dimensions (if prescaled)   |
+| `meta.prescaledSize` | Object  | Resized dimensions (if prescaled)    |
 | `meta.input_size`    | Object  | Original image dimensions            |
 | `meta.output_size`   | Object  | Enhanced image dimensions            |
 
