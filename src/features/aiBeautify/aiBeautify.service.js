@@ -106,7 +106,7 @@ export const aiBeautifyService = {
                     onRetry: (e, i) => {
                         if (process.env.NODE_ENV !== "production") {
                             console.warn(
-                                `[aiBeautify] retry #${i + 1}`,
+                                `[aiBeautify] retry#${i + 1}`,
                                 e?.message
                             );
                         }
