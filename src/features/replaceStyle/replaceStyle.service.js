@@ -1,9 +1,10 @@
-import sharp from "sharp";
 import { replicate } from "../../integrations/replicate/client.js";
 import { withRetry } from "../../utils/retry.js";
 import { uploadBufferToR2 } from "../../integrations/r2/storage.service.js";
 import { withReplicateLimiter } from "../../utils/limiters.js";
-import { PERF } from "../../config/perf.js";
+import { prescaleImage, readReplicateOutput } from "../../utils/image.js";
+import { resultCache } from "../../utils/cache.js";
+import { metrics } from "../../utils/metrics.js";
 
 // Model FLUX Kontext Pro — State-of-the-art text-based image editing
 const MODEL = "black-forest-labs/flux-kontext-pro";
@@ -22,23 +23,6 @@ const STYLE_PRESETS = {
         "Change the image to 1990s animated cartoon style with bold outlines, simplified features, and vibrant flat colors. Keep the exact same facial features, expression, pose, and composition. Use classic hand-drawn animation techniques with cel-shading.",
 };
 
-// Pre-resize để giảm chi phí/độ trễ
-async function preScale(buffer) {
-    const meta = await sharp(buffer).metadata();
-    if (!meta.width || !meta.height) return buffer;
-    const maxSide = Math.max(meta.width, meta.height);
-    if (maxSide <= PERF.image.maxSidePx) return buffer;
-
-    const scale = PERF.image.maxSidePx / maxSide;
-    const W = Math.round((meta.width || 0) * scale);
-    const H = Math.round((meta.height || 0) * scale);
-
-    return await sharp(buffer)
-        .resize(W, H, { fit: "inside" })
-        .jpeg({ quality: 92 })
-        .toBuffer();
-}
-
 function buildPrompt(style, extra) {
     const base = STYLE_PRESETS[style] || "";
     return extra && extra.trim()
@@ -46,71 +30,88 @@ function buildPrompt(style, extra) {
         : base;
 }
 
-// Hỗ trợ cả FileOutput (SDK mới) lẫn URL string
-async function readReplicateOutputToBuffer(out) {
-    const arr = Array.isArray(out) ? out : [out];
-    const first = arr[0];
-
-    if (first && typeof first?.blob === "function") {
-        const blob = await first.blob();
-        const ab = await blob.arrayBuffer();
-        return Buffer.from(ab);
-    }
-
-    const url =
-        typeof first === "string" ? first : first?.url || first?.toString?.();
-    if (!url) throw new Error("Không xác định được output từ Replicate");
-    const resp = await fetch(url);
-    const ab = await resp.arrayBuffer();
-    return Buffer.from(ab);
-}
-
 export const styleService = {
     applyStyle: async ({ inputBuffer, inputMime, style, extra, requestId }) => {
-        const scaled = await preScale(inputBuffer);
-        const prompt = buildPrompt(style, extra);
-
-        // Hạn chế đồng thời các job Replicate nặng
-        return await withReplicateLimiter(async () => {
-            const runOnce = async () => {
-                const out = await replicate.run(MODEL, {
-                    input: {
-                        input_image: scaled, // buffer — SDK sẽ stream lên
-                        prompt,
-                        // Có thể thêm aspect_ratio nếu muốn ép tỷ lệ, ví dụ "1:1", "3:4", "16:9"
-                        // aspect_ratio: "original",
-                    },
-                    wait: true,
-                });
-                return await readReplicateOutputToBuffer(out);
-            };
-
-            const outputBuffer = await withRetry(() => runOnce(), {
-                retries: 2,
-                baseDelayMs: 800,
-                factor: 2,
-                onRetry: (e, i) => {
-                    // bạn có thể log bằng pino tại đây nếu muốn
-                    if (process.env.NODE_ENV !== "production") {
-                        console.warn(
-                            `[styleService] retry #${i + 1}`,
-                            e?.message
-                        );
-                    }
+        const startTime = Date.now();
+        try {
+            // Check cache first
+            const cacheKey = resultCache.makeKey(
+                inputBuffer,
+                {
+                    style,
+                    extra,
+                    feature: "replaceStyle",
                 },
-            });
+                requestId
+            );
+            const cached = resultCache.get(cacheKey);
+            if (cached) {
+                const duration = Date.now() - startTime;
+                metrics.recordRequest("replaceStyle", duration, true, false);
+                console.log(`[replaceStyle] Cache hit: ${cacheKey}`);
+                return cached;
+            }
 
-            const ext = inputMime?.includes("png") ? "png" : "jpg";
-            const { key } = await uploadBufferToR2(outputBuffer, {
-                contentType: ext === "png" ? "image/png" : "image/jpeg",
-                ext,
-                prefix: `styles/${style}`,
+            const { buffer: scaled } = await prescaleImage(inputBuffer, {
+                format: "jpeg",
             });
+            const prompt = buildPrompt(style, extra);
 
-            return {
-                key,
-                meta: { style, bytes: outputBuffer.length, requestId },
-            };
-        });
+            // Hạn chế đồng thời các job Replicate nặng
+            return await withReplicateLimiter(async () => {
+                const runOnce = async () => {
+                    const out = await replicate.run(MODEL, {
+                        input: {
+                            input_image: scaled, // buffer — SDK sẽ stream lên
+                            prompt,
+                            // Có thể thêm aspect_ratio nếu muốn ép tỷ lệ, ví dụ "1:1", "3:4", "16:9"
+                            // aspect_ratio: "original",
+                        },
+                        wait: true,
+                    });
+                    return await readReplicateOutput(out);
+                };
+
+                const outputBuffer = await withRetry(() => runOnce(), {
+                    retries: 2,
+                    baseDelayMs: 800,
+                    factor: 2,
+                    onRetry: (e, i) => {
+                        // bạn có thể log bằng pino tại đây nếu muốn
+                        if (process.env.NODE_ENV !== "production") {
+                            console.warn(
+                                `[styleService] retry #${i + 1}`,
+                                e?.message
+                            );
+                        }
+                    },
+                });
+
+                const ext = inputMime?.includes("png") ? "png" : "jpg";
+                const { key } = await uploadBufferToR2(outputBuffer, {
+                    contentType: ext === "png" ? "image/png" : "image/jpeg",
+                    ext,
+                    prefix: `styles/${style}`,
+                });
+
+                const result = {
+                    key,
+                    meta: { style, bytes: outputBuffer.length, requestId },
+                };
+
+                // Cache result
+                resultCache.set(cacheKey, result);
+
+                // Record metrics
+                const duration = Date.now() - startTime;
+                metrics.recordRequest("replaceStyle", duration, false, false);
+
+                return result;
+            }, "heavy"); // Heavy model - slow FLUX
+        } catch (error) {
+            const duration = Date.now() - startTime;
+            metrics.recordRequest("replaceStyle", duration, false, true);
+            throw error;
+        }
     },
 };
