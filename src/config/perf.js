@@ -8,10 +8,6 @@ export const PERF = {
     concurrency: {
         replaceBg: Number(process.env.CONCURRENCY_REPLACE_BG || 6),
         defaultHeavy: Number(process.env.CONCURRENCY_DEFAULT_HEAVY || 6),
-        // Replicate concurrency by model type
-        replicateLight: Number(process.env.REPLICATE_LIGHT_CONCURRENCY || 8), // Real-ESRGAN, GFPGAN
-        replicateHeavy: Number(process.env.REPLICATE_HEAVY_CONCURRENCY || 4), // IC-Light, FLUX
-        replicateComic: Number(process.env.REPLICATE_COMIC_CONCURRENCY || 2), // Gemini + Animagine
     },
 
     // Upload/Body size
