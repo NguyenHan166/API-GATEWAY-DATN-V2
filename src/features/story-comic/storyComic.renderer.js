@@ -5,18 +5,6 @@ const PAGE_WIDTH = 1080;
 const PAGE_HEIGHT = 1620;
 const GAP = 24;
 
-async function loadCanvasLib() {
-    try {
-        return await import("@napi-rs/canvas");
-    } catch (err) {
-        logger.warn(
-            { err: err?.message },
-            "Falling back to sharp renderer (canvas not available)"
-        );
-        return null;
-    }
-}
-
 function layoutForPanels(count) {
     if (count === 3) {
         const topHeight = Math.round(PAGE_HEIGHT * 0.55);
@@ -87,164 +75,126 @@ function buildBubbleText(panel) {
     return speaker ? `${speaker}: ${dialogue}` : dialogue;
 }
 
-function wrapTextCanvas(ctx, text, maxWidth) {
-    const words = text.split(/\s+/);
-    const lines = [];
-    let current = "";
-    for (const word of words) {
-        const tentative =
-            current.length === 0 ? word : `${current} ${word}`.trim();
-        if (ctx.measureText(tentative).width > maxWidth && current) {
-            lines.push(current);
-            current = word;
-        } else {
-            current = tentative;
-        }
-    }
-    if (current) lines.push(current);
-    return lines;
-}
-
-function drawSpeechBubble(ctx, { text, x, y, width, height }) {
-    const bubbleHeight = Math.min(height, Math.max(80, height * 0.45));
-    const padding = 14;
-    const radius = 14;
-    const tailWidth = 22;
-    const tailHeight = 16;
-
-    ctx.save();
-    ctx.lineWidth = 2;
-    ctx.fillStyle = "#ffffff";
-    ctx.strokeStyle = "#000000";
-    ctx.font = "20px 'Arial'";
-
-    const maxLineWidth = width - padding * 2;
-    const lines = wrapTextCanvas(ctx, text, maxLineWidth);
-    const lineHeight = 24;
-    const textHeight = lines.length * lineHeight;
-    const bodyHeight = Math.min(
-        bubbleHeight - tailHeight,
-        textHeight + padding * 2
-    );
-
-    const rectHeight = Math.max(bodyHeight, 60);
-    const rectY = y;
-    const rectX = x;
-
-    ctx.beginPath();
-    ctx.moveTo(rectX + radius, rectY);
-    ctx.lineTo(rectX + width - radius, rectY);
-    ctx.quadraticCurveTo(rectX + width, rectY, rectX + width, rectY + radius);
-    ctx.lineTo(rectX + width, rectY + rectHeight - radius);
-    ctx.quadraticCurveTo(
-        rectX + width,
-        rectY + rectHeight,
-        rectX + width - radius,
-        rectY + rectHeight
-    );
-    ctx.lineTo(rectX + width * 0.35, rectY + rectHeight);
-    ctx.lineTo(rectX + width * 0.35 - tailWidth, rectY + rectHeight + tailHeight);
-    ctx.lineTo(rectX + width * 0.35 - tailWidth * 1.2, rectY + rectHeight);
-    ctx.lineTo(rectX + radius, rectY + rectHeight);
-    ctx.quadraticCurveTo(rectX, rectY + rectHeight, rectX, rectY + rectHeight - radius);
-    ctx.lineTo(rectX, rectY + radius);
-    ctx.quadraticCurveTo(rectX, rectY, rectX + radius, rectY);
-    ctx.closePath();
-
-    ctx.fill();
-    ctx.stroke();
-
-    ctx.fillStyle = "#000000";
-    ctx.textBaseline = "top";
-    lines.forEach((line, idx) => {
-        ctx.fillText(line, rectX + padding, rectY + padding + idx * lineHeight);
-    });
-
-    ctx.restore();
-}
-
-async function renderWithCanvas({ panels }) {
-    const canvasLib = await loadCanvasLib();
-    if (!canvasLib) return null;
-
-    const { createCanvas, loadImage } = canvasLib;
-    const canvas = createCanvas(PAGE_WIDTH, PAGE_HEIGHT);
-    const ctx = canvas.getContext("2d");
-
-    ctx.fillStyle = "#f7f7f5";
-    ctx.fillRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT);
-
-    const layout = layoutForPanels(panels.length);
-
-    for (let i = 0; i < panels.length; i++) {
-        const cell = layout[i] || layout[layout.length - 1];
-        const img = await loadImage(panels[i].imageBuffer);
-        ctx.drawImage(img, cell.x, cell.y, cell.width, cell.height);
-
-        const text = buildBubbleText(panels[i]);
-        if (text) {
-            drawSpeechBubble(ctx, {
-                text,
-                x: cell.x + 10,
-                y: cell.y + 10,
-                width: cell.width - 20,
-                height: Math.floor(cell.height * 0.45),
-            });
-        }
-    }
-
-    return canvas.toBuffer("image/png");
+function escapeXml(text) {
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
 }
 
 function wrapTextFallback(text, maxChars) {
     if (!text) return [""];
+    
+    // Tối ưu cho tiếng Việt: tách theo từ, không tách giữa chữ
     const words = text.split(/\s+/);
     const lines = [];
     let current = "";
-    for (const w of words) {
-        if ((current + " " + w).trim().length > maxChars) {
-            if (current) lines.push(current.trim());
-            current = w;
+    
+    for (const word of words) {
+        const testLine = current ? `${current} ${word}` : word;
+        
+        // Ước lượng độ rộng: tiếng Việt có dấu nên cần nhiều space hơn
+        if (testLine.length > maxChars && current) {
+            lines.push(current.trim());
+            current = word;
         } else {
-            current = `${current} ${w}`.trim();
+            current = testLine;
         }
     }
-    if (current) lines.push(current.trim());
-    return lines.length ? lines : [""];
+    
+    if (current.trim()) {
+        lines.push(current.trim());
+    }
+    
+    return lines.length > 0 ? lines : [""];
 }
 
 function speechBubbleSvg({ text, width, height }) {
-    const padding = 12;
-    const tailHeight = 14;
-    const fontSize = 18;
-    const safeWidth = Math.max(220, Math.min(width, 520));
-    const maxChars = Math.max(14, Math.floor((safeWidth - padding * 2) / 8));
-    const lines = wrapTextFallback(text, maxChars);
-    const lineHeight = fontSize + 6;
-    const bodyHeight = padding * 2 + lines.length * lineHeight;
+    const padding = 14;
+    const tailHeight = 16;
+    const fontSize = 20;
+    const safeWidth = Math.max(240, Math.min(width, 540));
+    
+    // Tính toán maxChars dựa trên font size và width thực tế
+    const avgCharWidth = fontSize * 0.5; // Ước lượng độ rộng trung bình của 1 ký tự
+    const maxChars = Math.floor((safeWidth - padding * 2) / avgCharWidth);
+    
+    const lines = wrapTextFallback(text, Math.max(15, maxChars));
+    const lineHeight = fontSize + 8;
+    const bodyHeight = padding * 2 + lines.length * lineHeight + 4;
     const bubbleHeight = Math.min(bodyHeight + tailHeight, height);
-    const textYStart = padding + fontSize;
+    const textYStart = padding + 4;
+    
+    // Generate unique ID for filter to avoid conflicts
+    const filterId = `shadow-${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Tạo text nodes với XML escape và styling tốt hơn
     const textNodes = lines
         .map(
             (line, idx) =>
-                `<text x="${padding}" y="${
-                    textYStart + idx * lineHeight
-                }" font-size="${fontSize}" font-family="Arial, sans-serif" fill="#000">${line.replace(
-                    /&/g,
-                    "&amp;"
-                )}</text>`
+                `<text 
+                    x="${padding + 2}" 
+                    y="${textYStart + idx * lineHeight}" 
+                    font-size="${fontSize}" 
+                    font-family="'Noto Sans', 'Segoe UI', Arial, sans-serif" 
+                    font-weight="600"
+                    fill="#1a1a1a"
+                    dominant-baseline="hanging"
+                    xml:space="preserve">${escapeXml(line)}</text>`
         )
-        .join("");
+        .join("\n    ");
 
     return `
 <svg xmlns="http://www.w3.org/2000/svg" width="${safeWidth}" height="${bubbleHeight}">
-  <path d="M8 8 h ${safeWidth - 16} a8 8 0 0 1 8 8 v ${bubbleHeight - tailHeight - 16} a8 8 0 0 1 -8 8 h -${
-        safeWidth - 16
-    } a8 8 0 0 1 -8 -8 v -${bubbleHeight - tailHeight - 16} a8 8 0 0 1 8 -8 z" fill="white" stroke="black" stroke-width="2" />
-  <path d="M${safeWidth * 0.18} ${bubbleHeight - tailHeight} l 18 ${
-        tailHeight - 2
-    } l -8 -${tailHeight}" fill="white" stroke="black" stroke-width="2" />
-  ${textNodes}
+  <defs>
+    <filter id="${filterId}" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="2" dy="3" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.2"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Bubble shadow -->
+  <path 
+    d="M10 0 h ${safeWidth - 20} a10 10 0 0 1 10 10 v ${bubbleHeight - tailHeight - 20} a10 10 0 0 1 -10 10 h -${safeWidth - 20} a10 10 0 0 1 -10 -10 v -${bubbleHeight - tailHeight - 20} a10 10 0 0 1 10 -10 z" 
+    fill="rgba(0,0,0,0.08)" 
+    transform="translate(3,4)" />
+  
+  <!-- Bubble body -->
+  <path 
+    d="M10 0 h ${safeWidth - 20} a10 10 0 0 1 10 10 v ${bubbleHeight - tailHeight - 20} a10 10 0 0 1 -10 10 h -${safeWidth - 20} a10 10 0 0 1 -10 -10 v -${bubbleHeight - tailHeight - 20} a10 10 0 0 1 10 -10 z" 
+    fill="white" 
+    stroke="#2c2c2c" 
+    stroke-width="2.5" 
+    stroke-linejoin="round"
+    filter="url(#${filterId})" />
+  
+  <!-- Tail shadow -->
+  <path 
+    d="M${safeWidth * 0.15} ${bubbleHeight - tailHeight} l 20 ${tailHeight - 2} l -10 -${tailHeight + 2}" 
+    fill="rgba(0,0,0,0.08)" 
+    transform="translate(3,4)" />
+  
+  <!-- Tail -->
+  <path 
+    d="M${safeWidth * 0.15} ${bubbleHeight - tailHeight} l 20 ${tailHeight - 2} l -10 -${tailHeight + 2}" 
+    fill="white" 
+    stroke="#2c2c2c" 
+    stroke-width="2.5" 
+    stroke-linejoin="round" />
+  
+  <!-- Text content -->
+  <g>
+    ${textNodes}
+  </g>
 </svg>
     `.trim();
 }
@@ -304,12 +254,9 @@ async function renderWithSharp({ panels }) {
 }
 
 export async function renderComicPage({ storyId, pageIndex, panels }) {
-    const canvasBuffer = await renderWithCanvas({ panels });
-    if (canvasBuffer) return canvasBuffer;
-
     logger.info(
-        { storyId, pageIndex },
-        "Rendered with sharp fallback for story page"
+        { storyId, pageIndex, panelCount: panels.length },
+        "Rendering comic page with Sharp + optimized SVG bubbles"
     );
     return renderWithSharp({ panels });
 }
