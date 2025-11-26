@@ -86,15 +86,15 @@ function escapeXml(text) {
 
 function wrapTextFallback(text, maxChars) {
     if (!text) return [""];
-    
+
     // Tối ưu cho tiếng Việt: tách theo từ, không tách giữa chữ
     const words = text.split(/\s+/);
     const lines = [];
     let current = "";
-    
+
     for (const word of words) {
         const testLine = current ? `${current} ${word}` : word;
-        
+
         // Ước lượng độ rộng: tiếng Việt có dấu nên cần nhiều space hơn
         if (testLine.length > maxChars && current) {
             lines.push(current.trim());
@@ -103,11 +103,11 @@ function wrapTextFallback(text, maxChars) {
             current = testLine;
         }
     }
-    
+
     if (current.trim()) {
         lines.push(current.trim());
     }
-    
+
     return lines.length > 0 ? lines : [""];
 }
 
@@ -116,20 +116,20 @@ function speechBubbleSvg({ text, width, height }) {
     const tailHeight = 16;
     const fontSize = 20;
     const safeWidth = Math.max(240, Math.min(width, 540));
-    
+
     // Tính toán maxChars dựa trên font size và width thực tế
     const avgCharWidth = fontSize * 0.5; // Ước lượng độ rộng trung bình của 1 ký tự
     const maxChars = Math.floor((safeWidth - padding * 2) / avgCharWidth);
-    
+
     const lines = wrapTextFallback(text, Math.max(15, maxChars));
     const lineHeight = fontSize + 8;
     const bodyHeight = padding * 2 + lines.length * lineHeight + 4;
     const bubbleHeight = Math.min(bodyHeight + tailHeight, height);
     const textYStart = padding + 4;
-    
+
     // Generate unique ID for filter to avoid conflicts
     const filterId = `shadow-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     // Tạo text nodes với XML escape và styling tốt hơn
     const textNodes = lines
         .map(
@@ -164,13 +164,21 @@ function speechBubbleSvg({ text, width, height }) {
   
   <!-- Bubble shadow -->
   <path 
-    d="M10 0 h ${safeWidth - 20} a10 10 0 0 1 10 10 v ${bubbleHeight - tailHeight - 20} a10 10 0 0 1 -10 10 h -${safeWidth - 20} a10 10 0 0 1 -10 -10 v -${bubbleHeight - tailHeight - 20} a10 10 0 0 1 10 -10 z" 
+    d="M10 0 h ${safeWidth - 20} a10 10 0 0 1 10 10 v ${
+        bubbleHeight - tailHeight - 20
+    } a10 10 0 0 1 -10 10 h -${safeWidth - 20} a10 10 0 0 1 -10 -10 v -${
+        bubbleHeight - tailHeight - 20
+    } a10 10 0 0 1 10 -10 z" 
     fill="rgba(0,0,0,0.08)" 
     transform="translate(3,4)" />
   
   <!-- Bubble body -->
   <path 
-    d="M10 0 h ${safeWidth - 20} a10 10 0 0 1 10 10 v ${bubbleHeight - tailHeight - 20} a10 10 0 0 1 -10 10 h -${safeWidth - 20} a10 10 0 0 1 -10 -10 v -${bubbleHeight - tailHeight - 20} a10 10 0 0 1 10 -10 z" 
+    d="M10 0 h ${safeWidth - 20} a10 10 0 0 1 10 10 v ${
+        bubbleHeight - tailHeight - 20
+    } a10 10 0 0 1 -10 10 h -${safeWidth - 20} a10 10 0 0 1 -10 -10 v -${
+        bubbleHeight - tailHeight - 20
+    } a10 10 0 0 1 10 -10 z" 
     fill="white" 
     stroke="#2c2c2c" 
     stroke-width="2.5" 
@@ -179,13 +187,17 @@ function speechBubbleSvg({ text, width, height }) {
   
   <!-- Tail shadow -->
   <path 
-    d="M${safeWidth * 0.15} ${bubbleHeight - tailHeight} l 20 ${tailHeight - 2} l -10 -${tailHeight + 2}" 
+    d="M${safeWidth * 0.15} ${bubbleHeight - tailHeight} l 20 ${
+        tailHeight - 2
+    } l -10 -${tailHeight + 2}" 
     fill="rgba(0,0,0,0.08)" 
     transform="translate(3,4)" />
   
   <!-- Tail -->
   <path 
-    d="M${safeWidth * 0.15} ${bubbleHeight - tailHeight} l 20 ${tailHeight - 2} l -10 -${tailHeight + 2}" 
+    d="M${safeWidth * 0.15} ${bubbleHeight - tailHeight} l 20 ${
+        tailHeight - 2
+    } l -10 -${tailHeight + 2}" 
     fill="white" 
     stroke="#2c2c2c" 
     stroke-width="2.5" 
