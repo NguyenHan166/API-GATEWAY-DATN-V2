@@ -1,0 +1,75 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Logs
+logs/
+*.log
+
+# Environment variables
+.env
+.env.*.local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Test and coverage
+coverage/
+test-results/
+.nyc_output/
+
+# Build output
+dist/
+build/
+out/
+lib/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.iml
+
+# System files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+.Spotlight-V100
+.Trashes
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Documentation (optional, comment out if you want them in the image)
+*.md
+!README.md
+
+# Lock files (we're copying package.json, npm ci will recreate package-lock.json)
+package-lock.json
+
+# Other
+.envrc
+*~
+*.swp
+*.swo
