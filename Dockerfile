@@ -18,7 +18,7 @@ WORKDIR /app
 
 # Copy file package và cài dependency
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 # Copy toàn bộ source
 COPY . .
