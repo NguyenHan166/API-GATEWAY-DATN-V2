@@ -19,7 +19,8 @@ export const comicController = {
         try {
             const result = await generateComic({
                 prompt: parsed.value.prompt,
-                panels: parsed.value.panels,
+                pages: parsed.value.pages,
+                panelsPerPage: parsed.value.panelsPerPage,
                 style: parsed.value.style,
                 requestId: req.id,
             });
@@ -27,17 +28,13 @@ export const comicController = {
             return res.json({
                 request_id: req.id,
                 status: "success",
-                page_url: result.page.url,
+                comic_url: result.image.url,
                 data: {
-                    key: result.page.key,
-                    url: result.page.url,
-                    presigned_url: result.page.presigned_url,
+                    comic_id: result.comic_id,
+                    image: result.image,
+                    panels: result.panels,
                 },
-                meta: {
-                    story_id: result.story_id,
-                    panels: result.meta.panels,
-                    model: result.meta.model,
-                },
+                meta: result.meta,
             });
         } catch (err) {
             return res.status(400).json(

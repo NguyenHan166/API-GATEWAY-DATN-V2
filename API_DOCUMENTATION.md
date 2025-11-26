@@ -630,13 +630,13 @@ Chuyển đổi ảnh sang các phong cách nghệ thuật khác nhau
 
 ## 9. Comic Generation
 
-Tạo truyện tranh anime tự động từ prompt văn bản
+Tạo truyện tranh anime nhiều trang với thoại tiếng Việt từ prompt văn bản
 
 ### 9.1 Generate Comic
 
 **Endpoint**: `POST /comic/generate`
 
-**Chức năng**: Tạo một trang comic hoàn chỉnh với AI (storyboard + images + speech bubbles)
+**Chức năng**: Tạo comic nhiều trang (1-3 trang) với AI, mỗi trang có 3-9 panel, thoại tiếng Việt overlay trên ảnh
 
 **Content-Type**: `multipart/form-data`
 
@@ -644,16 +644,18 @@ Tạo truyện tranh anime tự động từ prompt văn bản
 
 ```
 prompt=Một cô gái phát hiện ra cổng thần bí trong khu rừng
-panels=4
-style=anime_color
+pages=2
+panelsPerPage=4
+style=anime
 ```
 
 **Request Parameters**:
 | Parameter | Type | Required | Description | Default |
 | --------- | ------ | -------- | -------------------------------- | --------------- |
 | `prompt` | String | ✅ | Mô tả câu chuyện (≥ 5 ký tự) | - |
-| `panels` | Number | ❌ | Số lượng panel (1-6) | `4` |
-| `style` | String | ❌ | Style của comic | `"anime_color"` |
+| `pages` | Number | ❌ | Số trang (1-3) | `2` |
+| `panelsPerPage` | Number | ❌ | Số panel mỗi trang (3-9) | `4` |
+| `style` | String | ❌ | Phong cách: `"anime"`, `"manga"`, `"webtoon"` | `"anime"` |
 
 **Response Success (200)**:
 
@@ -661,51 +663,75 @@ style=anime_color
 {
     "request_id": "req_abc123xyz",
     "status": "success",
-    "page_url": "https://pub-xxxx.r2.dev/comics/story-id/page-0.png",
     "data": {
-        "key": "comics/550e8400-e29b-41d4-a716-446655440000/page-0.png",
-        "url": "https://pub-xxxx.r2.dev/comics/.../page-0.png",
-        "presigned_url": "https://pub-xxxx.r2.dev/comics/...?X-Amz-Algorithm=..."
-    },
-    "meta": {
-        "story_id": "550e8400-e29b-41d4-a716-446655440000",
+        "comic_id": "550e8400-e29b-41d4-a716-446655440000",
+        "image": {
+            "key": "comics/550e8400-1732694400000/comic.png",
+            "url": "https://pub-xxxx.r2.dev/comics/550e8400-1732694400000/comic.png",
+            "presigned_url": "https://pub-xxxx.r2.dev/comics/...?X-Amz-Algorithm=...",
+            "expires_in": 3600
+        },
         "panels": [
             {
-                "id": 1,
-                "dialogue": "Xin chào! Tôi là nhân vật chính.",
-                "speaker": "Hero",
-                "emotion": "happy"
+                "page": 1,
+                "panel": 1,
+                "description_vi": "Cô gái đi bộ trong khu rừng rậm rạp",
+                "description_en": "A girl walking through a dense forest",
+                "dialogue": "Chỗ này trông kỳ lạ quá...",
+                "speaker": "Mai",
+                "emotion": "curious"
             },
             {
-                "id": 2,
-                "dialogue": "Cuộc phiêu lưu bắt đầu thôi!",
-                "speaker": "Hero",
-                "emotion": "excited"
+                "page": 1,
+                "panel": 2,
+                "description_vi": "Cổng đá phát sáng xuất hiện",
+                "description_en": "A glowing stone portal appears",
+                "dialogue": "Cái gì đây?!",
+                "speaker": "Mai",
+                "emotion": "surprised"
             }
-        ],
+        ]
+    },
+    "meta": {
+        "pages": 2,
+        "panels_per_page": 4,
+        "total_panels": 8,
+        "style": "anime",
         "model": {
-            "llm": "google/gemini-2.5-flash",
-            "image": "cjwbw/animagine-xl-3.1"
-        }
+            "storyboard": "google/gemini-2.5-flash",
+            "image": "google/nano-banana",
+            "overlay": "sharp + SVG"
+        },
+        "processing_time_ms": 45230
     }
 }
 ```
 
-**Processing Pipeline**:
+**Processing Pipeline** (Hybrid Approach):
 
-1. **Gemini 2.5 Flash**: Tạo storyboard (kịch bản, thoại, mô tả cảnh)
-2. **Animagine XL 3.1**: Sinh ảnh anime cho từng panel
-3. **Composition**: Layout panels + speech bubbles
-4. **Output**: Trang comic hoàn chỉnh (1080x1620px PNG)
+1. **Gemini 2.5 Flash**: Tạo storyboard JSON với thoại tiếng Việt
+    - Output: `{ panels: [{ description_vi, description_en, dialogue, speaker, emotion }] }`
+2. **Nano Banana**: Sinh ảnh comic layout nhiều trang (chỉ dùng description_en)
+    - Prompt format: "two comic book pages side by side, ### Page 1\n**Panel 1** _Description:_ ..."
+3. **SVG Overlay**: Composite bong bóng thoại tiếng Việt lên ảnh
+    - Font: Noto Sans, Segoe UI (hỗ trợ tiếng Việt)
+    - Auto-positioning dựa trên layout grid
+4. **Output**: Ảnh PNG hoàn chỉnh (nhiều trang xếp ngang, tỷ lệ 2:3)
 
-**Processing Time**: 60-240 seconds (tùy số panels)
+**Processing Time**: 45-120 seconds (tùy số trang × panels)
+
+**Layout Structure**:
+
+-   **1 page**: Trang đơn, các panel xếp dọc
+-   **2 pages**: 2 trang xếp ngang (side-by-side)
+-   **3 pages**: 3 trang xếp ngang (horizontal strip)
 
 **Use Cases**:
 
--   Quick comic stories
--   Visual narratives
--   Social media content
+-   Comic tiếng Việt cho thị trường Việt Nam
+-   Visual storytelling với nhiều trang
 -   Educational comics
+-   Social media content (Instagram carousel, Facebook posts)
 
 ---
 

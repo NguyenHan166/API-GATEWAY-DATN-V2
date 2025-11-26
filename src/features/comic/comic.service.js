@@ -5,116 +5,91 @@ import { withReplicateLimiter } from "../../utils/limiters.js";
 import { withRetry } from "../../utils/retry.js";
 import {
     uploadBufferToR2,
-    presignGetUrl,
     buildPublicUrl,
     getImageUrl,
 } from "../../integrations/r2/storage.service.js";
 import { PERF } from "../../config/perf.js";
 import { logger } from "../../config/logger.js";
-import { renderComicPage } from "../story-comic/storyComic.renderer.js";
 
 const GEMINI_MODEL = process.env.GEMINI_MODEL_ID || "google/gemini-2.5-flash";
-const ANIMAGINE_MODEL =
-    process.env.ANIMAGINE_MODEL_ID ||
-    "cjwbw/animagine-xl-3.1:6afe2e6b27dad2d6f480b59195c221884b6acc589ff4d05ff0e5fc058690fbb9";
+const NANO_BANANA_MODEL = "google/nano-banana";
 
-const DEFAULT_NEGATIVE_PROMPT =
-    "nsfw, lowres, text, logo, watermark, signature, speech bubble, caption, bad hands, extra fingers, deformed, extra limbs";
-const POSITIVE_SUFFIX =
-    "anime style, vibrant colors, high quality, detailed background, no text, no speech bubble";
+const FETCH_TIMEOUT_MS = Number(process.env.HTTP_TIMEOUT_MS || 30000);
 
-const FETCH_TIMEOUT_MS = Number(process.env.HTTP_TIMEOUT_MS || 20000);
+// Comic page constants
+const PAGE_WIDTH = 1080;
+const PAGE_HEIGHT = 1620;
+const BUBBLE_PADDING = 14;
+const BUBBLE_TAIL_HEIGHT = 16;
+const BUBBLE_FONT_SIZE = 20;
 
-function detectMainGender(text) {
-    const t = (text || "").toLowerCase();
-    const maleKeywords = [
-        "chàng trai",
-        "anh ",
-        "anh ấy",
-        "anh ay",
-        "người đàn ông",
-        "nguoi dan ong",
-        "chàng thanh niên",
-        "chang thanh nien",
-        "nam chính",
-        "nam chinh",
-        "cậu bé",
-        "cau be",
-        "chàng",
-    ];
-    const femaleKeywords = [
-        "cô gái",
-        "co gai",
-        "cô bé",
-        "co be",
-        "người phụ nữ",
-        "nguoi phu nu",
-        "nữ chính",
-        "nu chinh",
-        "cô nàng",
-        "co nang",
-        "chị ",
-        "chi ",
-    ];
-    if (maleKeywords.some((k) => t.includes(k))) return "male";
-    if (femaleKeywords.some((k) => t.includes(k))) return "female";
-    return null;
-}
-
-function buildSystemPrompt({ panels, characterHint }) {
+function buildScriptPrompt({ userPrompt, pages, panelsPerPage }) {
+    const totalPanels = pages * panelsPerPage;
     return `
-Bạn là trợ lý tạo storyboard comic anime màu (không manga).
-- Trả về đúng 1 object JSON, không markdown, không giải thích, không kèm text thừa.
-- JSON phải bắt đầu bằng { và kết thúc bằng }.
-- Phải có đúng ${panels} panel trong mảng "panels".
-- Mỗi panel cần: id, description_vi (tiếng Việt, 1 câu gọn ≤ 25 từ, nêu cảnh, ánh sáng, mood), prompt_tags (Danbooru tiếng Anh, đủ tag nhân vật/cảnh/background/chất liệu ánh sáng), dialogue (tiếng Việt tự nhiên ≤ 40 ký tự), speaker, emotion (happy|sad|angry|surprised|neutral).
-- Không dùng từ khóa manga, screentone, black and white, lineart only.
-- prompt_tags phải hợp với Animagine XL 3.1: masterpiece, best quality, anime style, vibrant colors, high quality, detailed background, no text, no speech bubble, [các tag cảnh/nhân vật], ánh sáng (soft lighting/moody lighting), góc máy (dynamic angle/close up/...).
-- Dùng template JSON hợp lệ:
+Bạn là biên kịch truyện tranh chuyên nghiệp. Dựa trên câu chuyện của người dùng, tạo storyboard JSON chi tiết.
+
+YÊU CẦU:
+- Tạo ${totalPanels} panel (${pages} trang × ${panelsPerPage} panel/trang)
+- Mỗi panel cần: id, description_vi (mô tả cảnh bằng tiếng Việt), description_en (mô tả ngắn gọn bằng tiếng Anh cho AI vẽ), dialogue (lời thoại tiếng Việt, ≤50 ký tự), speaker (tên nhân vật), emotion (happy|sad|angry|surprised|neutral)
+- Lời thoại phải tự nhiên, ngắn gọn, phù hợp với nhân vật
+- Mô tả tiếng Anh (description_en) phải rõ ràng về: nhân vật, bối cảnh, hành động, ánh sáng, góc máy
+
+ĐỊNH DẠNG JSON:
 {
-  "story_id": "story-id",
-  "characters": [
-    {"name": "Tên", "role": "main|support", "description_en": "english tags of appearance"}
-  ],
+  "story_id": "story-id-unique",
   "panels": [
     {
       "id": 1,
-      "description_vi": "string",
-      "prompt_tags": "tag1, tag2, ...",
-      "dialogue": "string",
-      "speaker": "string",
-      "emotion": "happy|sad|angry|surprised|neutral"
+      "description_vi": "Mô tả cảnh bằng tiếng Việt (1-2 câu)",
+      "description_en": "English visual description for AI image generation",
+      "dialogue": "Lời thoại tiếng Việt ngắn gọn",
+      "speaker": "Tên nhân vật",
+      "emotion": "happy"
     }
   ]
 }
-- Giữ 1 nhân vật chính xuyên suốt, cùng giới tính${
-        characterHint ? ` (${characterHint})` : ""
-    }, trang phục và kiểu tóc nhất quán ở mọi panel.
-    `.trim();
+
+CÂU CHUYỆN NGƯỜI DÙNG:
+${userPrompt}
+
+Tạo storyboard JSON hoàn chỉnh với ${totalPanels} panels:`.trim();
 }
 
-function buildUserPrompt({ userPrompt, style }) {
-    return `
-Người dùng muốn: ${userPrompt}
-Style trang: ${style || "anime_color"}
-Tạo storyboard JSON với thoại ngắn, giữ nguyên bối cảnh nhân vật, dùng tiếng Việt tự nhiên.
-    `.trim();
-}
+function buildNanoBananaPrompt({ panels, pages, panelsPerPage, style }) {
+    const stylePrefix = style || "comic book style art";
+    const qualitySuffix =
+        "drawing, by Dave Stevens, by Adam Hughes, 1940's, 1950's, hand-drawn, color, high resolution, best quality";
 
-function buildFallbackStoryboard({ prompt, panels, storyId }) {
-    return {
-        story_id: storyId,
-        panels: Array.from({ length: panels }).map((_, i) => ({
-            id: i + 1,
-            description_vi: `Khung ${i + 1}: ${prompt}`,
-            prompt_tags:
-                "masterpiece, best quality, anime style, vibrant colors, detailed background, no text, no speech bubble",
-            dialogue: " ",
-            speaker: "Narrator",
-            emotion: "neutral",
-        })),
-        characters: [],
-    };
+    // Build detailed page-by-page script
+    const pageScripts = [];
+    for (let pageIdx = 0; pageIdx < pages; pageIdx++) {
+        const startPanel = pageIdx * panelsPerPage;
+        const endPanel = startPanel + panelsPerPage;
+        const pagePanels = panels.slice(startPanel, endPanel);
+
+        const panelDescriptions = pagePanels
+            .map((p, idx) => {
+                const panelNum = idx + 1;
+                return `**Panel ${panelNum}** *Description:* ${p.description_en}`;
+            })
+            .join("  \n");
+
+        pageScripts.push(`### Page ${pageIdx + 1}\n${panelDescriptions}`);
+    }
+
+    const fullScript = pageScripts.join("\n\n");
+
+    // Build final prompt with clear multi-page instruction
+    let layoutInstruction = "";
+    if (pages === 1) {
+        layoutInstruction = `single comic book page with ${panelsPerPage} panels arranged in a grid layout`;
+    } else if (pages === 2) {
+        layoutInstruction = `two comic book pages displayed side by side horizontally, each page has ${panelsPerPage} panels in grid layout`;
+    } else {
+        layoutInstruction = `${pages} comic book pages arranged horizontally in a row, each page contains ${panelsPerPage} panels in grid layout`;
+    }
+
+    return `${stylePrefix} of ${layoutInstruction}. ${fullScript}. ${qualitySuffix}`.trim();
 }
 
 function extractJson(text) {
@@ -136,77 +111,149 @@ function extractJson(text) {
         throw new Error("Empty response from model");
     }
 
-    const direct = rawStr.trim();
+    // Try direct parse
     try {
-        return JSON.parse(direct);
+        return JSON.parse(rawStr);
     } catch (_) {}
 
+    // Try extract JSON from markdown
     const match = rawStr.match(/\{[\s\S]*\}/);
     if (match) {
         try {
             return JSON.parse(match[0]);
         } catch (_) {}
     }
+
     throw new Error("Model did not return valid JSON");
 }
 
-function normalizePanels(panels, requested, fallbackPrompt) {
-    const safe = Array.isArray(panels) ? panels.slice(0, requested) : [];
-    const filled = [];
-    for (let i = 0; i < requested; i++) {
-        const p = safe[i] || {};
-        const dialogue = p.dialogue || " ";
-        filled.push({
-            id: p.id || i + 1,
+function normalizePanels(panels, totalPanels, fallbackPrompt) {
+    const safe = Array.isArray(panels) ? panels : [];
+    const result = [];
+
+    for (let i = 0; i < totalPanels; i++) {
+        const panel = safe[i] || {};
+        result.push({
+            id: panel.id || i + 1,
             description_vi:
-                p.description_vi ||
-                `Khung ${i + 1}: ${fallbackPrompt || "Cảnh anime màu."}`,
-            prompt_tags:
-                p.prompt_tags ||
-                "masterpiece, best quality, anime style, vibrant colors, detailed background, no text, no speech bubble",
-            dialogue,
-            speaker: p.speaker || "Narrator",
-            emotion: p.emotion || "neutral",
+                panel.description_vi ||
+                `Cảnh ${i + 1}: ${fallbackPrompt || "Truyện tranh"}`,
+            description_en:
+                panel.description_en || `Scene ${i + 1} of the comic story`,
+            dialogue: (panel.dialogue || "").toString().trim(),
+            speaker: (panel.speaker || "Narrator").toString().trim(),
+            emotion: ["happy", "sad", "angry", "surprised", "neutral"].includes(
+                panel.emotion
+            )
+                ? panel.emotion
+                : "neutral",
         });
     }
-    return filled.map((p, idx) => ({ ...p, id: p.id || idx + 1 }));
+
+    return result;
 }
 
-function applyGenderTags(tags, gender) {
-    if (!gender) return tags;
-    const lower = tags.toLowerCase();
-    if (gender === "male") {
-        if (
-            !lower.includes("male") &&
-            !lower.includes("1boy") &&
-            !lower.includes("man")
-        ) {
-            return `${tags}, male, 1boy, masculine face, short hair`;
-        }
-    }
-    if (gender === "female") {
-        if (
-            !lower.includes("female") &&
-            !lower.includes("1girl") &&
-            !lower.includes("woman")
-        ) {
-            return `${tags}, female, 1girl, feminine face`;
-        }
-    }
-    return tags;
+function escapeXml(text) {
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
 }
 
-function buildPanelPrompt(panel, mainGender) {
-    const tags = panel.prompt_tags || "";
-    const gendered = applyGenderTags(tags, mainGender);
-    const trimmed = [gendered, POSITIVE_SUFFIX]
-        .filter(Boolean)
-        .join(", ")
-        .replace(/\s+,/g, ",")
-        .replace(/,+/g, ",")
-        .replace(/,\s*,/g, ",");
+function wrapText(text, maxChars) {
+    if (!text) return [""];
 
-    return trimmed;
+    const words = text.split(/\s+/);
+    const lines = [];
+    let current = "";
+
+    for (const word of words) {
+        const testLine = current ? `${current} ${word}` : word;
+
+        if (testLine.length > maxChars && current) {
+            lines.push(current.trim());
+            current = word;
+        } else {
+            current = testLine;
+        }
+    }
+
+    if (current.trim()) {
+        lines.push(current.trim());
+    }
+
+    return lines.length > 0 ? lines : [""];
+}
+
+function buildSpeechBubbleSvg({ text, maxWidth }) {
+    if (!text) return null;
+
+    const avgCharWidth = BUBBLE_FONT_SIZE * 0.5;
+    const maxChars = Math.floor((maxWidth - BUBBLE_PADDING * 2) / avgCharWidth);
+    const lines = wrapText(text, Math.max(15, maxChars));
+    const lineHeight = BUBBLE_FONT_SIZE + 8;
+    const bodyHeight = BUBBLE_PADDING * 2 + lines.length * lineHeight + 4;
+    const bubbleHeight = bodyHeight + BUBBLE_TAIL_HEIGHT;
+    const bubbleWidth = Math.min(
+        maxWidth,
+        Math.max(240, BUBBLE_PADDING * 2 + maxChars * avgCharWidth)
+    );
+
+    const filterId = `shadow-${Math.random().toString(36).substr(2, 9)}`;
+    const textYStart = BUBBLE_PADDING + 4;
+
+    const textNodes = lines
+        .map(
+            (line, idx) =>
+                `<text x="${BUBBLE_PADDING + 2}" y="${
+                    textYStart + idx * lineHeight
+                }" font-size="${BUBBLE_FONT_SIZE}" font-family="'Noto Sans', 'Segoe UI', Arial, sans-serif" font-weight="600" fill="#1a1a1a" dominant-baseline="hanging" xml:space="preserve">${escapeXml(
+                    line
+                )}</text>`
+        )
+        .join("\n    ");
+
+    return `
+<svg xmlns="http://www.w3.org/2000/svg" width="${bubbleWidth}" height="${bubbleHeight}">
+  <defs>
+    <filter id="${filterId}" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="2" dy="3" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.2"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <path d="M10 0 h ${bubbleWidth - 20} a10 10 0 0 1 10 10 v ${
+        bubbleHeight - BUBBLE_TAIL_HEIGHT - 20
+    } a10 10 0 0 1 -10 10 h -${bubbleWidth - 20} a10 10 0 0 1 -10 -10 v -${
+        bubbleHeight - BUBBLE_TAIL_HEIGHT - 20
+    } a10 10 0 0 1 10 -10 z" fill="rgba(0,0,0,0.08)" transform="translate(3,4)" />
+  <path d="M10 0 h ${bubbleWidth - 20} a10 10 0 0 1 10 10 v ${
+        bubbleHeight - BUBBLE_TAIL_HEIGHT - 20
+    } a10 10 0 0 1 -10 10 h -${bubbleWidth - 20} a10 10 0 0 1 -10 -10 v -${
+        bubbleHeight - BUBBLE_TAIL_HEIGHT - 20
+    } a10 10 0 0 1 10 -10 z" fill="white" stroke="#2c2c2c" stroke-width="2.5" stroke-linejoin="round" filter="url(#${filterId})" />
+  <path d="M${bubbleWidth * 0.15} ${bubbleHeight - BUBBLE_TAIL_HEIGHT} l 20 ${
+        BUBBLE_TAIL_HEIGHT - 2
+    } l -10 -${
+        BUBBLE_TAIL_HEIGHT + 2
+    }" fill="rgba(0,0,0,0.08)" transform="translate(3,4)" />
+  <path d="M${bubbleWidth * 0.15} ${bubbleHeight - BUBBLE_TAIL_HEIGHT} l 20 ${
+        BUBBLE_TAIL_HEIGHT - 2
+    } l -10 -${
+        BUBBLE_TAIL_HEIGHT + 2
+    }" fill="white" stroke="#2c2c2c" stroke-width="2.5" stroke-linejoin="round" />
+  <g>
+    ${textNodes}
+  </g>
+</svg>`.trim();
 }
 
 async function fetchBuffer(url, timeoutMs = FETCH_TIMEOUT_MS) {
@@ -226,30 +273,16 @@ async function fetchBuffer(url, timeoutMs = FETCH_TIMEOUT_MS) {
 
 async function runGeminiStoryboard({
     prompt,
-    panels,
-    style,
+    pages,
+    panelsPerPage,
     requestId,
-    mainGender,
 }) {
-    const genderHint =
-        mainGender === "male" ? "nam" : mainGender === "female" ? "nữ" : null;
-    const systemPrompt = buildSystemPrompt({
-        panels,
-        characterHint: genderHint,
+    const totalPanels = pages * panelsPerPage;
+    const scriptPrompt = buildScriptPrompt({
+        userPrompt: prompt,
+        pages,
+        panelsPerPage,
     });
-    const userPrompt = buildUserPrompt({ userPrompt: prompt, style });
-    const finalPrompt = `
-${systemPrompt}
-
-YÊU CẦU ĐẦU RA:
-- Trả về đúng 1 object JSON, không markdown, không giải thích, không kèm chữ thừa.
-- JSON có mảng "panels" độ dài ${panels}.
-- Mỗi panel: { "id", "description_vi", "prompt_tags", "dialogue", "speaker", "emotion" }.
-- Thoại tiếng Việt ≤ 40 ký tự, tự nhiên, đúng nhân vật. Trong prompt_tags phải có bối cảnh, ánh sáng, góc máy, màu sắc.
-
-NỘI DUNG NGƯỜI DÙNG:
-${userPrompt}
-    `.trim();
 
     const retryOpts = {
         retries: PERF.retry.retries || 2,
@@ -262,47 +295,64 @@ ${userPrompt}
             withReplicateLimiter(() =>
                 replicate.run(GEMINI_MODEL, {
                     input: {
-                        prompt: finalPrompt,
-                        max_output_tokens: 5000,
-                        temperature: 0.25,
+                        prompt: scriptPrompt,
+                        max_output_tokens: 8000,
+                        temperature: 0.3,
                     },
                 })
             ),
         retryOpts
     );
 
-    const storyId = randomUUID();
-    let parsed;
+    let storyboard;
     try {
-        parsed = extractJson(llmOutput);
+        storyboard = extractJson(llmOutput);
     } catch (err) {
         logger.warn(
-            {
-                requestId,
-                model: GEMINI_MODEL,
-                err: err?.message,
-                raw: String(llmOutput)?.slice(0, 300),
-            },
-            "Gemini returned invalid JSON, using fallback storyboard"
+            { requestId, model: GEMINI_MODEL, err: err?.message },
+            "Gemini returned invalid JSON, using fallback"
         );
-        parsed = buildFallbackStoryboard({ prompt, panels, storyId });
+        storyboard = {
+            story_id: randomUUID(),
+            panels: [],
+        };
     }
 
-    const story = {
-        story_id: parsed.story_id || storyId,
-        panels: normalizePanels(parsed.panels, panels, prompt),
-        characters: Array.isArray(parsed.characters) ? parsed.characters : [],
-    };
+    const storyId = storyboard.story_id || randomUUID();
+    const panels = normalizePanels(storyboard.panels, totalPanels, prompt);
 
     logger.info(
-        { requestId, storyId: story.story_id, model: GEMINI_MODEL },
-        "Generated comic storyboard (inline)"
+        {
+            requestId,
+            storyId,
+            model: GEMINI_MODEL,
+            panelCount: panels.length,
+        },
+        "Generated comic storyboard with Vietnamese dialogue"
     );
 
-    return story;
+    return { storyId, panels };
 }
 
-async function runAnimagine({ prompt, requestId }) {
+async function runNanaBanana({
+    panels,
+    pages,
+    panelsPerPage,
+    style,
+    requestId,
+}) {
+    const prompt = buildNanoBananaPrompt({
+        panels,
+        pages,
+        panelsPerPage,
+        style,
+    });
+
+    logger.info(
+        { requestId, promptLength: prompt.length, pages, panelsPerPage },
+        "Built Nano Banana prompt (multi-page layout)"
+    );
+
     const retryOpts = {
         retries: PERF.retry.retries || 2,
         baseDelayMs: PERF.retry.minTimeoutMs || 600,
@@ -312,14 +362,10 @@ async function runAnimagine({ prompt, requestId }) {
     return await withRetry(
         () =>
             withReplicateLimiter(() =>
-                replicate.run(ANIMAGINE_MODEL, {
+                replicate.run(NANO_BANANA_MODEL, {
                     input: {
                         prompt,
-                        negative_prompt: DEFAULT_NEGATIVE_PROMPT,
-                        width: 832,
-                        height: 1216,
-                        num_inference_steps: 28,
-                        guidance_scale: 7,
+                        aspect_ratio: "2:3",
                     },
                 })
             ),
@@ -327,106 +373,183 @@ async function runAnimagine({ prompt, requestId }) {
             ...retryOpts,
             beforeRetry: ({ attempt }) =>
                 logger.warn(
-                    { attempt, model: ANIMAGINE_MODEL, requestId },
-                    "Retrying Animagine generation"
+                    { attempt, model: NANO_BANANA_MODEL, requestId },
+                    "Retrying Nano Banana generation"
                 ),
         }
     );
 }
 
-async function generatePanelsImages(panels, requestId, mainGender) {
-    const tasks = panels.map(async (panel) => {
-        const prompt = buildPanelPrompt(panel, mainGender);
-        const output = await runAnimagine({ prompt, requestId });
-        const first =
-            Array.isArray(output) && output.length > 0
-                ? output[0]
-                : output?.output || output;
-        if (!first) throw new Error("Model returned empty output");
+async function resolveOutputBuffer(output) {
+    const first =
+        Array.isArray(output) && output.length > 0
+            ? output[0]
+            : output?.output || output;
 
-        let buf;
-        if (typeof first === "string") {
-            buf = await fetchBuffer(first, FETCH_TIMEOUT_MS);
-        } else if (typeof first?.blob === "function") {
-            const blob = await first.blob();
-            const ab = await blob.arrayBuffer();
-            buf = Buffer.from(ab);
-        } else if (first?.url) {
-            buf = await fetchBuffer(first.url, FETCH_TIMEOUT_MS);
-        } else if (Buffer.isBuffer(first)) {
-            buf = first;
-        } else {
-            buf = Buffer.from(first);
-        }
+    if (!first) throw new Error("Model returned empty output");
 
-        const pngBuffer = await sharp(buf).png().toBuffer();
-        return { ...panel, imageBuffer: pngBuffer };
-    });
-
-    return await Promise.all(tasks);
+    if (typeof first === "string") {
+        return await fetchBuffer(first);
+    }
+    if (typeof first?.blob === "function") {
+        const blob = await first.blob();
+        const ab = await blob.arrayBuffer();
+        return Buffer.from(ab);
+    }
+    if (first?.url) {
+        return await fetchBuffer(first.url);
+    }
+    if (Buffer.isBuffer(first)) return first;
+    return Buffer.from(first);
 }
 
-async function composePage({ storyId, renderedPanels }) {
-    const pageBuffer = await renderComicPage({
-        storyId,
-        pageIndex: 0,
-        panels: renderedPanels,
+async function overlayVietnameseBubbles({
+    baseImageBuffer,
+    panels,
+    pages,
+    panelsPerPage,
+}) {
+    const baseImage = sharp(baseImageBuffer);
+    const metadata = await baseImage.metadata();
+    const imageWidth = metadata.width || PAGE_WIDTH;
+    const imageHeight = metadata.height || PAGE_HEIGHT;
+
+    const composites = [];
+
+    // Calculate page layout (side by side if multiple pages)
+    const pageWidth = Math.floor(imageWidth / pages);
+    const pageHeight = imageHeight;
+
+    // Calculate panel grid within each page
+    const panelCols =
+        panelsPerPage <= 4 ? 2 : Math.ceil(Math.sqrt(panelsPerPage));
+    const panelRows = Math.ceil(panelsPerPage / panelCols);
+    const panelWidth = Math.floor(pageWidth / panelCols);
+    const panelHeight = Math.floor(pageHeight / panelRows);
+
+    for (let i = 0; i < panels.length; i++) {
+        const panel = panels[i];
+        const dialogue = panel.dialogue?.trim();
+        const speaker = panel.speaker?.trim();
+
+        if (!dialogue) continue;
+
+        const fullText = speaker ? `${speaker}: ${dialogue}` : dialogue;
+
+        // Determine which page this panel belongs to
+        const pageIdx = Math.floor(i / panelsPerPage);
+        const panelInPage = i % panelsPerPage;
+
+        // Calculate position within the page
+        const row = Math.floor(panelInPage / panelCols);
+        const col = panelInPage % panelCols;
+
+        // Calculate absolute position in final image
+        const pageX = pageIdx * pageWidth;
+        const panelX = pageX + col * panelWidth;
+        const panelY = row * panelHeight;
+
+        const bubbleSvg = buildSpeechBubbleSvg({
+            text: fullText,
+            maxWidth: panelWidth - 30,
+        });
+
+        if (bubbleSvg) {
+            composites.push({
+                input: Buffer.from(bubbleSvg),
+                left: Math.round(panelX + 15),
+                top: Math.round(panelY + 15),
+            });
+        }
+    }
+
+    if (composites.length === 0) {
+        return baseImageBuffer;
+    }
+
+    return await baseImage.composite(composites).png().toBuffer();
+}
+
+export async function generateComic({
+    prompt,
+    pages,
+    panelsPerPage,
+    style,
+    requestId,
+}) {
+    // Step 1: Generate storyboard with Vietnamese dialogue using Gemini
+    const { storyId, panels } = await runGeminiStoryboard({
+        prompt,
+        pages,
+        panelsPerPage,
+        requestId,
     });
 
-    const key = `comics/${storyId}/page-0.png`;
-    await uploadBufferToR2(pageBuffer, {
+    // Step 2: Generate comic layout using Nano Banana (English visual description)
+    const output = await runNanaBanana({
+        panels,
+        pages,
+        panelsPerPage,
+        style,
+        requestId,
+    });
+
+    const baseImageBuffer = await resolveOutputBuffer(output);
+
+    // Step 3: Overlay Vietnamese speech bubbles on top of the comic image
+    const finalImageBuffer = await overlayVietnameseBubbles({
+        baseImageBuffer,
+        panels,
+        pages,
+        panelsPerPage,
+    });
+
+    // Step 4: Upload final comic to R2
+    // Use randomUUID to ensure unique key even with same prompt
+    const comicId = randomUUID();
+    const timestamp = Date.now();
+    const key = `comics/${comicId}-${timestamp}/comic.png`;
+
+    await uploadBufferToR2(finalImageBuffer, {
         key,
         contentType: "image/png",
     });
+
     const expiresIn = PERF.r2.presignExpiresSec || 3600;
     const presigned = await getImageUrl(key, expiresIn);
     const publicUrl = buildPublicUrl(key);
 
-    return {
-        key,
-        url: publicUrl || presigned,
-        presigned_url: presigned,
-        buffer: pageBuffer,
-    };
-}
-
-export async function generateComic({ prompt, panels, style, requestId }) {
-    const mainGender = detectMainGender(prompt);
-    const story = await runGeminiStoryboard({
-        prompt,
-        panels,
-        style,
-        requestId,
-        mainGender,
-    });
-    const renderedPanels = await generatePanelsImages(
-        story.panels,
-        requestId,
-        mainGender
-    );
-    const page = await composePage({
-        storyId: story.story_id,
-        renderedPanels,
-    });
-
     logger.info(
-        { requestId, storyId: story.story_id, model: ANIMAGINE_MODEL },
-        "Rendered comic page (single API)"
+        {
+            requestId,
+            comicId,
+            panelCount: panels.length,
+            model: { llm: GEMINI_MODEL, image: NANO_BANANA_MODEL },
+        },
+        "Generated comic with Vietnamese dialogue overlay"
     );
 
     return {
-        page,
-        story_id: story.story_id,
+        comic_id: comicId,
+        image: {
+            key,
+            url: publicUrl || presigned,
+            presigned_url: presigned,
+        },
+        panels: panels.map((p) => ({
+            id: p.id,
+            description_vi: p.description_vi,
+            dialogue: p.dialogue,
+            speaker: p.speaker,
+            emotion: p.emotion,
+        })),
         meta: {
-            panels: renderedPanels.map((p) => ({
-                id: p.id,
-                dialogue: p.dialogue,
-                speaker: p.speaker,
-                emotion: p.emotion,
-            })),
+            pages,
+            panelsPerPage,
+            totalPanels: pages * panelsPerPage,
             model: {
                 llm: GEMINI_MODEL,
-                image: ANIMAGINE_MODEL,
+                image: NANO_BANANA_MODEL,
             },
         },
     };

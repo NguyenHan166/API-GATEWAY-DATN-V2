@@ -1,14 +1,20 @@
 import { z } from "zod";
 
 const GenerateRequestSchema = z.object({
-    prompt: z.string().min(5, "prompt too short"),
-    panels: z.coerce
+    prompt: z.string().min(10, "prompt too short (minimum 10 characters)"),
+    pages: z.coerce
         .number()
         .int()
-        .min(1, "at least 1 panel")
-        .max(6, "too many panels")
-        .default(4),
-    style: z.string().default("anime_color"),
+        .min(1, "at least 1 page")
+        .max(3, "maximum 3 pages")
+        .default(1),
+    panelsPerPage: z.coerce
+        .number()
+        .int()
+        .min(3, "at least 3 panels per page")
+        .max(9, "maximum 9 panels per page")
+        .default(6),
+    style: z.string().default("comic book style art"),
 });
 
 export function parseGenerateBody(body) {

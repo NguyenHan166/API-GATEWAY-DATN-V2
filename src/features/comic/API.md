@@ -2,12 +2,13 @@
 
 ## Overview
 
-Service tạo truyện tranh anime tự động từ prompt văn bản. Hệ thống sử dụng kết hợp 2 AI models:
+Service tạo truyện tranh tự động từ prompt văn bản với **lời thoại tiếng Việt** sử dụng công nghệ Hybrid AI. Hệ thống kết hợp 2 AI models:
 
-1. **Gemini 2.5 Flash** - Tạo storyboard (kịch bản, thoại, mô tả cảnh)
-2. **Animagine XL 3.1** - Sinh ảnh anime theo từng panel
+1. **Gemini 2.5 Flash** - Tạo storyboard chi tiết với lời thoại tiếng Việt tự nhiên
+2. **Google Nano Banana** - Sinh ảnh comic với layout chuyên nghiệp
+3. **SVG Renderer** - Overlay speech bubbles tiếng Việt lên ảnh comic
 
-Kết quả là một trang truyện comic hoàn chỉnh với layout chuyên nghiệp, speech bubbles và thoại tiếng Việt.
+Kết quả là một ảnh comic book hoàn chỉnh với layout đẹp mắt và **lời thoại tiếng Việt** rõ ràng, phù hợp thị trường Việt Nam.
 
 ## Endpoint
 
@@ -17,7 +18,13 @@ POST /api/comic/generate
 
 ## Description
 
-Tạo một trang comic anime từ prompt văn bản. AI sẽ tự động tạo storyboard, sinh hình ảnh cho từng panel, và composite thành trang comic hoàn chỉnh với thoại.
+Tạo comic book từ prompt văn bản tiếng Việt. AI sẽ:
+
+-   Tạo storyboard chi tiết với lời thoại tiếng Việt
+-   Sinh ảnh comic layout chuyên nghiệp
+-   Overlay speech bubbles tiếng Việt lên ảnh
+
+Đây là giải pháp **Hybrid** kết hợp sức mạnh của Nano Banana (layout đẹp) với khả năng sinh lời thoại tiếng Việt tự nhiên.
 
 ## Request
 
@@ -29,17 +36,19 @@ Content-Type: multipart/form-data
 
 ### Body Parameters (form-data fields)
 
-| Parameter | Type   | Required | Description                  | Default         |
-| --------- | ------ | -------- | ---------------------------- | --------------- |
-| `prompt`  | String | ✅       | Mô tả câu chuyện (≥ 5 ký tự) | -               |
-| `panels`  | Number | ❌       | Số lượng panel (1-6)         | `4`             |
-| `style`   | String | ❌       | Style của comic              | `"anime_color"` |
+| Parameter       | Type   | Required | Description                   | Default                  |
+| --------------- | ------ | -------- | ----------------------------- | ------------------------ |
+| `prompt`        | String | ✅       | Mô tả câu chuyện (≥ 10 ký tự) | -                        |
+| `pages`         | Number | ❌       | Số trang (1-3)                | `1`                      |
+| `panelsPerPage` | Number | ❌       | Số panel mỗi trang (3-9)      | `6`                      |
+| `style`         | String | ❌       | Style prefix cho comic        | `"comic book style art"` |
 
 ### Constraints
 
--   **Prompt length**: Tối thiểu 5 ký tự
--   **Panels**: 1-6 panels per page
--   **Style**: Hiện tại hỗ trợ "anime_color"
+-   **Prompt length**: Tối thiểu 10 ký tự
+-   **Pages**: 1-3 trang
+-   **Panels per page**: 3-9 panels mỗi trang
+-   **Style**: Prefix mô tả phong cách comic (ví dụ: "comic book style art", "manga style", "graphic novel art")
 
 ## Response
 
@@ -49,34 +58,41 @@ Content-Type: multipart/form-data
 {
     "request_id": "req_abc123xyz",
     "status": "success",
-    "page_url": "https://pub-xxxx.r2.dev/comics/story-id/page-0.png",
+    "comic_url": "https://pub-xxxx.r2.dev/comics/550e8400-e29b-41d4-a716-446655440000/comic.png",
     "data": {
-        "key": "comics/550e8400-e29b-41d4-a716-446655440000/page-0.png",
-        "url": "https://pub-xxxx.r2.dev/comics/.../page-0.png",
-        "presigned_url": "https://pub-xxxx.r2.dev/comics/...?X-Amz-Algorithm=..."
-    },
-    "meta": {
-        "story_id": "550e8400-e29b-41d4-a716-446655440000",
+        "comic_id": "550e8400-e29b-41d4-a716-446655440000",
+        "image": {
+            "key": "comics/550e8400-e29b-41d4-a716-446655440000/comic.png",
+            "url": "https://pub-xxxx.r2.dev/comics/.../comic.png",
+            "presigned_url": "https://pub-xxxx.r2.dev/comics/...?X-Amz-Algorithm=..."
+        },
         "panels": [
             {
                 "id": 1,
-                "dialogue": "Xin chào! Tôi là nhân vật chính.",
-                "speaker": "Hero",
-                "emotion": "happy"
+                "description_vi": "Cô gái trẻ đứng trước cổng kỳ lạ phát sáng trong rừng",
+                "dialogue": "Đây là gì nhỉ? Trông kỳ lạ quá!",
+                "speaker": "Mai",
+                "emotion": "surprised"
             },
             {
                 "id": 2,
-                "dialogue": "Cuộc phiêu lưu bắt đầu thôi!",
-                "speaker": "Hero",
+                "description_vi": "Cô bước qua cổng, ánh sáng chói lọi bao quanh",
+                "dialogue": "Mình phải khám phá xem!",
+                "speaker": "Mai",
                 "emotion": "excited"
             }
-        ],
+        ]
+    },
+    "meta": {
+        "pages": 1,
+        "panelsPerPage": 6,
+        "totalPanels": 6,
         "model": {
             "llm": "google/gemini-2.5-flash",
-            "image": "cjwbw/animagine-xl-3.1"
+            "image": "google/nano-banana"
         }
     },
-    "timestamp": "2025-11-18T10:30:00.000Z"
+    "timestamp": "2025-11-27T10:30:00.000Z"
 }
 ```
 
@@ -90,41 +106,30 @@ Content-Type: multipart/form-data
         "message": "Invalid input",
         "code": "VALIDATION_ERROR",
         "details": {
-            "prompt": "prompt too short"
+            "prompt": "prompt too short (minimum 10 characters)"
         }
     },
-    "timestamp": "2025-11-18T10:30:00.000Z"
-}
-```
-
-### Error Response (500 Internal Server Error)
-
-```json
-{
-    "request_id": "req_abc123xyz",
-    "status": "error",
-    "error": {
-        "message": "Failed to generate comic",
-        "code": "PROCESSING_ERROR"
-    },
-    "timestamp": "2025-11-18T10:30:00.000Z"
+    "timestamp": "2025-11-27T10:30:00.000Z"
 }
 ```
 
 ## Response Fields
 
-| Field                | Type   | Description                                    |
-| -------------------- | ------ | ---------------------------------------------- |
-| `request_id`         | String | Unique request identifier                      |
-| `status`             | String | "success" or "error"                           |
-| `page_url`           | String | Direct URL to comic page                       |
-| `data.key`           | String | R2 storage key                                 |
-| `data.url`           | String | Public URL                                     |
-| `data.presigned_url` | String | Presigned URL (expires in 1 hour)              |
-| `meta.story_id`      | String | Unique story identifier                        |
-| `meta.panels`        | Array  | Panel information (dialogue, speaker, emotion) |
-| `meta.model.llm`     | String | LLM model used for storyboard                  |
-| `meta.model.image`   | String | Image generation model                         |
+| Field                      | Type   | Description                              |
+| -------------------------- | ------ | ---------------------------------------- |
+| `request_id`               | String | Unique request identifier                |
+| `status`                   | String | "success" or "error"                     |
+| `comic_url`                | String | Direct URL to comic image                |
+| `data.comic_id`            | String | Unique comic identifier                  |
+| `data.image.key`           | String | R2 storage key                           |
+| `data.image.url`           | String | Public URL                               |
+| `data.image.presigned_url` | String | Presigned URL (expires in 1 hour)        |
+| `data.script`              | String | Generated comic script (markdown format) |
+| `meta.pages`               | Number | Number of pages requested                |
+| `meta.panelsPerPage`       | Number | Number of panels per page                |
+| `meta.totalPanels`         | Number | Total panels (pages × panelsPerPage)     |
+| `meta.model.llm`           | String | LLM model used for script generation     |
+| `meta.model.image`         | String | Image generation model                   |
 
 ## Rate Limiting
 
@@ -134,20 +139,23 @@ Content-Type: multipart/form-data
 
 ## Examples
 
-### Basic Usage (4 panels)
+### Basic Usage (1 page, 6 panels - default)
 
 #### cURL
 
 ```bash
 curl -X POST http://localhost:3000/api/comic/generate \
-  -F "prompt=Một cô gái phát hiện ra cổng thần bí trong khu rừng"
+  -F "prompt=Một cô gái phát hiện ra cổng thần bí trong khu rừng, bước qua và gặp sinh vật kỳ lạ"
 ```
 
-#### JavaScript (Fetch)
+#### JavaScript
 
 ```javascript
 const form = new FormData();
-form.append("prompt", "Một cô gái phát hiện ra cổng thần bí trong khu rừng");
+form.append(
+    "prompt",
+    "Một cô gái phát hiện ra cổng thần bí trong khu rừng, bước qua và gặp sinh vật kỳ lạ"
+);
 
 const response = await fetch("http://localhost:3000/api/comic/generate", {
     method: "POST",
@@ -155,8 +163,9 @@ const response = await fetch("http://localhost:3000/api/comic/generate", {
 });
 
 const result = await response.json();
-console.log("Comic page:", result.page_url);
-console.log("Story ID:", result.meta.story_id);
+console.log("Comic image:", result.comic_url);
+console.log("Comic ID:", result.data.comic_id);
+console.log("Lời thoại panel 1:", result.data.panels[0].dialogue);
 ```
 
 #### Python
@@ -166,32 +175,39 @@ import requests
 
 url = "http://localhost:3000/api/comic/generate"
 form = {
-    "prompt": (None, "Một cô gái phát hiện ra cổng thần bí trong khu rừng")
+    "prompt": (None, "Một cô gái phát hiện ra cổng thần bí trong khu rừng, bước qua và gặp sinh vật kỳ lạ")
 }
 
 response = requests.post(url, files=form)
 
 result = response.json()
-print(f"Comic page: {result['page_url']}")
-print(f"Panels: {len(result['meta']['panels'])}")
+print(f"Comic image: {result['comic_url']}")
+print(f"Total panels: {result['meta']['totalPanels']}")
+for panel in result['data']['panels']:
+    print(f"Panel {panel['id']}: {panel['speaker']} - {panel['dialogue']}")
 ```
 
-### Custom Panels (2 panels)
+### Custom Configuration (2 pages, 4 panels each)
 
 #### cURL
 
 ```bash
 curl -X POST http://localhost:3000/api/comic/generate \
-  -F "prompt=Anh hùng đối mặt với quái vật khổng lồ" \
-  -F "panels=2"
+  -F "prompt=Anh hùng đối mặt với quái vật khổng lồ, chiến đấu anh dũng và giành chiến thắng" \
+  -F "pages=2" \
+  -F "panelsPerPage=4"
 ```
 
 #### JavaScript
 
 ```javascript
 const form = new FormData();
-form.append("prompt", "Anh hùng đối mặt với quái vật khổng lồ");
-form.append("panels", "2");
+form.append(
+    "prompt",
+    "Anh hùng đối mặt với quái vật khổng lồ, chiến đấu anh dũng và giành chiến thắng"
+);
+form.append("pages", "2");
+form.append("panelsPerPage", "4");
 
 const response = await fetch("http://localhost:3000/api/comic/generate", {
     method: "POST",
@@ -199,26 +215,34 @@ const response = await fetch("http://localhost:3000/api/comic/generate", {
 });
 
 const result = await response.json();
+console.log(
+    `Generated ${result.meta.pages} pages with ${result.meta.panelsPerPage} panels each`
+);
 ```
 
-### Maximum Panels (6 panels)
+### Maximum Panels (3 pages, 9 panels each)
 
 #### cURL
 
 ```bash
 curl -X POST http://localhost:3000/api/comic/generate \
-  -F "prompt=Hành trình tìm kiếm kho báu bị mất trong hang động" \
-  -F "panels=6" \
-  -F "style=anime_color"
+  -F "prompt=Hành trình tìm kiếm kho báu bị mất trong hang động nguy hiểm, gặp nhiều thử thách" \
+  -F "pages=3" \
+  -F "panelsPerPage=9" \
+  -F "style=comic book style art"
 ```
 
 #### JavaScript
 
 ```javascript
 const form = new FormData();
-form.append("prompt", "Hành trình tìm kiếm kho báu bị mất trong hang động");
-form.append("panels", "6");
-form.append("style", "anime_color");
+form.append(
+    "prompt",
+    "Hành trình tìm kiếm kho báu bị mất trong hang động nguy hiểm, gặp nhiều thử thách"
+);
+form.append("pages", "3");
+form.append("panelsPerPage", "9");
+form.append("style", "comic book style art");
 
 const response = await fetch("http://localhost:3000/api/comic/generate", {
     method: "POST",
@@ -226,22 +250,23 @@ const response = await fetch("http://localhost:3000/api/comic/generate", {
 });
 
 const result = await response.json();
-
-// Display all panel dialogues
-result.meta.panels.forEach((panel) => {
-    console.log(`Panel ${panel.id}: ${panel.speaker} - ${panel.dialogue}`);
-});
+console.log(`Total panels: ${result.meta.totalPanels}`); // 27 panels
 ```
 
-### Node.js Example
+### Node.js Example with File Download
 
 ```javascript
 import fetch from "node-fetch";
+import fs from "fs";
 
-async function generateComic() {
+async function generateAndSaveComic() {
     const form = new FormData();
-    form.append("prompt", "Câu chuyện về một ninja trẻ học võ thuật");
-    form.append("panels", "4");
+    form.append(
+        "prompt",
+        "Câu chuyện về một ninja trẻ học võ thuật từ sư phụ già"
+    );
+    form.append("pages", "1");
+    form.append("panelsPerPage", "6");
 
     const response = await fetch("http://localhost:3000/api/comic/generate", {
         method: "POST",
@@ -252,198 +277,174 @@ async function generateComic() {
 
     if (result.status === "success") {
         console.log("✅ Comic generated!");
-        console.log("Page URL:", result.page_url);
-        console.log("Story ID:", result.meta.story_id);
+        console.log("Comic URL:", result.comic_url);
+        console.log("Script preview:");
+        console.log(result.data.script.substring(0, 300) + "...");
 
-        // Download the comic page
-        const imageResponse = await fetch(result.data.presigned_url);
+        // Download the comic image
+        const imageResponse = await fetch(result.data.image.presigned_url);
         const buffer = await imageResponse.arrayBuffer();
-        // Save or process buffer...
+        fs.writeFileSync("comic.png", Buffer.from(buffer));
+        console.log("💾 Saved to comic.png");
     }
 }
 
-generateComic();
+generateAndSaveComic();
 ```
 
 ## Processing Pipeline
 
-### 1. Storyboard Generation (Gemini)
+### 1. Script Generation (Gemini)
+
+Gemini tạo script chi tiết theo format comic book chuyên nghiệp:
 
 -   Phân tích prompt của user
--   Tạo storyboard với số lượng panels yêu cầu
--   Sinh thoại tiếng Việt tự nhiên (≤ 40 ký tự)
--   Tạo prompt tags chi tiết cho từng panel
--   Xác định nhân vật, cảm xúc, góc máy
+-   Tạo script với cấu trúc: Page → Panel → Description + Dialogue
+-   Mỗi panel có: Số thứ tự, mô tả cảnh chi tiết, caption/dialogue
+-   Format markdown chuẩn comic script
 
-**Output:**
+**Example Script Output:**
 
-```json
-{
-    "story_id": "uuid",
-    "characters": [
-        {
-            "name": "Hero",
-            "role": "main",
-            "description_en": "young ninja, blue eyes"
-        }
-    ],
-    "panels": [
-        {
-            "id": 1,
-            "description_vi": "Ninja trẻ đứng trên núi cao, ánh sáng hoàng hôn",
-            "prompt_tags": "masterpiece, anime style, young ninja, mountain top, sunset lighting",
-            "dialogue": "Hành trình của tôi mới bắt đầu...",
-            "speaker": "Hero",
-            "emotion": "determined"
-        }
-    ]
-}
+```markdown
+### Page 1
+
+**Panel 1**  
+_Description:_ The cityscape gleams under a bright sun, hovercars gracefully navigating between white buildings adorned with intricate blue tech patterns.  
+_Caption:_ The day began like any other in the futuristic city of Neonexus.
+
+**Panel 2**  
+_Description:_ People in professional attire hurry along the streets, their eyes fixed on the sky.  
+_Caption:_ The citizens of Neonexus moved with purpose, unaware of the impending chaos.
+
+**Panel 3**  
+_Description:_ Kai, a young man with a determined expression, rushes towards the towering spire at the heart of the city.  
+_Kai:_ (thought bubble) "Something feels off today."
+
+[...]
 ```
 
-### 2. Image Generation (Animagine)
+### 2. Prompt Building for Nano Banana
 
-**For each panel:**
+Từ script được tạo, hệ thống xây dựng prompt cho Nano Banana:
 
--   Generate image từ prompt_tags
--   Resolution: 832x1216 (portrait ratio)
--   28 inference steps
--   Guidance scale: 7
--   Negative prompts để tránh NSFW, text, watermarks
+```
+comic book style art of [FULL SCRIPT], drawing, by Dave Stevens, by Adam Hughes,
+1940's, 1950's, hand-drawn, color, high resolution, best quality
+```
 
-**Quality settings:**
+**Features:**
 
--   Vibrant anime colors
--   Detailed backgrounds
--   No text/speech bubbles in images
--   High quality anime style
+-   Prefix style có thể tùy chỉnh (default: "comic book style art")
+-   Bao gồm toàn bộ script với chi tiết từng panel
+-   Quality suffix: drawing style, artist references, era, quality tags
 
-### 3. Page Composition
+### 3. Image Generation (Nano Banana)
 
-**Layout system:**
+**Model**: `google/nano-banana`
 
--   **1 panel**: Full page
--   **2 panels**: Side by side
--   **3-6 panels**: Grid layout
--   Page size: 1080x1620px
--   Gap between panels: 18px
+-   Input: Prompt đầy đủ với script
+-   Aspect ratio: 2:3 (portrait, phù hợp comic book)
+-   Output: Single image với layout tự động nhiều panel
 
-**Speech bubbles:**
+**Nano Banana tự động:**
 
--   Auto-generated from dialogue
--   White bubbles with black border
--   Positioned top-left of each panel
--   Speaker name included
--   Text wrapping for long dialogue
--   Max 40 characters per dialogue
+-   Phân chia layout dựa trên số panel trong script
+-   Sắp xếp panels theo thứ tự comic book (top-to-bottom, left-to-right)
+-   Thêm speech bubbles và text vào đúng vị trí
+-   Tạo comic book styling (borders, gutters, typography)
 
 ### 4. Storage & Delivery
 
--   Composite page uploaded to R2
--   Path: `comics/{story_id}/page-0.png`
+-   Image được convert sang PNG
+-   Upload lên R2 storage
+-   Path: `comics/{comic_id}/comic.png`
 -   Presigned URL expires in 1 hour
--   PNG format for quality
+-   PNG format for best quality
 
 ## Processing Time
 
--   **2 panels**: 60-90 seconds
--   **4 panels**: 90-150 seconds
--   **6 panels**: 150-240 seconds
+-   **1 page, 3-6 panels**: 40-90 seconds
+-   **2 pages, 6 panels each**: 60-120 seconds
+-   **3 pages, 9 panels each**: 90-180 seconds
 
-_Time includes: storyboard generation + image generation for all panels + composition_
+_Time includes: script generation + prompt building + Nano Banana image generation + upload_
 
 ## Panel Configuration
 
-### 1 Panel
+### Recommended Configurations
 
--   Best for: Title pages, splash pages
--   Layout: Full page single image
+#### Quick Story (1 page, 3-4 panels)
 
-### 2 Panels
+-   Best for: Simple stories, short sequences
+-   Processing time: ~40-60 seconds
 
--   Best for: Before/after, dialogue scenes
--   Layout: Side by side
+#### Standard Comic (1 page, 6 panels) - **Default**
 
-### 3 Panels
+-   Best for: Complete short stories
+-   Processing time: ~60-90 seconds
 
--   Best for: Quick action sequences
--   Layout: Grid (usually 1x3 or 2x2)
+#### Extended Story (2 pages, 4-6 panels each)
 
-### 4 Panels (Recommended)
+-   Best for: Medium-length narratives
+-   Processing time: ~80-120 seconds
 
--   Best for: Standard storytelling
--   Layout: 2x2 grid
--   Balanced composition
+#### Epic Tale (3 pages, 6-9 panels each)
 
-### 5 Panels
-
--   Best for: Detailed sequences
--   Layout: Mixed grid
-
-### 6 Panels (Maximum)
-
--   Best for: Complex stories
--   Layout: 2x3 or 3x2 grid
--   More detailed narrative
+-   Best for: Complex stories with multiple acts
+-   Processing time: ~120-180 seconds
 
 ## Prompt Writing Tips
 
-### Good Prompts
+### Excellent Prompts ✅
 
-✅ **Story-focused:**
+**Story-focused with clear progression:**
 
--   "Một phù thủy trẻ khám phá thư viện ma thuật"
--   "Chiến binh đối đầu với rồng trong hang động lửa"
--   "Cô gái robot tìm kiếm ký ức bị mất"
+-   "Một phù thủy trẻ khám phá thư viện ma thuật, tìm thấy cuốn sách cổ, triệu hồi rồng và trở thành bạn"
+-   "Chiến binh đối đầu với rồng trong hang động lửa, chiến đấu dũng cảm, cuối cùng giành chiến thắng"
+-   "Cô gái robot tỉnh dậy, tìm kiếm ký ức bị mất, gặp người tạo ra mình, khám phá sự thật đau lòng"
 
-✅ **Clear setting:**
+**Clear setting and character:**
 
--   "Trong tương lai cyberpunk, hacker trẻ..."
--   "Tại làng ninja ẩn mình, học trò phát hiện..."
+-   "Trong tương lai cyberpunk, hacker trẻ xâm nhập hệ thống tập đoàn, phát hiện âm mưu, phải chạy trốn"
+-   "Tại làng ninja ẩn mình, học trò phát hiện sư phụ là kẻ phản bội, phải đối đầu để cứu làng"
 
-✅ **Character-driven:**
+**Action and emotion:**
 
--   "Hai anh em sinh đôi chia tay ở ngã tư đường"
--   "Nữ hiệp sĩ bảo vệ làng khỏi quái vật"
+-   "Hai anh em sinh đôi chia tay ở ngã tư đường, gặp lại sau 10 năm, ôm nhau khóc"
+-   "Nữ hiệp sĩ bảo vệ làng khỏi quái vật, bị thương nặng nhưng không từ bỏ"
 
-### Avoid
+### Prompts to Avoid ❌
 
-❌ **Too vague:**
+**Too vague:**
 
--   "Một câu chuyện hay"
--   "Vẽ ảnh anime"
+-   "Một câu chuyện hay" → Không đủ chi tiết
+-   "Vẽ ảnh đẹp" → Không có narrative
 
-❌ **Too complex:**
+**Too short:**
 
--   Prompts > 200 từ với quá nhiều chi tiết
--   Quá nhiều nhân vật (tốt nhất 1-3 nhân vật)
+-   "Con mèo dễ thương" → Minimum 10 characters, cần story
+-   "Phong cảnh đẹp" → Not a story
 
-❌ **Not story-like:**
+**Too complex:**
 
--   "Con mèo dễ thương"
--   "Phong cảnh đẹp"
+-   Prompts > 500 từ với quá nhiều chi tiết → Gemini sẽ tự tóm tắt
+-   Quá nhiều nhân vật (>5) → Khó maintain consistency
 
 ## Use Cases
 
-### Storytelling
+### Entertainment
 
 -   Quick comic stories
 -   Visual narratives
--   Character introductions
+-   Fan fiction visualization
 -   Story prototypes
 
 ### Content Creation
 
--   Social media content
+-   Social media comics
 -   Blog illustrations
 -   Educational comics
 -   Tutorial sequences
-
-### Entertainment
-
--   Short comic strips
--   Meme comics
--   Fan fiction visualization
--   Creative writing aids
 
 ### Marketing
 
@@ -452,180 +453,235 @@ _Time includes: storyboard generation + image generation for all panels + compos
 -   Explainer comics
 -   Advertisement storyboards
 
+### Creative Writing
+
+-   Story visualization
+-   Character development
+-   Plot planning
+-   Scene composition
+
 ## Technical Details
 
 ### AI Models
 
 **Gemini 2.5 Flash:**
 
--   Purpose: Storyboard generation
--   Temperature: 0.25 (more consistent)
--   Max tokens: 5000
--   Output: Structured JSON
+-   Purpose: Script generation
+-   Temperature: 0.3 (balanced creativity/consistency)
+-   Max tokens: 8000
+-   Output: Structured comic script in markdown
 
-**Animagine XL 3.1:**
+**Google Nano Banana:**
 
--   Purpose: Anime image generation
--   Steps: 28
--   Guidance: 7
--   Resolution: 832x1216
--   Negative prompts: NSFW, text, logos, watermarks
+-   Purpose: Comic image generation
+-   Aspect ratio: 2:3 (portrait comic book format)
+-   Auto-layout: Multiple panels with proper spacing
+-   Built-in: Speech bubbles, text, comic styling
 
-### Layout Engine
+### Image Output
 
--   Smart grid layout based on panel count
--   Maintains aspect ratios
--   Equal spacing with 18px gaps
--   Responsive panel sizing
-
-### Speech Bubbles
-
--   SVG-based rendering
--   Auto text wrapping
--   Max line length: calculated dynamically
--   Font: Arial (web-safe)
--   Font size: 18px
+-   Format: PNG
+-   Aspect ratio: 2:3 (portrait)
+-   Size: Optimized by Nano Banana (typically 1024x1536 or similar)
+-   Quality: High resolution, suitable for web and print
+-   File size: ~2-8MB depending on complexity
 
 ### Storage
 
--   Format: PNG
--   Composite page size: ~2-5MB
--   Storage path: `comics/{story_id}/page-0.png`
--   R2 presigned URLs (1 hour expiry)
+-   Storage: Cloudflare R2
+-   Path pattern: `comics/{comic_id}/comic.png`
+-   Presigned URLs: 1 hour expiry
+-   Public URLs: Available if R2 public access enabled
 
 ## Error Handling
 
 ### Automatic Retry
 
--   Replicate API calls: 2 retries
--   Exponential backoff (600ms base)
--   Factor: 2x
+-   Gemini API calls: 2 retries
+-   Nano Banana API calls: 2 retries
+-   Exponential backoff (600ms base, 2x factor)
+-   Image download: 30 second timeout per attempt
 
-### Fallback Storyboard
+### Fallback Behavior
 
-If Gemini fails to return valid JSON:
+If script generation partially fails:
 
--   System generates basic storyboard
--   Uses user prompt for all panels
--   Generic dialogue placeholders
--   Continues with image generation
-
-### Image Fetch Timeout
-
--   Default: 20 seconds per image
--   Configurable via `HTTP_TIMEOUT_MS`
+-   System uses user prompt directly in Nano Banana
+-   May result in simpler comic structure
 
 ## Best Practices
 
-### Prompt Writing
+### Prompt Writing ✅
 
-✅ **DO:**
+**DO:**
 
--   Write in Vietnamese for natural dialogue
--   Focus on story/action
--   Specify setting/mood
--   Keep prompts 10-100 words
--   Include character descriptions
+-   Write story with beginning, middle, end
+-   Include character emotions and actions
+-   Specify setting and mood
+-   Keep prompts 20-200 words
+-   Focus on visual storytelling
 
-❌ **DON'T:**
+**DON'T:**
 
--   Write extremely long prompts
--   Include too many characters (>3)
--   Request specific art styles contradicting anime
+-   Write non-narrative prompts
 -   Include NSFW content
+-   Expect specific art styles that conflict with comic book format
+-   Rely on extremely detailed art direction
 
-### Panel Selection
+### API Usage ✅
 
--   **2 panels**: Simple dialogues
--   **4 panels**: Standard stories (recommended)
--   **6 panels**: Complex narratives
+**DO:**
 
-### API Usage
+-   Cache results using `comic_id`
+-   Download and store comic images
+-   Use `request_id` for debugging
+-   Handle processing times gracefully (40-180 seconds)
 
-✅ **DO:**
+**DON'T:**
 
--   Cache results using story_id
--   Download and store comic pages
--   Use request_id for debugging
--   Handle long processing times (2-4 minutes)
-
-❌ **DON'T:**
-
--   Rely on presigned URLs long-term
+-   Rely on presigned URLs long-term (1 hour expiry)
 -   Request same story multiple times
--   Ignore processing time warnings
+-   Ignore rate limits
+
+### Configuration Selection ✅
+
+**For short stories** (1-2 min read):
+
+-   `pages: 1, panelsPerPage: 3-6`
+
+**For medium stories** (3-5 min read):
+
+-   `pages: 1-2, panelsPerPage: 6-9`
+
+**For long stories** (5+ min read):
+
+-   `pages: 2-3, panelsPerPage: 6-9`
 
 ## Limitations
 
 ### Current Limitations
 
--   Single page output only
--   Maximum 6 panels per page
--   Vietnamese dialogue only (storyboard)
--   Anime style only
--   No custom character persistence across requests
+-   Maximum 3 pages per request
+-   Maximum 9 panels per page (27 panels total)
+-   Aspect ratio locked to 2:3 (portrait)
+-   Comic book style only (via Nano Banana)
+-   Single image output (not individual panels)
 
 ### Content Restrictions
 
--   NSFW content filtered
--   No text/logos in generated images
--   No copyrighted characters (may vary)
+-   NSFW content may be filtered by model
+-   Copyrighted characters not guaranteed
+-   Text in non-Latin scripts may have quality issues
 
 ## Error Codes
 
-| Code                  | HTTP Status | Description              | Solution                                  |
-| --------------------- | ----------- | ------------------------ | ----------------------------------------- |
-| `VALIDATION_ERROR`    | 400         | Invalid input parameters | Check prompt length (≥5) and panels (1-6) |
-| `PROCESSING_ERROR`    | 400         | Comic generation failed  | Retry with different prompt               |
-| `RATE_LIMIT_EXCEEDED` | 429         | Too many requests        | Wait and retry                            |
-| `INTERNAL_ERROR`      | 500         | Server error             | Contact support with request_id           |
+| Code                  | HTTP Status | Description              | Solution                                                    |
+| --------------------- | ----------- | ------------------------ | ----------------------------------------------------------- |
+| `VALIDATION_ERROR`    | 400         | Invalid input parameters | Check prompt length (≥10), pages (1-3), panelsPerPage (3-9) |
+| `PROCESSING_ERROR`    | 400         | Comic generation failed  | Retry with different prompt or configuration                |
+| `RATE_LIMIT_EXCEEDED` | 429         | Too many requests        | Wait and retry after cooldown period                        |
+| `INTERNAL_ERROR`      | 500         | Server error             | Contact support with `request_id`                           |
 
 ## Troubleshooting
 
 ### Comic generation timeout
 
--   Reduce number of panels
+**Symptoms:** Request takes > 3 minutes
+**Solutions:**
+
+-   Reduce `pages` count
+-   Reduce `panelsPerPage` count
 -   Simplify prompt
 -   Retry during off-peak hours
 
 ### Poor quality results
 
--   Make prompt more specific
--   Add setting/mood details
--   Try different panel counts
+**Symptoms:** Comic doesn't match story well
+**Solutions:**
 
-### Dialogue too long/cut off
+-   Make prompt more descriptive and story-focused
+-   Add more details about characters and setting
+-   Specify emotions and actions clearly
+-   Try different `panelsPerPage` configuration
 
--   Keep prompts concise
--   Let AI generate dialogue (don't force long text)
--   System auto-wraps at 40 chars
+### Script too long/complex
 
-### Images don't match story
+**Symptoms:** Generated script is overwhelming
+**Solutions:**
 
--   Make prompt more descriptive
--   Include character details
--   Specify setting clearly
+-   Reduce `pages` or `panelsPerPage`
+-   Simplify user prompt
+-   Focus on core story elements
+
+### Image download fails
+
+**Symptoms:** Presigned URL doesn't work
+**Solutions:**
+
+-   URLs expire after 1 hour - download immediately
+-   Use public URL if available
+-   Regenerate if needed
 
 ## Support
 
 For issues or questions:
 
-1. Check prompt meets minimum requirements
-2. Verify panel count is 1-6
-3. Review error messages and request_id
-4. Ensure Gemini and Animagine API keys configured
+1. Check prompt meets minimum requirements (≥10 characters)
+2. Verify configuration is within limits
+3. Review error messages and `request_id`
+4. Ensure Gemini and Replicate API keys configured
 5. Check R2 storage credentials
+6. Verify Nano Banana model access
 
 ## Changelog
 
-### v1.0.0 (Current)
+### v2.0.0 (Current - Hybrid Nano Banana + Vietnamese)
+
+-   **NEW**: Hybrid approach - Nano Banana + Vietnamese overlay
+-   **NEW**: Lời thoại tiếng Việt tự nhiên từ Gemini
+-   **NEW**: SVG speech bubbles tiếng Việt overlay
+-   **NEW**: Multi-page support (1-3 pages)
+-   **NEW**: Configurable panels per page (3-9)
+-   **IMPROVED**: Layout đẹp từ Nano Banana
+-   **IMPROVED**: Lời thoại tiếng Việt dễ đọc
+-   **IMPROVED**: Font hỗ trợ tiếng Việt (Noto Sans)
+-   **PERFECT FOR**: Thị trường Việt Nam 🇻🇳
+
+### v1.0.0 (Legacy - Animagine)
 
 -   Gemini 2.5 Flash for storyboard
--   Animagine XL 3.1 for image generation
--   1-6 panels support
--   Vietnamese dialogue support
--   Auto speech bubbles
--   Smart grid layout
--   R2 storage integration
--   Presigned URL delivery
--   Rate limiting (60 req/min)
+-   Animagine XL 3.1 for individual panels
+-   Custom panel composition
+-   1-6 panels support (single page only)
+
+## Migration from v1.0.0
+
+If you were using the old API:
+
+**Old API:**
+
+```javascript
+{
+  prompt: "Story here",
+  panels: 4,  // ❌ Removed
+  style: "anime_color"  // ❌ Changed
+}
+```
+
+**New API:**
+
+```javascript
+{
+  prompt: "Story here",
+  pages: 1,  // ✅ New
+  panelsPerPage: 6,  // ✅ New (similar to old 'panels')
+  style: "comic book style art"  // ✅ New default
+}
+```
+
+**Response changes:**
+
+-   `page_url` → `comic_url`
+-   `story_id` → `comic_id`
+-   Added: `data.script` (full generated script)
+-   Removed: Individual panel data
