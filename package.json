@@ -6,9 +6,7 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "dev": "nodemon --watch src --ext js,json --exec \"node src/server.js\" | pino-pretty",
-        "start": "node src/server.js",
-        "build": "echo 'No build step required'",
-        "postinstall": "npm rebuild @napi-rs/canvas --build-from-source || echo 'Canvas rebuild failed, using fallback'"
+        "start": "node src/server.js"
     },
     "keywords": [],
     "author": "",
@@ -17,7 +15,6 @@
     "dependencies": {
         "@aws-sdk/client-s3": "^3.922.0",
         "@aws-sdk/s3-request-presigner": "^3.922.0",
-        "@napi-rs/canvas": "^0.1.63",
         "compression": "^1.8.1",
         "cors": "^2.8.5",
         "dotenv": "^17.2.3",
