@@ -6,7 +6,6 @@
 
 ## 📋 Table of Contents
 
--   [Authentication](#authentication)
 -   [Rate Limiting](#rate-limiting)
 -   [Response Format](#response-format)
 -   [Error Handling](#error-handling)

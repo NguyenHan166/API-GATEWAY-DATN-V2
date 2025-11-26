@@ -6,8 +6,6 @@ import { errorHandler } from "./middlewares/error.js";
 import { requestId } from "./middlewares/requestId.js";
 import { PERF } from "./config/perf.js";
 import { getManifestCached } from "./features/manifest/manifest.service.js";
-import { metrics } from "./utils/metrics.js";
-import { resultCache } from "./utils/cache.js";
 import cors from "cors";
 
 export function createApp() {
@@ -30,17 +28,6 @@ export function createApp() {
 
     // Health
     app.get("/health", (_req, res) => res.json({ ok: true }));
-
-    // Metrics endpoint
-    app.get("/metrics", (_req, res) => {
-        const summary = metrics.getSummary();
-        const cacheStats = resultCache.stats;
-
-        res.json({
-            ...summary,
-            cache: cacheStats,
-        });
-    });
 
     // Routes
     app.use("/api", api);

@@ -1,3 +1,4 @@
+import sharp from "sharp";
 import { replicate } from "../../integrations/replicate/client.js";
 import { withRetry } from "../../utils/retry.js";
 import { withReplicateLimiter } from "../../utils/limiters.js";
@@ -6,11 +7,27 @@ import {
     getImageUrl,
     // presignGetUrl, // <- KHÔNG CẦN cho input nữa
 } from "../../integrations/r2/storage.service.js";
-import { prescaleImage } from "../../utils/image.js";
 import { PERF } from "../../config/perf.js";
 
 const MODEL =
     "zsxkib/ic-light:d41bcb10d8c159868f4cfbd7c6a2ca01484f7d39e4613419d5952c61562f1ba7";
+
+// Hạ size ảnh để tránh timeout/chi phí
+async function preScale(buffer) {
+    const meta = await sharp(buffer).metadata();
+    if (!meta.width || !meta.height) return buffer;
+    const maxSide = Math.max(meta.width, meta.height);
+    if (maxSide <= PERF.image.maxSidePx) return buffer;
+
+    const scale = PERF.image.maxSidePx / maxSide;
+    const W = Math.round((meta.width || 0) * scale);
+    const H = Math.round((meta.height || 0) * scale);
+    // nén nhẹ để nhỏ hơn khi upload
+    return sharp(buffer)
+        .resize(W, H, { fit: "inside" })
+        .jpeg({ quality: 92 })
+        .toBuffer();
+}
 
 // tải nhị phân nếu client đưa image_url
 async function fetchBinary(url, timeoutMs = PERF.http.timeoutMs) {
@@ -69,9 +86,7 @@ export async function icLightRelight(p) {
     const inputBuffer = fileBuffer
         ? fileBuffer
         : await fetchBinary(imageUrl, PERF.http.timeoutMs);
-    const { buffer: preprocessed } = await prescaleImage(inputBuffer, {
-        format: "jpeg",
-    });
+    const preprocessed = await preScale(inputBuffer);
 
     const inputPayload = {
         subject_image: preprocessed, // Buffer directly
@@ -90,14 +105,12 @@ export async function icLightRelight(p) {
 
     const prediction = await withRetry(
         () =>
-            withReplicateLimiter(
-                () =>
-                    replicate.predictions.create({
-                        version: MODEL,
-                        input: inputPayload,
-                    }),
-                "heavy"
-            ), // Heavy model - slow IC-Light
+            withReplicateLimiter(() =>
+                replicate.predictions.create({
+                    version: MODEL,
+                    input: inputPayload,
+                })
+            ),
         {
             retries: PERF.retry.retries,
             factor: PERF.retry.factor,
@@ -123,12 +136,12 @@ export async function icLightRelight(p) {
     }
 
     // 7) Xử lý output (mảng URL) -> tải về -> upload R2 -> presign kết quả
-    // PARALLEL UPLOAD: Upload all outputs simultaneously instead of sequentially
     const outList = Array.isArray(final.output) ? final.output : [final.output];
     if (!outList?.length) throw new Error("Empty output from model");
 
-    const uploadPromises = outList.map(async (url, i) => {
-        const resultResp = await fetch(url);
+    const afterUrls = [];
+    for (let i = 0; i < outList.length; i++) {
+        const resultResp = await fetch(outList[i]);
         if (!resultResp.ok)
             throw new Error(`Fetch output failed: ${resultResp.status}`);
         const resultBuffer = Buffer.from(await resultResp.arrayBuffer());
@@ -155,10 +168,9 @@ export async function icLightRelight(p) {
         });
 
         // Trả public URL cho FE
-        return await getImageUrl(uploaded.key, 3600);
-    });
-
-    const afterUrls = await Promise.all(uploadPromises);
+        const signed = await getImageUrl(uploaded.key, 3600);
+        afterUrls.push(signed);
+    }
 
     return {
         // Không còn before_url từ R2 trong phương án B; nếu cần vẫn có thể trả lại link tạm của Replicate để debug

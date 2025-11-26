@@ -12,31 +12,16 @@ export function makeLimiter(n = 4) {
 }
 
 /**
- * Replicate concurrency limiters by model type
- * - light: Fast models (Real-ESRGAN, GFPGAN) - 8 concurrent
- * - heavy: Slow models (IC-Light, FLUX) - 4 concurrent
- * - comic: Story generation (Gemini + Animagine) - 2 concurrent
+ * Concurrency cho các job nặng (Replicate, model lớn).
+ * Bạn có thể đọc từ PERF.concurrency.replicate hoặc ENV nếu muốn.
  */
-const REPLICATE_LIMITS = {
-    light: pLimit(Math.max(1, PERF.concurrency.replicateLight)),
-    heavy: pLimit(Math.max(1, PERF.concurrency.replicateHeavy)),
-    comic: pLimit(Math.max(1, PERF.concurrency.replicateComic)),
-};
+const MAX_CONCURRENCY = Number(process.env.REPLICATE_CONCURRENCY || 2);
+const replicateLimiter = pLimit(Math.max(1, MAX_CONCURRENCY));
 
 /**
- * Wrap a task with Replicate limiter by model type
- * @param {Function} taskFn - Async function to execute
- * @param {string} type - Model type: 'light' | 'heavy' | 'comic' (default: 'light')
- * @returns {Promise} - Task result
- *
- * @example
- * // Light models (fast)
- * await withReplicateLimiter(() => replicate.run(MODEL, ...), 'light');
- *
- * // Heavy models (slow)
- * await withReplicateLimiter(() => replicate.run(MODEL, ...), 'heavy');
+ * Gói một tác vụ vào limiter cho Replicate.
+ * Ví dụ: await withReplicateLimiter(() => doSomething());
  */
-export async function withReplicateLimiter(taskFn, type = "light") {
-    const limiter = REPLICATE_LIMITS[type] || REPLICATE_LIMITS.light;
-    return limiter(taskFn);
+export async function withReplicateLimiter(taskFn) {
+    return replicateLimiter(taskFn);
 }

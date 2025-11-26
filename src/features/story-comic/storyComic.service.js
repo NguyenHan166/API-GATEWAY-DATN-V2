@@ -207,21 +207,19 @@ async function runAnimagine({ prompt, seed, requestId }) {
 
     return withRetry(
         () =>
-            withReplicateLimiter(
-                () =>
-                    replicate.run(ANIMAGINE_MODEL, {
-                        input: {
-                            prompt,
-                            negative_prompt: DEFAULT_NEGATIVE_PROMPT,
-                            width: 832,
-                            height: 1216,
-                            num_inference_steps: 28,
-                            guidance_scale: 7,
-                            ...(Number.isFinite(seed) ? { seed } : {}),
-                        },
-                    }),
-                "comic"
-            ), // Comic model - story generation
+            withReplicateLimiter(() =>
+                replicate.run(ANIMAGINE_MODEL, {
+                    input: {
+                        prompt,
+                        negative_prompt: DEFAULT_NEGATIVE_PROMPT,
+                        width: 832,
+                        height: 1216,
+                        num_inference_steps: 28,
+                        guidance_scale: 7,
+                        ...(Number.isFinite(seed) ? { seed } : {}),
+                    },
+                })
+            ),
         {
             ...retryOpts,
             beforeRetry: ({ attempt }) =>
