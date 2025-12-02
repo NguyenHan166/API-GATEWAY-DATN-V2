@@ -1,4 +1,10 @@
 import { z } from "zod";
+import {
+    DEFAULT_QUALITY_SELECTOR,
+    DEFAULT_STYLE_SELECTOR,
+    QUALITY_SELECTOR_OPTIONS,
+    STYLE_SELECTOR_OPTIONS,
+} from "./storyComic.constants.js";
 
 const GenerateRequestSchema = z.object({
     prompt: z.string().min(8, "prompt too short"),
@@ -14,6 +20,12 @@ const GenerateRequestSchema = z.object({
         .min(3, "panels per page must be 3 or 4")
         .max(4, "panels per page must be 3 or 4")
         .default(4),
+    style_selector: z
+        .enum(STYLE_SELECTOR_OPTIONS)
+        .default(DEFAULT_STYLE_SELECTOR),
+    quality_selector: z
+        .enum(QUALITY_SELECTOR_OPTIONS)
+        .default(DEFAULT_QUALITY_SELECTOR),
 });
 
 export function parseStoryComicBody(body) {

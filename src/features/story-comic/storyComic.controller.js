@@ -22,6 +22,8 @@ export const storyComicController = {
                 prompt: parsed.value.prompt,
                 pages: parsed.value.pages,
                 panelsPerPage: parsed.value.panels_per_page,
+                styleSelector: parsed.value.style_selector,
+                qualitySelector: parsed.value.quality_selector,
                 requestId: req.id,
             });
 

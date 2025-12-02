@@ -7,29 +7,28 @@ const GAP = 24;
 
 function layoutForPanels(count) {
     if (count === 3) {
-        const topHeight = Math.round(PAGE_HEIGHT * 0.55);
-        const bottomHeight =
-            (PAGE_HEIGHT - topHeight - GAP * 3) / 2 > 0
-                ? Math.round((PAGE_HEIGHT - topHeight - GAP * 3) / 2)
-                : Math.round((PAGE_HEIGHT - GAP * 4) / 3);
+        // Layout: left column has two stacked panels, right column one tall panel
+        const leftWidth = Math.floor((PAGE_WIDTH - GAP * 3) * 0.44);
+        const rightWidth = PAGE_WIDTH - leftWidth - GAP * 3;
+        const stackedHeight = Math.floor((PAGE_HEIGHT - GAP * 3) / 2);
         return [
             {
                 x: GAP,
                 y: GAP,
-                width: PAGE_WIDTH - GAP * 2,
-                height: topHeight - GAP,
+                width: leftWidth,
+                height: stackedHeight,
             },
             {
                 x: GAP,
-                y: topHeight + GAP,
-                width: (PAGE_WIDTH - GAP * 3) / 2,
-                height: bottomHeight,
+                y: GAP * 2 + stackedHeight,
+                width: leftWidth,
+                height: stackedHeight,
             },
             {
-                x: GAP * 2 + (PAGE_WIDTH - GAP * 3) / 2,
-                y: topHeight + GAP,
-                width: (PAGE_WIDTH - GAP * 3) / 2,
-                height: bottomHeight,
+                x: GAP * 2 + leftWidth,
+                y: GAP,
+                width: rightWidth,
+                height: PAGE_HEIGHT - GAP * 2,
             },
         ];
     }
@@ -214,12 +213,18 @@ function speechBubbleSvg({ text, width, height }) {
 async function renderWithSharp({ panels }) {
     const layout = layoutForPanels(panels.length);
     const composites = [];
+    const isThreePanel = panels.length === 3;
 
     panels.forEach((panel, idx) => {
         const cell = layout[idx] || layout[layout.length - 1];
+        const useContain = isThreePanel && idx === 0;
         composites.push({
             input: sharp(panel.imageBuffer)
-                .resize(cell.width, cell.height, { fit: "cover" })
+                .resize(cell.width, cell.height, {
+                    fit: useContain ? "contain" : "cover",
+                    background: { r: 248, g: 248, b: 246, alpha: 1 },
+                    position: "center",
+                })
                 .png()
                 .toBuffer(),
             left: Math.round(cell.x),

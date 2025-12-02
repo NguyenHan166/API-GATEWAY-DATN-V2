@@ -22,11 +22,13 @@ Content-Type: application/json
 
 ### Body Parameters
 
-| Parameter         | Type   | Required | Description                                 | Default |
-| ----------------- | ------ | -------- | ------------------------------------------- | ------- |
-| `prompt`          | String | ✅       | Mô tả câu chuyện (≥ 8 ký tự)                | -       |
-| `pages`           | Number | ❌       | 2 hoặc 3 trang                              | `3`     |
-| `panels_per_page` | Number | ❌       | 3 hoặc 4 panel mỗi trang                    | `4`     |
+| Parameter          | Type   | Required | Description                                                                 | Default          |
+| ------------------ | ------ | -------- | --------------------------------------------------------------------------- | ---------------- |
+| `prompt`           | String | ✅       | Mô tả câu chuyện (≥ 8 ký tự)                                                | -                |
+| `pages`            | Number | ❌       | 2 hoặc 3 trang                                                              | `3`              |
+| `panels_per_page`  | Number | ❌       | 3 hoặc 4 panel mỗi trang                                                    | `4`              |
+| `style_selector`   | Enum   | ❌       | Preset style của Animagine: `(None)`, `Cinematic`, `Photographic`, `Anime`, `Manga`, `Digital Art`, `Pixel art`, `Fantasy art`, `Neonpunk`, `3D Model` | `(None)`         |
+| `quality_selector` | Enum   | ❌       | Preset quality tag: `(None)`, `Standard v3.0`, `Standard v3.1`, `Light v3.1`, `Heavy v3.1`                            | `Standard v3.1`  |
 
 ### Constraints
 
@@ -42,7 +44,9 @@ curl -X POST http://localhost:3000/api/story-comic/generate \
   -d '{
         "prompt": "Một nữ sinh nhút nhát gặp mèo phép thuật trong đêm mưa ở Tokyo",
         "pages": 3,
-        "panels_per_page": 4
+        "panels_per_page": 4,
+        "style_selector": "Anime",
+        "quality_selector": "Standard v3.1"
       }'
 ```
 
@@ -82,7 +86,9 @@ curl -X POST http://localhost:3000/api/story-comic/generate \
     ],
     "model": {
       "llm": "google/gemini-2.5-flash",
-      "image": "cjwbw/animagine-xl-3.1"
+      "image": "cjwbw/animagine-xl-3.1",
+      "style_selector": "Anime",
+      "quality_selector": "Standard v3.1"
     }
   }
 }

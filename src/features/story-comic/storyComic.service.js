@@ -12,6 +12,12 @@ import {
     generateOutlineWithGemini,
     generatePageStoryboard,
 } from "./storyComic.llm.js";
+import {
+    DEFAULT_QUALITY_SELECTOR,
+    DEFAULT_STYLE_SELECTOR,
+    QUALITY_SELECTOR_OPTIONS,
+    STYLE_SELECTOR_OPTIONS,
+} from "./storyComic.constants.js";
 import { renderComicPage } from "./storyComic.renderer.js";
 import { PERF } from "../../config/perf.js";
 import { logger } from "../../config/logger.js";
@@ -50,6 +56,27 @@ function normalizeEmotion(value) {
     const allowed = ["happy", "sad", "angry", "surprised", "neutral"];
     const lower = String(value || "").toLowerCase();
     return allowed.includes(lower) ? lower : "neutral";
+}
+
+function normalizeSelector(value, allowed, fallback) {
+    const raw = (value || "").toString().trim();
+    return allowed.includes(raw) ? raw : fallback;
+}
+
+function normalizeStyleSelector(value) {
+    return normalizeSelector(
+        value,
+        STYLE_SELECTOR_OPTIONS,
+        DEFAULT_STYLE_SELECTOR
+    );
+}
+
+function normalizeQualitySelector(value) {
+    return normalizeSelector(
+        value,
+        QUALITY_SELECTOR_OPTIONS,
+        DEFAULT_QUALITY_SELECTOR
+    );
 }
 
 function normalizeOutlineBeats(outline, pages, prompt) {
@@ -198,7 +225,13 @@ async function resolveOutputBuffer(output) {
     return Buffer.from(first);
 }
 
-async function runAnimagine({ prompt, seed, requestId }) {
+async function runAnimagine({
+    prompt,
+    seed,
+    requestId,
+    styleSelector,
+    qualitySelector,
+}) {
     const retryOpts = {
         retries: PERF.retry?.retries ?? 2,
         baseDelayMs: PERF.retry?.minTimeoutMs ?? 600,
@@ -216,6 +249,8 @@ async function runAnimagine({ prompt, seed, requestId }) {
                         height: 1216,
                         num_inference_steps: 28,
                         guidance_scale: 7,
+                        style_selector: styleSelector,
+                        quality_selector: qualitySelector,
                         ...(Number.isFinite(seed) ? { seed } : {}),
                     },
                 })
@@ -231,7 +266,10 @@ async function runAnimagine({ prompt, seed, requestId }) {
     );
 }
 
-async function generatePanelsImages(panels, { pageIndex, requestId }) {
+async function generatePanelsImages(
+    panels,
+    { pageIndex, requestId, styleSelector, qualitySelector }
+) {
     const retryOpts = {
         retries: 2,
         baseDelayMs: 800,
@@ -245,7 +283,13 @@ async function generatePanelsImages(panels, { pageIndex, requestId }) {
             : undefined;
 
         const buildPanel = async () => {
-            const output = await runAnimagine({ prompt, seed, requestId });
+            const output = await runAnimagine({
+                prompt,
+                seed,
+                requestId,
+                styleSelector,
+                qualitySelector,
+            });
             const buffer = await resolveOutputBuffer(output);
             return {
                 ...panel,
@@ -282,6 +326,8 @@ export async function generateStoryComic({
     prompt,
     pages,
     panelsPerPage,
+    styleSelector,
+    qualitySelector,
     requestId,
 }) {
     const outlineResp = await generateOutlineWithGemini({
@@ -289,6 +335,9 @@ export async function generateStoryComic({
         pages,
         requestId,
     });
+
+    const selectedStyle = normalizeStyleSelector(styleSelector);
+    const selectedQuality = normalizeQualitySelector(qualitySelector);
 
     const storyId = outlineResp.story_id || makeStoryId(prompt);
     const outline = normalizeOutlineBeats(outlineResp.outline, pages, prompt);
@@ -315,6 +364,8 @@ export async function generateStoryComic({
         const renderedPanels = await generatePanelsImages(normalizedPanels, {
             pageIndex,
             requestId,
+            styleSelector: selectedStyle,
+            qualitySelector: selectedQuality,
         });
         const pageBuffer = await renderComicPage({
             storyId,
@@ -356,7 +407,12 @@ export async function generateStoryComic({
             requestId,
             storyId,
             pages: results.length,
-            model: { llm: LLM_MODEL, image: ANIMAGINE_MODEL },
+            model: {
+                llm: LLM_MODEL,
+                image: ANIMAGINE_MODEL,
+                style_selector: selectedStyle,
+                quality_selector: selectedQuality,
+            },
         },
         "Generated story comic (multi-page)"
     );
@@ -367,7 +423,12 @@ export async function generateStoryComic({
         meta: {
             outline,
             pages: metaPages,
-            model: { llm: LLM_MODEL, image: ANIMAGINE_MODEL },
+            model: {
+                llm: LLM_MODEL,
+                image: ANIMAGINE_MODEL,
+                style_selector: selectedStyle,
+                quality_selector: selectedQuality,
+            },
         },
     };
 }
