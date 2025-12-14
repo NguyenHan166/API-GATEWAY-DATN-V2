@@ -266,12 +266,11 @@ Text-guided relighting cho ảnh chân dung
 **Request Parameters**:
 | Parameter | Type | Required | Description | Default |
 | ------------------- | ------ | -------- | ---------------------------------------------------- | ----------------------------------------------- |
-| `image` | File | ❌* | File ảnh (JPEG, PNG, WebP) | - |
-| `image_url` | String | ❌* | URL của ảnh | - |
+| `image` | File | ✅ | File ảnh (JPEG, PNG, WebP) | - |
 | `prompt` | String | ✅ | Mô tả ánh sáng mong muốn | `"studio soft light, flattering portrait lighting"` |
 | `appended_prompt` | String | ❌ | Text thêm vào cuối prompt | `"best quality"` |
 | `negative_prompt` | String | ❌ | Mô tả những gì muốn tránh | `"lowres, bad anatomy, bad hands, cropped, worst quality"` |
-| `light_source` | String | ❌ | `"None"`, `"Left Light"`, `"Right Light"`, `"Top Light"`, `"Bottom Light"` | `"None"` |
+| `light_source` | String | ✅ | `"None"`, `"Left Light"`, `"Right Light"`, `"Top Light"`, `"Bottom Light"` | `"None"` |
 | `steps` | Number | ❌ | Số steps inference (1-100) | `25` |
 | `cfg` | Number | ❌ | Guidance scale (1-32) | `2` |
 | `width` | Number | ❌ | Chiều rộng output (256-1024, step 64) | Auto |
@@ -574,7 +573,7 @@ Chuyển đổi ảnh sang các phong cách nghệ thuật khác nhau
 
 ### 8.1 Apply Style
 
-**Endpoint**: `POST /style/replace-style`
+**Endpoint**: `POST /style`
 
 **Chức năng**: Biến đổi ảnh sang phong cách nghệ thuật (anime, watercolor, oil painting, etc.)
 
