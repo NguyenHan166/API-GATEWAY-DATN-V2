@@ -12,21 +12,29 @@ import { PERF } from "../../config/perf.js";
 const MODEL =
     "zsxkib/ic-light:d41bcb10d8c159868f4cfbd7c6a2ca01484f7d39e4613419d5952c61562f1ba7";
 
-// Hạ size ảnh để tránh timeout/chi phí
+// Hạ size ảnh và đảm bảo chuyển sang RGB (loại bỏ alpha channel) để tránh lỗi với PNG
 async function preScale(buffer) {
     const meta = await sharp(buffer).metadata();
     if (!meta.width || !meta.height) return buffer;
-    const maxSide = Math.max(meta.width, meta.height);
-    if (maxSide <= PERF.image.maxSidePx) return buffer;
 
-    const scale = PERF.image.maxSidePx / maxSide;
-    const W = Math.round((meta.width || 0) * scale);
-    const H = Math.round((meta.height || 0) * scale);
+    const maxSide = Math.max(meta.width, meta.height);
+    const needsResize = maxSide > PERF.image.maxSidePx;
+
+    // Luôn chuyển sang JPEG để đảm bảo 3 kênh màu (RGB)
+    // Điều này sửa lỗi "assert C == 3" khi upload ảnh PNG có 4 kênh (RGBA)
+    let sharpInstance = sharp(buffer)
+        .flatten({ background: { r: 255, g: 255, b: 255 } }) // Loại bỏ alpha, thay bằng nền trắng
+        .toColorspace("srgb"); // Đảm bảo colorspace chuẩn
+
+    if (needsResize) {
+        const scale = PERF.image.maxSidePx / maxSide;
+        const W = Math.round((meta.width || 0) * scale);
+        const H = Math.round((meta.height || 0) * scale);
+        sharpInstance = sharpInstance.resize(W, H, { fit: "inside" });
+    }
+
     // nén nhẹ để nhỏ hơn khi upload
-    return sharp(buffer)
-        .resize(W, H, { fit: "inside" })
-        .jpeg({ quality: 92 })
-        .toBuffer();
+    return sharpInstance.jpeg({ quality: 92 }).toBuffer();
 }
 
 // tải nhị phân nếu client đưa image_url

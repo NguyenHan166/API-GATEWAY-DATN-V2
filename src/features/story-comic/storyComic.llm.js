@@ -108,6 +108,13 @@ function buildOutlinePrompt({ userPrompt, pages }) {
     const beatHint = pages === 2 ? "8-9" : "9-12";
     return `
 Bạn là biên kịch truyện tranh anime màu. Tạo outline chi tiết cho câu chuyện từ prompt của người dùng, gồm ${beatHint} beat (mở đầu -> cao trào -> kết thúc) để vẽ ${pages} trang comic (mỗi trang 3-4 panel).
+
+QUAN TRỌNG - NHÂN VẬT NHẤT QUÁN:
+- Tạo danh sách nhân vật (characters) với mô tả chi tiết bằng Danbooru tags tiếng Anh.
+- Mỗi nhân vật cần: appearance_tags (ngoại hình cố định), outfit_tags (trang phục), distinguishing_features (đặc điểm nhận dạng).
+- Các tags này sẽ được dùng cho MỌI panel để đảm bảo nhân vật giống nhau xuyên suốt truyện.
+
+Yêu cầu khác:
 - Viết tiếng Việt mạch lạc cho summary_vi, thêm summary_en 1-2 câu tiếng Anh, chọn main_emotion (happy|sad|angry|surprised|neutral).
 - story_id ngắn, không dấu, không khoảng trắng.
 - Chỉ trả về JSON object, không markdown, không kèm chữ thừa.
@@ -115,6 +122,15 @@ Bạn là biên kịch truyện tranh anime màu. Tạo outline chi tiết cho c
 Schema JSON:
 {
   "story_id": "string_ngan_khong_dau_cach",
+  "characters": [
+    {
+      "name": "Tên nhân vật (tiếng Việt hoặc Nhật)",
+      "role": "main hoặc supporting",
+      "appearance_tags": "1girl/1boy, hair color, hair length, eye color, skin tone, body type (Danbooru tags)",
+      "outfit_tags": "clothing details, accessories (Danbooru tags)",
+      "distinguishing_features": "unique features like hairpin, glasses, scar (Danbooru tags)"
+    }
+  ],
   "outline": [
     {
       "id": 1,
@@ -173,16 +189,44 @@ Schema JSON:
 `.trim();
 }
 
+function fallbackCharacter(prompt) {
+    return [
+        {
+            name: "Main Character",
+            role: "main",
+            appearance_tags: "1girl, long black hair, brown eyes, fair skin",
+            outfit_tags: "casual clothes, white shirt, blue jeans",
+            distinguishing_features: "gentle expression",
+        },
+    ];
+}
+
+function normalizeCharacters(characters, prompt) {
+    if (!Array.isArray(characters) || characters.length === 0) {
+        return fallbackCharacter(prompt);
+    }
+    return characters.map((char) => ({
+        name: (char.name || "Character").toString().trim(),
+        role: ["main", "supporting"].includes(char.role) ? char.role : "main",
+        appearance_tags: (char.appearance_tags || "1girl").toString().trim(),
+        outfit_tags: (char.outfit_tags || "casual clothes").toString().trim(),
+        distinguishing_features: (char.distinguishing_features || "")
+            .toString()
+            .trim(),
+    }));
+}
+
 function fallbackOutline({ prompt, pages }) {
     const beatsCount = pages === 2 ? 8 : 10;
     const storyId = sanitizeStoryId(null, prompt);
+    const characters = fallbackCharacter(prompt);
     const outline = Array.from({ length: beatsCount }).map((_, idx) => ({
         id: idx + 1,
         summary_vi: `Diễn biến ${idx + 1} của câu chuyện: ${prompt}`,
         summary_en: `Beat ${idx + 1} of the story about ${prompt}`,
         main_emotion: "neutral",
     }));
-    return { story_id: storyId, outline };
+    return { story_id: storyId, characters, outline };
 }
 
 function fallbackStoryboard({ beats, pageIndex, panels, storyId }) {
@@ -193,9 +237,9 @@ function fallbackStoryboard({ beats, pageIndex, panels, storyId }) {
         beats_used: beats.map((b) => b.id || 0),
         panels: Array.from({ length: panels }).map((_, idx) => ({
             id: idx + 1,
-            description_vi: `Cảnh ${idx + 1} trang ${
-                pageIndex + 1
-            }: ${beats[idx % beats.length]?.summary_vi || ""}`,
+            description_vi: `Cảnh ${idx + 1} trang ${pageIndex + 1}: ${
+                beats[idx % beats.length]?.summary_vi || ""
+            }`,
             prompt_tags:
                 "masterpiece, best quality, anime style, vibrant colors, detailed background, no text, no speech bubble",
             dialogue: "",
@@ -205,11 +249,7 @@ function fallbackStoryboard({ beats, pageIndex, panels, storyId }) {
     };
 }
 
-export async function generateOutlineWithGemini({
-    prompt,
-    pages,
-    requestId,
-}) {
+export async function generateOutlineWithGemini({ prompt, pages, requestId }) {
     const outlinePrompt = buildOutlinePrompt({ userPrompt: prompt, pages });
     const raw = await callGemini(outlinePrompt, {
         temperature: 0.25,
@@ -230,9 +270,16 @@ export async function generateOutlineWithGemini({
 
     const storyId = sanitizeStoryId(parsed.story_id, prompt);
     const outline = Array.isArray(parsed.outline) ? parsed.outline : [];
+    const characters = normalizeCharacters(parsed.characters, prompt);
+
+    logger.info(
+        { requestId, storyId, characterCount: characters.length },
+        "Generated outline with character sheet"
+    );
 
     return {
         story_id: storyId,
+        characters,
         outline,
     };
 }

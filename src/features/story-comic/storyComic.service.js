@@ -173,8 +173,49 @@ function normalizePanels(panels, panelsPerPage, beats, prompt) {
     return result;
 }
 
-function buildImagePrompt(panel) {
-    return normalizePromptTags(panel.prompt_tags);
+function buildCharacterTags(characters) {
+    if (!Array.isArray(characters) || characters.length === 0) {
+        return "";
+    }
+    // Get main characters first, then supporting
+    const sorted = [...characters].sort((a, b) => {
+        if (a.role === "main" && b.role !== "main") return -1;
+        if (a.role !== "main" && b.role === "main") return 1;
+        return 0;
+    });
+
+    // Build tags from main character(s) only for consistency
+    const mainChars = sorted.filter((c) => c.role === "main").slice(0, 2);
+    if (mainChars.length === 0 && sorted.length > 0) {
+        mainChars.push(sorted[0]);
+    }
+
+    const tags = mainChars
+        .map((char) => {
+            const parts = [
+                char.appearance_tags,
+                char.outfit_tags,
+                char.distinguishing_features,
+            ]
+                .filter(Boolean)
+                .join(", ");
+            return parts;
+        })
+        .join(", ");
+
+    return tags;
+}
+
+function buildImagePrompt(panel, characters) {
+    const characterTags = buildCharacterTags(characters);
+    const panelTags = panel.prompt_tags || "";
+
+    // Prepend character tags to ensure consistency
+    const combinedTags = characterTags
+        ? `${characterTags}, ${panelTags}`
+        : panelTags;
+
+    return normalizePromptTags(combinedTags);
 }
 
 async function fetchBuffer(url, timeoutMs = FETCH_TIMEOUT_MS) {
@@ -268,7 +309,7 @@ async function runAnimagine({
 
 async function generatePanelsImages(
     panels,
-    { pageIndex, requestId, styleSelector, qualitySelector }
+    { pageIndex, requestId, styleSelector, qualitySelector, characters }
 ) {
     const retryOpts = {
         retries: 2,
@@ -277,7 +318,7 @@ async function generatePanelsImages(
     };
 
     const tasks = panels.map(async (panel, idx) => {
-        const prompt = buildImagePrompt(panel);
+        const prompt = buildImagePrompt(panel, characters);
         const seed = Number.isFinite(pageIndex)
             ? pageIndex * 100 + idx
             : undefined;
@@ -341,7 +382,18 @@ export async function generateStoryComic({
 
     const storyId = outlineResp.story_id || makeStoryId(prompt);
     const outline = normalizeOutlineBeats(outlineResp.outline, pages, prompt);
+    const characters = outlineResp.characters || [];
     const outlineChunks = splitOutline(outline, pages);
+
+    logger.info(
+        {
+            requestId,
+            storyId,
+            characterCount: characters.length,
+            characters: characters.map((c) => c.name),
+        },
+        "Starting story generation with character sheet"
+    );
 
     const results = [];
     const metaPages = [];
@@ -366,6 +418,7 @@ export async function generateStoryComic({
             requestId,
             styleSelector: selectedStyle,
             qualitySelector: selectedQuality,
+            characters,
         });
         const pageBuffer = await renderComicPage({
             storyId,
@@ -421,6 +474,7 @@ export async function generateStoryComic({
         storyId,
         pages: results,
         meta: {
+            characters,
             outline,
             pages: metaPages,
             model: {
