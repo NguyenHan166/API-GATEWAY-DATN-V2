@@ -10,7 +10,7 @@ const LightSourceEnum = z.enum([
 ]);
 
 export const IcLightSchema = z.object({
-    image_url: z.string().url().optional(),
+    image_url: z.string().url().nullish(),
 
     // Text-guided relighting
     prompt: z
@@ -23,8 +23,8 @@ export const IcLightSchema = z.object({
         .default("lowres, bad anatomy, bad hands, cropped, worst quality"),
 
     // Size (replicate enum list; ta validate mềm, server vẫn pass số)
-    width: z.number().int().optional(), // 256..1024 theo step 64
-    height: z.number().int().optional(),
+    width: z.number().int().nullish(), // 256..1024 theo step 64
+    height: z.number().int().nullish(),
 
     steps: z.number().int().min(1).max(100).default(25),
     cfg: z.number().min(1).max(32).default(2),
