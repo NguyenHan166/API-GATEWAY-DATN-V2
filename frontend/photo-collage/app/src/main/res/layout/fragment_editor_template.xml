@@ -1,0 +1,209 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.asoft.artsal.photo.ui.template.fragment.EditorTemplateFragment">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/background_editor"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <include
+        android:id="@+id/viewHeader"
+        layout="@layout/view_header_editor"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/templatePreview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/navigation_bar"
+        app:layout_constraintTop_toBottomOf="@id/viewHeader" />
+
+    <include
+        android:id="@+id/bannerAds"
+        layout="@layout/layout_banner_control"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/navigation_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_77"
+        android:background="@color/white"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/dp_16"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@id/bannerAds"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/menuCrop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/dp_40">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imgCrop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dp_8"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_nav_crop" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvCrop"
+                style="@style/BaseTheme.TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_4"
+                android:text="@string/crop"
+                android:textColor="@color/txt_normal"
+                android:textSize="@dimen/sp_11"
+                app:layout_constraintEnd_toEndOf="@id/imgCrop"
+                app:layout_constraintStart_toStartOf="@id/imgCrop"
+                app:layout_constraintTop_toBottomOf="@id/imgCrop" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/menuReplace"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/dp_40">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imgReplace"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dp_8"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_nav_replace" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvReplace"
+                style="@style/BaseTheme.TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_4"
+                android:text="@string/replace"
+                android:textColor="@color/txt_normal"
+                android:textSize="@dimen/sp_11"
+                app:layout_constraintEnd_toEndOf="@id/imgReplace"
+                app:layout_constraintStart_toStartOf="@id/imgReplace"
+                app:layout_constraintTop_toBottomOf="@id/imgReplace" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/menuFilter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            >
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imgFilter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dp_8"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_nav_filter" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvFilter"
+                style="@style/BaseTheme.TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_4"
+                android:text="@string/filter"
+                android:textColor="@color/txt_normal"
+                android:textSize="@dimen/sp_11"
+                app:layout_constraintEnd_toEndOf="@id/imgFilter"
+                app:layout_constraintStart_toStartOf="@id/imgFilter"
+                app:layout_constraintTop_toBottomOf="@id/imgFilter" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/menuAdjust"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_8"
+            android:visibility="gone">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imgAdjust"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dp_8"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_nav_adjust" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvAdjust"
+                style="@style/BaseTheme.TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_4"
+                android:text="@string/adjust"
+                android:textColor="@color/txt_normal"
+                android:textSize="@dimen/sp_11"
+                app:layout_constraintEnd_toEndOf="@id/imgAdjust"
+                app:layout_constraintStart_toStartOf="@id/imgAdjust"
+                app:layout_constraintTop_toBottomOf="@id/imgAdjust" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/menuAiEnhance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp_40">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imgAiEnhance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dp_8"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_effect_edit" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvAiEnhance"
+                style="@style/BaseTheme.TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_4"
+                android:text="@string/ai_enhance"
+                android:textColor="@color/txt_normal"
+                android:textSize="@dimen/sp_11"
+                app:layout_constraintEnd_toEndOf="@id/imgAiEnhance"
+                app:layout_constraintStart_toStartOf="@id/imgAiEnhance"
+                app:layout_constraintTop_toBottomOf="@id/imgAiEnhance" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
+
+    <include
+        android:id="@+id/navAi"
+        layout="@layout/view_template_nav_edit_ai"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/bannerAds" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

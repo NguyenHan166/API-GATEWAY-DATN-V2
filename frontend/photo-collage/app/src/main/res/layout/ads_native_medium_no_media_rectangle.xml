@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.gms.ads.nativead.NativeAdView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/rootAds"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_50"
+        android:background="@drawable/bg_native_ads">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="@dimen/dp_14"
+            android:layout_height="@dimen/dp_9"
+            android:background="@drawable/bg_ads_war"
+            android:backgroundTint="#EDB949"
+            android:gravity="center"
+            android:text="@string/ad"
+            android:textColor="#B2FFFFFF"
+            android:textSize="@dimen/sp_6"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ad_app_icon"
+            android:layout_width="@dimen/dp_44"
+            android:layout_height="@dimen/dp_44"
+            android:layout_marginStart="@dimen/dp_11"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/ad_headline"
+            style="@style/BaseTheme.TextSemiBold"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="@dimen/dp_12"
+            android:layout_marginEnd="@dimen/dp_4"
+            android:ellipsize="end"
+            android:gravity="start|center_vertical"
+            android:maxLines="2"
+            android:textAlignment="center"
+            android:textColor="#363636"
+            android:textSize="@dimen/sp_14"
+            app:layout_constraintBottom_toBottomOf="@id/ad_app_icon"
+            app:layout_constraintEnd_toStartOf="@+id/ad_call_to_action"
+            app:layout_constraintStart_toEndOf="@id/ad_app_icon"
+            app:layout_constraintTop_toTopOf="@id/ad_app_icon"
+            tools:text="Tiki siêu SALE 11.01 | Shopping" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/ad_call_to_action"
+            android:layout_width="@dimen/dp_80"
+            android:layout_height="@dimen/dp_28"
+            android:layout_marginEnd="@dimen/dp_14"
+            android:background="@drawable/bg_radius_8"
+            android:backgroundTint="#01AEFF"
+            android:fontFamily="@font/sf_pro_semibold"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:textSize="@dimen/sp_10"
+            app:layout_constraintBottom_toBottomOf="@id/ad_app_icon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/ad_app_icon"
+            tools:text="INSTALL" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.gms.ads.nativead.NativeAdView>

@@ -1,0 +1,11 @@
+<resources>
+
+    <style name="Theme.MinSap.Launcher" parent="Theme.MinSap">
+        <item name="android:windowSplashScreenBackground">@color/primary</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="android:windowSplashScreenAnimationDuration">0</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/transparent</item>
+        <item name="postSplashScreenTheme">@style/Theme.MinSap</item>
+    </style>
+
+</resources>

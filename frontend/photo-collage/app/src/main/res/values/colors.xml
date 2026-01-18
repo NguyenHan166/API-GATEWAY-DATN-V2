@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="primary">#FFFFFFFF</color>
+    <color name="txt_primary">#EAEBEC</color>
+    <color name="transparent">@android:color/transparent</color>
+    <color name="scrimPrimary">#CC000000</color>
+    <color name="lightTransparent">#16000000</color>
+
+    <color name="btn_ads_bg">#01AEFF</color>"
+    <color name="txt_normal">#222222</color>
+    <color name="txt_nor_opacity_70">#B3222222</color>
+    <color name="txt_nor_opacity_80">#CC222222</color>
+    <color name="txt_nor_opacity_50">#80222222</color>
+    <color name="txt_normal_grey">#5C5C5C</color>
+    <color name="background_editor">#E6E6E6</color>
+    <color name="background_home">#F5F5F5</color>
+    <color name="background_main">#00141F</color>
+    <color name="background_container">#263740</color>
+    <color name="white_50">#80FFFFFF</color>
+    <color name="bg_main">#A1F9FF</color>
+    <color name="bg_main_second">#77D3FF</color>
+
+
+
+    <color name="txt_app_name">#89CFF0</color>
+    <color name="color_gray_light">#E0E0E0</color>
+
+    <color name="primary_gradient">#476CFF</color>
+    <color name="bg_camera">#476CFF</color>
+    <color name="secondary_gradient">#559EFF</color>
+    <color name="sub_secondary_gradient">#8BE5FF</color>
+    <color name="bg_second">#263740</color>
+
+
+    <array name="color_type">
+        <item>#FFFFFF</item>
+        <item>#BBBBBB</item>
+        <item>#4E4E4E</item>
+        <item>#000000</item>
+        <item>#FFD7CD</item>
+        <item>#FAAB9E</item>
+        <item>#ED5C61</item>
+        <item>#CB3244</item>
+        <item>#FFAA71</item>
+        <item>#92B496</item>
+        <item>#78AC9C</item>
+        <item>#7CB6C6</item>
+        <item>#72B1B2</item>
+        <item>#FFADD5</item>
+        <item>#FF8DC7</item>
+        <item>#CFADFF</item>
+        <item>#BA8DFF</item>
+        <item>#CC9999</item>
+        <item>#996666</item>
+        <item>#663333</item>
+    </array>
+
+</resources>

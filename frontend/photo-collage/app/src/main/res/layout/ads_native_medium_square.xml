@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.gms.ads.nativead.NativeAdView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/rootAds"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background_container"
+        android:paddingHorizontal="@dimen/dp_4"
+        android:paddingVertical="@dimen/dp_4">
+
+        <com.google.android.gms.ads.nativead.MediaView
+            android:id="@+id/ad_media"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@color/background_container"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/llHeader"
+            android:layout_width="0dp"
+            android:layout_marginHorizontal="@dimen/dp_8"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_10"
+            android:orientation="horizontal"
+            android:gravity="center"
+            app:layout_constraintEnd_toEndOf="@id/ad_media"
+            app:layout_constraintStart_toStartOf="@id/ad_media"
+            app:layout_constraintTop_toBottomOf="@id/ad_media">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/iv_ad_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_radius_2"
+                android:backgroundTint="#FDB812"
+                android:gravity="start"
+                android:paddingHorizontal="@dimen/dp_6"
+                android:paddingVertical="@dimen/dp_2"
+                android:text="@string/ad"
+                android:textColor="#B2FFFFFF"
+                android:textSize="@dimen/sp_9" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/ad_headline"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dp_4"
+                android:layout_weight="1"
+                android:fontFamily="@font/sf_pro_semibold"
+                android:gravity="start"
+                android:textColor="#FFFFFF"
+                android:textSize="@dimen/sp_12"
+                tools:text="Haravan" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="@dimen/dp_12"
+                android:layout_height="@dimen/dp_12"
+                android:layout_marginEnd="@dimen/dp_10"
+                android:visibility="visible"
+                app:srcCompat="@drawable/ic_info" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/ad_body"
+                style="@style/BaseTheme.TextRegular"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_5"
+                android:lineSpacingExtra="@dimen/dp_5"
+                android:textColor="#B5B5B5"
+                android:textSize="@dimen/sp_11"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/iv_ad_title"
+                app:layout_constraintTop_toBottomOf="@+id/ad_headline"
+                tools:text="Ex-Apple engineers turn your iPad, Mac, PC or Android into a blazing fasst monitor" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/ad_call_to_action"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_10"
+            android:layout_marginBottom="@dimen/dp_14"
+            android:layout_marginHorizontal="@dimen/dp_8"
+            android:background="@drawable/bg_button_ads"
+            android:fontFamily="@font/sf_pro_semibold"
+            android:gravity="center"
+            android:letterSpacing="0.015"
+            android:paddingVertical="@dimen/dp_12"
+            android:textColor="#FFFFFF"
+            android:textSize="@dimen/sp_16"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/ad_media"
+            app:layout_constraintStart_toStartOf="@+id/ad_media"
+            app:layout_constraintTop_toBottomOf="@+id/llHeader"
+            tools:text="SIGN UP" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.gms.ads.nativead.NativeAdView>

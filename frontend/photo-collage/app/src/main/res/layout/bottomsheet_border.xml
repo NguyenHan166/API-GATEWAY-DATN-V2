@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/content"
+        android:background="@drawable/bg_content_bottom_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        android:paddingBottom="@dimen/dp_20"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        >
+        <include
+            android:id="@+id/header"
+            layout="@layout/view_header_bottomsheet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dp_16"
+            android:layout_marginTop="@dimen/dp_8"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/controlContainer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dp_16"
+            android:layout_marginTop="@dimen/dp_16"
+            android:layout_marginBottom="@dimen/dp_20"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/header">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/imgBorderOuter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_border_outer_line" />
+
+                <SeekBar
+                    android:id="@+id/seekBarBorderOuter"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dp_24"
+                    android:layout_marginEnd="@dimen/dp_24"
+                    android:maxHeight="@dimen/dp_2"
+                    android:minHeight="@dimen/dp_2"
+                    android:paddingHorizontal="@dimen/dp_6"
+                    android:progressDrawable="@drawable/seekbar_progress"
+                    android:thumb="@drawable/ic_ellipse"
+                    app:layout_constraintBottom_toBottomOf="@id/imgBorderOuter"
+                    app:layout_constraintEnd_toStartOf="@id/tvBorderOuter"
+                    app:layout_constraintStart_toEndOf="@id/imgBorderOuter"
+                    app:layout_constraintTop_toTopOf="@id/imgBorderOuter"
+                    tools:progress="50" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvBorderOuter"
+                    style="@style/BaseTheme.TextRegular"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/sp_14"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="45" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/containerBorderInner"
+                android:layout_width="match_parent"
+                android:visibility="gone"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_20">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/imgBorderInner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_border_inner_line" />
+
+                <SeekBar
+                    android:id="@+id/seekBarBorderInner"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dp_24"
+                    android:layout_marginEnd="@dimen/dp_24"
+                    android:maxHeight="@dimen/dp_2"
+                    android:minHeight="@dimen/dp_2"
+                    android:paddingHorizontal="@dimen/dp_6"
+                    android:progressDrawable="@drawable/seekbar_progress"
+                    android:thumb="@drawable/ic_ellipse"
+                    app:layout_constraintBottom_toBottomOf="@id/imgBorderInner"
+                    app:layout_constraintEnd_toStartOf="@id/tvBorderInner"
+                    app:layout_constraintStart_toEndOf="@id/imgBorderInner"
+                    app:layout_constraintTop_toTopOf="@id/imgBorderInner"
+                    tools:progress="40" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvBorderInner"
+                    style="@style/BaseTheme.TextRegular"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/sp_14"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="45" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_20">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/imgBorderRadius"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_border_radius_line" />
+
+
+                <SeekBar
+                    android:id="@+id/seekBarBorderRadius"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dp_24"
+                    android:layout_marginEnd="@dimen/dp_24"
+                    android:maxHeight="@dimen/dp_2"
+                    android:minHeight="@dimen/dp_2"
+                    android:paddingHorizontal="@dimen/dp_6"
+                    android:progressDrawable="@drawable/seekbar_progress"
+                    android:thumb="@drawable/ic_ellipse"
+                    app:layout_constraintBottom_toBottomOf="@id/imgBorderRadius"
+                    app:layout_constraintEnd_toStartOf="@id/tvBorderRadius"
+                    app:layout_constraintStart_toEndOf="@id/imgBorderRadius"
+                    app:layout_constraintTop_toTopOf="@id/imgBorderRadius"
+                    tools:progress="30" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvBorderRadius"
+                    style="@style/BaseTheme.TextRegular"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/sp_14"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="45" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_56"
+        app:layout_constraintTop_toBottomOf="@+id/content"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,280 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.asoft.artsal.photo.ui.save.ResultSaveFragment">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/btn_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dp_16"
+        android:layout_marginTop="@dimen/dp_6"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_back" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvResult"
+        style="@style/BaseTheme.TextSemiBold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/dp_8"
+        android:text="@string/result"
+        android:textSize="@dimen/sp_16"
+        app:layout_constraintBottom_toBottomOf="@id/btn_back"
+        app:layout_constraintStart_toEndOf="@id/btn_back"
+        app:layout_constraintTop_toTopOf="@id/btn_back" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/btn_home"
+        android:layout_width="wrap_content"
+        android:layout_marginEnd="@dimen/dp_16"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_6"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_home" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_title_result"
+        style="@style/BaseTheme.TextExtraBold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dp_16"
+        android:layout_marginTop="@dimen/dp_32"
+        android:gravity="center"
+        android:text="@string/txt_result"
+        android:textColor="#222222"
+        android:textSize="@dimen/sp_20"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_back"
+
+        />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_body_welcome"
+        style="@style/BaseTheme.TextRegular"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dp_16"
+        android:layout_marginTop="@dimen/dp_16"
+        android:gravity="center"
+        android:text="@string/txt_body_result"
+        android:textColor="#5C5C5C"
+        android:textSize="@dimen/sp_14"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_title_result" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/img_result"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_160"
+        android:scaleType="fitCenter"
+        android:layout_marginHorizontal="@dimen/dp_84"
+        android:layout_marginTop="@dimen/dp_20"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_body_welcome"
+        app:srcCompat="@drawable/img_result_test" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvShareTo"
+        style="@style/BaseTheme.TextSemiBold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="@string/share_to"
+        android:textSize="@dimen/sp_16"
+        app:layout_constraintStart_toStartOf="@id/navigation_bar"
+        app:layout_constraintTop_toBottomOf="@id/img_result" />
+
+    <LinearLayout
+        android:id="@+id/navigation_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:baselineAligned="false"
+        android:layout_marginBottom="@dimen/dp_40"
+        android:layout_marginHorizontal="@dimen/dp_16"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingBottom="@dimen/dp_3"
+        app:layout_constraintTop_toBottomOf="@id/tvShareTo"
+        android:layout_marginTop="@dimen/dp_8"
+        android:weightSum="5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        >
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/facebookContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/imgFacebook"
+                android:layout_width="@dimen/dp_36"
+                android:layout_height="0dp"
+                android:scaleType="centerCrop"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="@+id/tvFacebook"
+                app:layout_constraintStart_toStartOf="@+id/tvFacebook"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/img_facebook" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvFacebook"
+                style="@style/BaseTheme.TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_8"
+                android:text="@string/facebook"
+                android:textColor="@color/black"
+                android:textSize="@dimen/sp_10"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/imgFacebook" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/instagramContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/imgInstagram"
+                android:layout_width="@dimen/dp_36"
+                android:layout_height="0dp"
+                android:scaleType="centerCrop"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/img_instagram" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvInstagram"
+                style="@style/BaseTheme.TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_8"
+                android:text="@string/instagram"
+                android:textColor="@color/black"
+                android:textSize="@dimen/sp_10"
+                app:layout_constraintEnd_toEndOf="@id/imgInstagram"
+                app:layout_constraintStart_toStartOf="@id/imgInstagram"
+                app:layout_constraintTop_toBottomOf="@id/imgInstagram" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/messengerContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/imgMessenger"
+                android:layout_width="@dimen/dp_36"
+                android:layout_height="0dp"
+                android:scaleType="centerCrop"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/img_messenger" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvMessenger"
+                style="@style/BaseTheme.TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_8"
+                android:text="@string/messenger"
+                android:textColor="@color/black"
+                android:textSize="@dimen/sp_10"
+                app:layout_constraintEnd_toEndOf="@id/imgMessenger"
+                app:layout_constraintStart_toStartOf="@id/imgMessenger"
+                app:layout_constraintTop_toBottomOf="@id/imgMessenger" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/twitterContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/imgX"
+                android:layout_width="@dimen/dp_36"
+                android:layout_height="0dp"
+                android:scaleType="centerCrop"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/img_twitter" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvX"
+                style="@style/BaseTheme.TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_8"
+                android:text="@string/twitter"
+                android:textColor="@color/black"
+                android:textSize="@dimen/sp_10"
+                app:layout_constraintEnd_toEndOf="@id/imgX"
+                app:layout_constraintStart_toStartOf="@id/imgX"
+                app:layout_constraintTop_toBottomOf="@id/imgX"
+                app:textAllCaps="true" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/moreContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/imgMore"
+                android:layout_width="@dimen/dp_36"
+                android:layout_height="0dp"
+                android:scaleType="centerCrop"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/img_more" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvMore"
+                style="@style/BaseTheme.TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_8"
+                android:text="@string/more"
+                android:textColor="@color/black"
+                android:textSize="@dimen/sp_10"
+                app:layout_constraintEnd_toEndOf="@id/imgMore"
+                app:layout_constraintStart_toStartOf="@id/imgMore"
+                app:layout_constraintTop_toBottomOf="@id/imgMore" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
+
+    <include
+        android:id="@+id/frameNative"
+        layout="@layout/layout_native_control"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

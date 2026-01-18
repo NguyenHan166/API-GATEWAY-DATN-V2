@@ -1,0 +1,124 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.asoft.artsal.photo.ui.settings.fragment.SettingsFragment">
+
+    <include
+        android:id="@+id/vToolbar"
+        layout="@layout/view_header_editor" />
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dp_16"
+        android:layout_marginTop="@dimen/dp_30"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/vToolbar">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/llLanguage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvLanguage"
+                style="@style/BaseTheme.TextMedium"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawablePadding="@dimen/dp_20"
+                android:text="@string/setting_language"
+                android:textColor="#222222"
+                android:textSize="@dimen/sp_14"
+                app:drawableStartCompat="@drawable/ic_language" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvValue"
+                style="@style/BaseTheme.TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:drawablePadding="@dimen/dp_8"
+                android:textColor="#80222222"
+                android:textSize="@dimen/sp_12"
+                app:drawableEndCompat="@drawable/ic_chevron_right"
+                tools:text="English" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_1"
+            android:layout_marginTop="@dimen/dp_24"
+            android:background="#1A222222" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvFeedback"
+            style="@style/BaseTheme.TextMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_24"
+            android:drawablePadding="@dimen/dp_20"
+            android:text="@string/setting_feedback"
+            android:textColor="#222222"
+            android:textSize="@dimen/sp_14"
+            app:drawableStartCompat="@drawable/ic_feedback" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_1"
+            android:layout_marginTop="@dimen/dp_24"
+            android:background="#1A222222" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvRateUs"
+            style="@style/BaseTheme.TextMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_24"
+            android:drawablePadding="@dimen/dp_20"
+            android:text="@string/rate_us"
+            android:textColor="#222222"
+            android:textSize="@dimen/sp_14"
+            app:drawableStartCompat="@drawable/ic_rate" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_1"
+            android:layout_marginTop="@dimen/dp_24"
+            android:background="#1A222222" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvShareApp"
+            style="@style/BaseTheme.TextMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_24"
+            android:drawablePadding="@dimen/dp_20"
+            android:text="@string/setting_share_app"
+            android:textColor="#222222"
+            android:textSize="@dimen/sp_14"
+            app:drawableStartCompat="@drawable/ic_share_app" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_1"
+            android:layout_marginTop="@dimen/dp_24"
+            android:background="#1A222222" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvPrivacy"
+            style="@style/BaseTheme.TextMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_24"
+            android:drawablePadding="@dimen/dp_20"
+            android:text="@string/setting_privacy_policy"
+            android:textColor="#222222"
+            android:textSize="@dimen/sp_14"
+            app:drawableStartCompat="@drawable/ic_privacy" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:orientation="vertical">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/header_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background_container"
+        android:paddingHorizontal="@dimen/dp_16">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_category_title"
+            style="@style/BaseTheme.TextSemiBold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/category"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_16"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/img_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="@dimen/dp_7"
+            android:paddingVertical="@dimen/dp_10"
+            android:src="@drawable/ic_arrow_down"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipgroup_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background_container"
+        android:paddingHorizontal="@dimen/dp_16"
+        android:paddingTop="@dimen/dp_12"
+        android:paddingBottom="@dimen/dp_16"
+        android:visibility="gone"
+        app:chipSpacingHorizontal="@dimen/dp_12"
+        app:chipSpacingVertical="@dimen/dp_12"
+        tools:visibility="visible">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/trending"
+            style="@style/Widget.Custom.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/trending"
+            android:textColor="@color/white_50"
+            app:checkedIconVisible="false"
+            app:chipBackgroundColor="@color/background_container"
+            app:chipCornerRadius="@dimen/dp_8"
+            app:chipEndPadding="@dimen/dp_12"
+            app:chipIcon="@drawable/ic_trending"
+            app:chipIconEnabled="true"
+            app:chipIconSize="@dimen/dp_10"
+            app:chipMinTouchTargetSize="0dp"
+            app:chipStartPadding="@dimen/dp_12"
+            app:chipStrokeColor="@color/white_50"
+            app:chipStrokeWidth="@dimen/dp_1"
+            app:textStartPadding="@dimen/dp_3" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/all"
+            style="@style/Widget.Custom.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/all"
+            android:textColor="@color/white_50"
+            app:checkedIconVisible="false"
+            app:chipBackgroundColor="@color/background_container"
+            app:chipCornerRadius="@dimen/dp_8"
+            app:chipEndPadding="@dimen/dp_12"
+            app:chipMinTouchTargetSize="0dp"
+            app:chipStartPadding="@dimen/dp_12"
+            app:chipStrokeColor="@color/white_50"
+            app:chipStrokeWidth="@dimen/dp_1" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/birthday"
+            style="@style/Widget.Custom.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/birthdays"
+            android:textColor="@color/white_50"
+            app:checkedIconVisible="false"
+            app:chipBackgroundColor="@color/background_container"
+            app:chipCornerRadius="@dimen/dp_8"
+            app:chipEndPadding="@dimen/dp_12"
+            app:chipMinTouchTargetSize="0dp"
+            app:chipStartPadding="@dimen/dp_12"
+            app:chipStrokeColor="@color/white_50"
+            app:chipStrokeWidth="@dimen/dp_1" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/travel"
+            style="@style/Widget.Custom.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/travel"
+            android:textColor="@color/white_50"
+            app:checkedIconVisible="false"
+            app:chipBackgroundColor="@color/background_container"
+            app:chipCornerRadius="@dimen/dp_8"
+            app:chipEndPadding="@dimen/dp_12"
+            app:chipMinTouchTargetSize="0dp"
+            app:chipStartPadding="@dimen/dp_12"
+            app:chipStrokeColor="@color/white_50"
+            app:chipStrokeWidth="@dimen/dp_1" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/special"
+            style="@style/Widget.Custom.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/special_days"
+            android:textColor="@color/white_50"
+            app:checkedIconVisible="false"
+            app:chipBackgroundColor="@color/background_container"
+            app:chipCornerRadius="@dimen/dp_8"
+            app:chipEndPadding="@dimen/dp_12"
+            app:chipMinTouchTargetSize="0dp"
+            app:chipStartPadding="@dimen/dp_12"
+            app:chipStrokeColor="@color/white_50"
+            app:chipStrokeWidth="@dimen/dp_1" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/holiday"
+            style="@style/Widget.Custom.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/holidays"
+            android:textColor="@color/white_50"
+            app:checkedIconVisible="false"
+            app:chipBackgroundColor="@color/background_container"
+            app:chipCornerRadius="@dimen/dp_8"
+            app:chipEndPadding="@dimen/dp_12"
+            app:chipMinTouchTargetSize="0dp"
+            app:chipStartPadding="@dimen/dp_12"
+            app:chipStrokeColor="@color/white_50"
+            app:chipStrokeWidth="@dimen/dp_1" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/season"
+            style="@style/Widget.Custom.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/seasons"
+            android:textColor="@color/white_50"
+            app:checkedIconVisible="false"
+            app:chipBackgroundColor="@color/background_container"
+            app:chipCornerRadius="@dimen/dp_8"
+            app:chipEndPadding="@dimen/dp_12"
+            app:chipMinTouchTargetSize="0dp"
+            app:chipStartPadding="@dimen/dp_12"
+            app:chipStrokeColor="@color/white_50"
+            app:chipStrokeWidth="@dimen/dp_1" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/milestone"
+            style="@style/Widget.Custom.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/milestones"
+            android:textColor="@color/white_50"
+            app:checkedIconVisible="false"
+            app:chipBackgroundColor="@color/background_container"
+            app:chipCornerRadius="@dimen/dp_8"
+            app:chipEndPadding="@dimen/dp_12"
+            app:chipMinTouchTargetSize="0dp"
+            app:chipStartPadding="@dimen/dp_12"
+            app:chipStrokeColor="@color/white_50"
+            app:chipStrokeWidth="@dimen/dp_1" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/moment"
+            style="@style/Widget.Custom.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/moments"
+            android:textColor="@color/white_50"
+            app:checkedIconVisible="false"
+            app:chipBackgroundColor="@color/background_container"
+            app:chipCornerRadius="@dimen/dp_8"
+            app:chipEndPadding="@dimen/dp_12"
+            app:chipMinTouchTargetSize="0dp"
+            app:chipStartPadding="@dimen/dp_12"
+            app:chipStrokeColor="@color/white_50"
+            app:chipStrokeWidth="@dimen/dp_1" />
+
+    </com.google.android.material.chip.ChipGroup>
+
+    <View
+        android:id="@+id/view_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#80000000" />
+
+</LinearLayout>

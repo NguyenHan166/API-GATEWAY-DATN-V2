@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation"
+    app:startDestination="@id/splash_fragment">
+
+    <fragment
+        android:id="@+id/splash_fragment"
+        android:name="com.asoft.artsal.photo.ui.splash.fragment.SplashFragment"
+        android:label="Splash"
+        tools:layout="@layout/fragment_splash">
+        <action
+            android:id="@+id/action_splash_to_select_language"
+            app:destination="@id/select_language_fragment" />
+        <action
+            android:id="@+id/action_splash_fragment_to_home_fragment"
+            app:destination="@id/home_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/select_language_fragment"
+        android:name="com.asoft.artsal.photo.ui.onboard.fragment.SelectLanguageFragment"
+        android:label="Select Language"
+        tools:layout="@layout/fragment_select_language">
+        <action
+            android:id="@+id/action_select_language_to_onboarding"
+            app:destination="@id/onboarding_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/onboarding_fragment"
+        android:name="com.asoft.artsal.photo.ui.onboard.fragment.OnboardingFragment"
+        android:label="OnBoarding"
+        tools:layout="@layout/fragment_onboarding">
+        <action
+            android:id="@+id/action_onboarding_fragment_to_home_fragment"
+            app:destination="@id/home_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/editor_collage_fragment"
+        android:name="com.asoft.artsal.photo.ui.collage.fragment.EditorCollageFragment"
+        android:label="Editor Collage"
+        tools:layout="@layout/fragment_editor_collage">
+        <action
+            android:id="@+id/action_editor_collage_to_save_result_fragment"
+            app:destination="@id/save_result_fragment" />
+        <action
+            android:id="@+id/action_editor_collage_to_crop_fragment"
+            app:destination="@id/crop_fragment" />
+        <action
+            android:id="@+id/action_editor_collage_fragment_to_gallery_photo_fragment"
+            app:destination="@id/gallery_photo_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/crop_fragment"
+        android:name="com.asoft.artsal.photo.ui.collage.fragment.CropFragment"
+        android:label="Crop"
+        tools:layout="@layout/fragment_crop">
+        <action
+            android:id="@+id/action_crop_fragment_to_editor_collage_fragment"
+            app:destination="@id/editor_collage_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/save_result_fragment"
+        android:name="com.asoft.artsal.photo.ui.save.ResultSaveFragment"
+        android:label="Save Photo"
+        tools:ignore="ExtraText"
+        tools:layout="@layout/fragment_result_save">
+
+        <action
+            android:id="@+id/action_save_result_fragment_to_home_fragment"
+            app:destination="@id/home_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/settings_fragment"
+        android:name="com.asoft.artsal.photo.ui.settings.fragment.SettingsFragment"
+        android:label="Settings"
+        tools:layout="@layout/fragment_settings">
+
+        <action
+            android:id="@+id/action_setting_to_select_language"
+            app:destination="@id/select_language_setting_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/select_language_setting_fragment"
+        android:name="com.asoft.artsal.photo.ui.settings.fragment.SelectLanguageSettingFragment"
+        android:label="Select Language Setting"
+        tools:layout="@layout/fragment_select_language">
+    </fragment>
+
+    <fragment
+        android:id="@+id/all_photo_fragment"
+        android:name="com.asoft.artsal.photo.ui.myphoto.fragment.AllPhotoFragment"
+        android:label="My Photo"
+        tools:layout="@layout/fragment_all_photo">
+        <action
+            android:id="@+id/action_all_photo_fragment_to_save_result_fragment"
+            app:destination="@id/save_result_fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/editor_template_fragment"
+        android:name="com.asoft.artsal.photo.ui.template.fragment.EditorTemplateFragment"
+        android:label="Editor Template"
+        tools:layout="@layout/fragment_editor_template">
+        <action
+            android:id="@+id/action_editor_template_fragment_to_save_result_fragment"
+            app:destination="@id/save_result_fragment" />
+        <action
+            android:id="@+id/action_editor_template_fragment_to_crop_fragment"
+            app:destination="@id/crop_fragment" />
+        <action
+            android:id="@+id/action_editor_template_fragment_to_gallery_photo_fragment"
+            app:destination="@id/gallery_photo_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/gallery_photo_fragment"
+        android:name="com.asoft.artsal.photo.ui.gallery.GalleryPhotoFragment"
+        android:label="Gallery"
+        tools:layout="@layout/fragment_gallery_photo">
+        <action
+            android:id="@+id/action_gallery_photo_fragment_to_editor_template_fragment"
+            app:destination="@id/editor_template_fragment" />
+        <action
+            android:id="@+id/action_gallery_photo_fragment_to_editor_collage_fragment"
+            app:destination="@id/editor_collage_fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/home_fragment"
+        android:name="com.asoft.artsal.photo.ui.home.fragment.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home">
+
+        <action
+            android:id="@+id/action_home_fragment_to_settings_fragment"
+            app:destination="@id/settings_fragment" />
+        <action
+            android:id="@+id/action_home_fragment_to_blank_canvas_fragment"
+            app:destination="@id/blank_canvas_fragment" />
+        <action
+            android:id="@+id/action_home_fragment_to_template_fragment"
+            app:destination="@id/template_fragment" />
+        <action
+            android:id="@+id/action_home_fragment_to_collage_fragment"
+            app:destination="@id/collage_fragment" />
+        <action
+            android:id="@+id/action_home_fragment_to_my_photo_fragment"
+            app:destination="@id/my_photo_fragment" />
+        <action
+            android:id="@+id/action_home_fragment_to_save_result_fragment"
+            app:destination="@id/save_result_fragment" />
+        <action
+            android:id="@+id/action_home_fragment_self"
+            app:destination="@id/home_fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/blank_canvas_fragment"
+        android:name="com.asoft.artsal.photo.ui.blankcanvas.BlankCanvasFragment"
+        android:label="Blank"
+        tools:layout="@layout/fragment_blank_canvas">
+        <action
+            android:id="@+id/action_blank_canvas_fragment_to_relight_fragment"
+            app:destination="@id/relight_fragment" />
+        <action
+            android:id="@+id/action_blank_canvas_fragment_to_background_fragment"
+            app:destination="@id/replace_bg_fragment" />
+        <action
+            android:id="@+id/action_blank_canvas_fragment_to_generate_story_comic_fragment"
+            app:destination="@id/generate_story_comic_fragment" />
+        <action
+            android:id="@+id/action_blank_canvas_fragment_to_style_fragment"
+            app:destination="@id/style_fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/collage_fragment"
+        android:name="com.asoft.artsal.photo.ui.collage.fragment.CollageFragment"
+        android:label="Collage"
+        tools:layout="@layout/fragment_collage">
+
+        <action
+            android:id="@+id/action_collage_fragment_to_gallery_photo_fragment"
+            app:destination="@id/gallery_photo_fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/template_fragment"
+        android:name="com.asoft.artsal.photo.ui.template.fragment.TemplateFragment"
+        android:label="Temnplate"
+        tools:layout="@layout/fragment_template">
+
+        <action
+            android:id="@+id/action_template_fragment_to_editor_template_fragment"
+            app:destination="@id/editor_template_fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/my_photo_fragment"
+        android:name="com.asoft.artsal.photo.ui.myphoto.fragment.MyPhotoFragment"
+        android:label="MyPhoto"
+        tools:layout="@layout/fragment_my_photo">
+        <action
+            android:id="@+id/action_my_photo_fragment_to_all_photo_fragment"
+            app:destination="@id/all_photo_fragment" />
+        <action
+            android:id="@+id/action_my_photo_fragment_to_save_result_fragment"
+            app:destination="@id/save_result_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/edit_image_fragment"
+        android:name="com.asoft.artsal.photo.ui.ai.fragment.EditImageFragment"
+        android:label="Image"
+        tools:layout="@layout/fragment_edit_image">
+    </fragment>
+    <fragment
+        android:id="@+id/relight_fragment"
+        android:name="com.asoft.artsal.photo.ui.ai.fragment.RelightFragment"
+        android:label="Relight"
+        tools:layout="@layout/fragment_relight">
+        <action
+            android:id="@+id/action_relight_fragment_to_result_gen_fragment"
+            app:destination="@id/result_gen_fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/enhance_fragment"
+        android:name="com.asoft.artsal.photo.ui.ai.fragment.EnhanceFragment"
+        android:label="Enhance"
+        tools:layout="@layout/fragment_enhance">
+    </fragment>
+    <fragment
+        android:id="@+id/beautify_fragment"
+        android:name="com.asoft.artsal.photo.ui.ai.fragment.BeautifyFragment"
+        android:label="Beautify"
+        tools:layout="@layout/fragment_beautify">
+    </fragment>
+    <fragment
+        android:id="@+id/replace_bg_fragment"
+        android:name="com.asoft.artsal.photo.ui.ai.fragment.ReplaceBgFragment"
+        android:label="ReplaceBg"
+        tools:layout="@layout/fragment_replace_bg">
+        <action
+            android:id="@+id/action_replace_bg_fragment_to_result_gen_fragment"
+            app:destination="@id/result_gen_fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/style_fragment"
+        android:name="com.asoft.artsal.photo.ui.ai.fragment.StyleFragment"
+        android:label="Style"
+        tools:layout="@layout/fragment_style">
+        <action
+            android:id="@+id/action_style_fragment_to_result_gen_fragment"
+            app:destination="@id/result_gen_fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/generate_comic_fragment"
+        android:name="com.asoft.artsal.photo.ui.ai.fragment.GenerateComicFragment"
+        android:label="GenerateComic"
+        tools:layout="@layout/fragment_generate_comic">
+    </fragment>
+    <fragment
+        android:id="@+id/generate_story_comic_fragment"
+        android:name="com.asoft.artsal.photo.ui.ai.fragment.GenerateStoryComicFragment"
+        android:label="GenerateStoryComic"
+        tools:layout="@layout/fragment_generate_story_comic">
+        <action
+            android:id="@+id/action_generate_story_comic_fragment_to_result_renerate_fragment"
+            app:destination="@id/result_renerate_fragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/result_renerate_fragment"
+        android:name="com.asoft.artsal.photo.ui.ai.fragment.ResultRenerateFragment"
+        android:label="ResultRenerate"
+        tools:layout="@layout/fragment_result_renerate">
+    </fragment>
+    <fragment
+        android:id="@+id/result_gen_fragment"
+        android:name="com.asoft.artsal.photo.ui.ai.fragment.ResultGenFragment"
+        android:label="ResultGen"
+        tools:layout="@layout/fragment_result_gen">
+    </fragment>
+</navigation>

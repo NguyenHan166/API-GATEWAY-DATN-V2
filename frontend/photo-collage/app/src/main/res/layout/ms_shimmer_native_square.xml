@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.facebook.shimmer.ShimmerFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/shimmer_native"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:shimmer_auto_start="true"
+    app:shimmer_base_color="#ccc">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/rootAds"
+        android:adjustViewBounds="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+        <View
+            android:id="@+id/ad_media"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="1:1"
+            android:background="@color/lightTransparent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/llHeader"
+            android:layout_width="0dp"
+            android:layout_marginTop="@dimen/dp_10"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@id/ad_media"
+            app:layout_constraintStart_toStartOf="@id/ad_media"
+            app:layout_constraintEnd_toEndOf="@id/ad_media"
+            >
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                >
+
+                <View
+                    android:id="@+id/native_ad_icon_load"
+                    android:layout_width="@dimen/dp_35"
+                    android:layout_height="@dimen/dp_35"
+                    android:background="@color/lightTransparent" />
+
+                <TextView
+                    style="@style/Theme.TxtAds"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true" />
+            </RelativeLayout>
+
+            <View
+                android:id="@+id/ad_headline"
+                android:fontFamily="@font/sf_pro_semibold"
+                android:layout_width="0dp"
+                android:background="@color/lightTransparent"
+                android:layout_height="@dimen/dp_35"
+                android:layout_marginStart="@dimen/dp_5"
+                android:textColor="@color/white"
+                android:textSize="@dimen/sp_12"
+                android:layout_weight="1"
+                />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/ad_body"
+                style="@style/BaseTheme.TextRegular"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_5"
+                android:textColor="#B5B5B5"
+                android:textSize="@dimen/sp_11"
+                android:lineSpacingExtra="@dimen/dp_5"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/iv_ad_title"
+                app:layout_constraintTop_toBottomOf="@+id/ad_headline"
+                android:visibility="gone"/>
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <View
+            android:id="@+id/ad_call_to_action"
+            android:layout_width="0dp"
+            android:layout_marginTop="10dp"
+            android:layout_height="@dimen/dp_41"
+            android:background="@color/lightTransparent"
+            app:layout_constraintTop_toBottomOf="@+id/llHeader"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/ad_media"
+            app:layout_constraintStart_toStartOf="@+id/ad_media"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</com.facebook.shimmer.ShimmerFrameLayout>

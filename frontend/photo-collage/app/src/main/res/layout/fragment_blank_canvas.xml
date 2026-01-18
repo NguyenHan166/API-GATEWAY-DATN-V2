@@ -1,0 +1,286 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_main"
+    tools:context="com.asoft.artsal.photo.ui.blankcanvas.BlankCanvasFragment">
+
+    <include
+        android:id="@+id/appBar"
+        layout="@layout/view_header_new"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvTitle"
+        style="@style/BaseTheme.TextRegular"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dp_16"
+        android:layout_marginTop="@dimen/dp_8"
+        android:gravity="center_horizontal"
+        android:text="@string/title_blank_canvas"
+        android:textColor="#CCFFFFFF"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/appBar" />
+
+    <GridLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dp_16"
+        android:layout_marginTop="@dimen/dp_32"
+        android:columnCount="2"
+        android:rowCount="2"
+        app:layout_constraintTop_toBottomOf="@id/appBar">
+
+        <!-- Item 1: Story Comic -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardStory"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_margin="@dimen/dp_8"
+            android:backgroundTint="#263740"
+            app:cardCornerRadius="@dimen/dp_12"
+            app:cardElevation="0dp">
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/btnStory"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="@dimen/dp_8">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:layout_width="@dimen/dp_142"
+                    android:layout_height="@dimen/dp_142"
+                    app:shapeAppearance="@style/roundedImageViewItem"
+                    app:srcCompat="@drawable/img_bg_story" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    style="@style/BaseTheme.TextSemiBold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_12"
+                    android:gravity="center"
+                    android:shadowColor="#80000000"
+                    android:shadowDx="0"
+                    android:shadowDy="2"
+                    android:shadowRadius="4"
+                    android:text="@string/story_comic"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/sp_16" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    style="@style/BaseTheme.TextLight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_4"
+                    android:layout_marginBottom="@dimen/dp_8"
+                    android:gravity="center"
+                    android:shadowColor="#80000000"
+                    android:shadowDx="0"
+                    android:shadowDy="1"
+                    android:shadowRadius="3"
+                    android:text="Generate comic art from text"
+                    android:textColor="@color/white_50"
+                    android:textSize="@dimen/sp_12" />
+            </androidx.appcompat.widget.LinearLayoutCompat>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Item 2: Style -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_margin="@dimen/dp_8"
+            android:backgroundTint="#263740"
+            app:cardCornerRadius="@dimen/dp_12"
+            app:cardElevation="0dp">
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/btnStyle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="@dimen/dp_8">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:layout_width="@dimen/dp_142"
+                    android:layout_height="@dimen/dp_142"
+                    android:scaleType="fitCenter"
+                    app:shapeAppearance="@style/roundedImageViewItem"
+                    app:srcCompat="@drawable/img_bg_style" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    style="@style/BaseTheme.TextSemiBold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_12"
+                    android:gravity="center"
+                    android:shadowColor="#80000000"
+                    android:shadowDx="0"
+                    android:shadowDy="2"
+                    android:shadowRadius="4"
+                    android:text="@string/style"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/sp_16" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    style="@style/BaseTheme.TextLight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_4"
+                    android:layout_marginBottom="@dimen/dp_8"
+                    android:gravity="center"
+                    android:shadowColor="#80000000"
+
+                    android:shadowDx="0"
+                    android:shadowDy="1"
+                    android:shadowRadius="3"
+                    android:text="Transform photo into artistic style."
+                    android:textColor="@color/white_50"
+                    android:textSize="@dimen/sp_12" />
+            </androidx.appcompat.widget.LinearLayoutCompat>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Item 3: Relight -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardRelight"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_margin="@dimen/dp_8"
+            android:backgroundTint="#263740"
+            app:cardCornerRadius="@dimen/dp_12"
+            app:cardElevation="0dp">
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/btnRelight"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="@dimen/dp_8">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:layout_width="@dimen/dp_142"
+                    android:layout_height="@dimen/dp_142"
+                    app:shapeAppearance="@style/roundedImageViewItem"
+                    app:srcCompat="@drawable/img_bg_relight" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    style="@style/BaseTheme.TextSemiBold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_12"
+                    android:gravity="center"
+                    android:shadowColor="#80000000"
+                    android:shadowDx="0"
+                    android:shadowDy="2"
+                    android:shadowRadius="4"
+                    android:text="@string/relight"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/sp_16" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    style="@style/BaseTheme.TextLight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_4"
+                    android:layout_marginBottom="@dimen/dp_8"
+                    android:gravity="center"
+                    android:shadowColor="#80000000"
+                    android:shadowDx="0"
+                    android:shadowDy="1"
+                    android:shadowRadius="3"
+                    android:text="@string/change_portrait_lighting_according_to_prompt"
+                    android:textColor="@color/white_50"
+                    android:textSize="@dimen/sp_12" />
+            </androidx.appcompat.widget.LinearLayoutCompat>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Item 4: Background -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardBackground"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_margin="@dimen/dp_8"
+            android:backgroundTint="#263740"
+            app:cardCornerRadius="@dimen/dp_12"
+            app:cardElevation="0dp">
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/btnBackground"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:padding="@dimen/dp_8">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:layout_width="@dimen/dp_142"
+                    android:layout_height="@dimen/dp_142"
+                    app:shapeAppearance="@style/roundedImageViewItem"
+                    app:srcCompat="@drawable/img_bg_background" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    style="@style/BaseTheme.TextSemiBold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_12"
+                    android:gravity="center"
+                    android:shadowColor="#80000000"
+                    android:shadowDx="0"
+                    android:shadowDy="2"
+                    android:shadowRadius="4"
+                    android:text="@string/background"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/sp_16" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    style="@style/BaseTheme.TextLight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_4"
+                    android:layout_marginBottom="@dimen/dp_8"
+                    android:gravity="center"
+                    android:shadowColor="#80000000"
+                    android:shadowDx="0"
+                    android:shadowDy="1"
+                    android:shadowRadius="3"
+                    android:text="@string/remove_or_replace_background"
+                    android:textColor="@color/white_50"
+                    android:textSize="@dimen/sp_12" />
+            </androidx.appcompat.widget.LinearLayoutCompat>
+        </androidx.cardview.widget.CardView>
+
+    </GridLayout>
+
+    <!-- Phần nút dưới cùng -->
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dp_16"
+        android:layout_marginTop="@dimen/dp_16"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/container">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnTryTemplates"
+            style="@style/BaseTheme.TextSemiBold"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/dp_44"
+            android:layout_marginStart="@dimen/dp_8"
+            android:layout_weight="1"
+            android:background="@drawable/bg_button"
+            android:text="Create comics"
+            android:textColor="@color/txt_normal"
+            android:textSize="@dimen/sp_15"
+            android:visibility="gone" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

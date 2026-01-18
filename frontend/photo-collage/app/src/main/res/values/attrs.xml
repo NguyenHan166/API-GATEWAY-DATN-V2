@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="HabitsLayout">
+        <attr name="nameHabit" format="string" />
+        <attr name="imgHabit" format="integer" />
+    </declare-styleable>
+
+    <declare-styleable name="MaskImageView">
+        <attr name="maskDrawable" format="reference" />
+        <attr name="backgroundDefault" format="boolean" />
+        <attr name="cornerRadius" format="dimension" />
+        <attr name="strokeColor" format="color" />
+        <attr name="strokeWidth" format="dimension" />
+    </declare-styleable>
+</resources>

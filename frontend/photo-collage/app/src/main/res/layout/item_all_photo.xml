@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/imgMyPhotos"
+        android:layout_width= "match_parent"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/img_result_test"
+        />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/containerOptions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_7"
+        android:layout_marginEnd="@dimen/dp_5"
+        android:background="@drawable/bg_options"
+        app:layout_constraintEnd_toEndOf="@id/imgMyPhotos"
+        app:layout_constraintTop_toTopOf="@id/imgMyPhotos">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imgOptions"
+            android:layout_width="@dimen/dp_12"
+            android:layout_height="@dimen/dp_12"
+            android:layout_margin="@dimen/dp_9"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_option" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvDate"
+        style="@style/BaseTheme.TextRegular"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_3"
+        android:textColor="#4E4E4E"
+        android:textSize="@dimen/sp_15"
+        app:layout_constraintTop_toBottomOf="@id/imgMyPhotos"
+        tools:text="10/07/2025" />
+</androidx.constraintlayout.widget.ConstraintLayout>

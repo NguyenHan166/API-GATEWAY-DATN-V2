@@ -1,0 +1,56 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.asoft.artsal.photo.ui.collage.fragment.CropFragment">
+
+    <include
+        android:id="@+id/header"
+        layout="@layout/view_header_bottomsheet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dp_16"
+        android:layout_marginTop="@dimen/dp_6" />
+
+    <View
+        android:id="@+id/backgroundCrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/header"
+        android:background="@color/background_editor"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="@dimen/dp_12"
+        />
+
+    <FrameLayout
+        android:id="@+id/cropFrame"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/control"
+        android:layout_below="@id/header"
+        android:layout_marginTop="@dimen/dp_12">
+
+        <com.yalantis.ucrop.view.UCropView
+            android:id="@+id/ucrop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+    </FrameLayout>
+
+
+    <include
+        android:id="@+id/control"
+        layout="@layout/view_control_crop_image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/bannerAds" />
+
+    <include
+        android:id="@+id/bannerAds"
+        layout="@layout/layout_banner_control"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:visibility="invisible" />
+
+</RelativeLayout>

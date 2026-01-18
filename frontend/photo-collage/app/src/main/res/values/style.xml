@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="BaseTheme.TextRegular" parent="Theme.MinSap">
+        <item name="android:fontFamily">@font/public_sans</item>
+        <item name="android:textSize">@dimen/sp_14</item>
+        <item name="android:textColor">@color/txt_normal</item>
+    </style>
+
+    <style name="BaseTheme.TextMedium" parent="Theme.MinSap">
+        <item name="android:fontFamily">@font/public_sans_medium</item>
+        <item name="android:textSize">@dimen/sp_14</item>
+        <item name="android:textColor">@color/txt_normal</item>
+    </style>
+
+    <style name="BaseTheme.TextSemiBold" parent="Theme.MinSap">
+        <item name="android:fontFamily">@font/public_sans_semibold</item>
+        <item name="android:textSize">@dimen/sp_14</item>
+        <item name="android:textColor">@color/txt_normal</item>
+    </style>
+
+    <style name="BaseTheme.TextBold" parent="Theme.MinSap">
+        <item name="android:fontFamily">@font/public_sans_bold</item>
+        <item name="android:textSize">@dimen/sp_14</item>
+        <item name="android:textColor">@color/txt_normal</item>
+    </style>
+
+    <style name="BaseTheme.TextExtraBold" parent="Theme.MinSap">
+        <item name="android:fontFamily">@font/public_sans_extrabold</item>
+        <item name="android:textSize">@dimen/sp_14</item>
+        <item name="android:textColor">@color/txt_normal</item>
+    </style>
+
+    <style name="BaseTheme.TextLight" parent="Theme.MinSap">
+        <item name="android:fontFamily">@font/public_sans_light</item>
+        <item name="android:textSize">@dimen/sp_12</item>
+        <item name="android:textColor">@color/txt_normal</item>
+    </style>
+
+    <style name="template_layout_style">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:background">#f0f0f0</item>
+        <item name="layout_constraintBottom_toBottomOf">parent</item>
+        <item name="layout_constraintEnd_toEndOf">parent</item>
+        <item name="layout_constraintStart_toStartOf">parent</item>
+        <item name="layout_constraintTop_toTopOf">parent</item>
+    </style>
+
+    <style name="Widget.Custom.Chip.Filter" parent="Base.Widget.MaterialComponents.Chip">
+        <item name="android:checkable">true</item>
+        <item name="chipIconVisible">false</item>
+        <item name="closeIconVisible">false</item>
+        <item name="checkedIcon">@drawable/ic_mtrl_chip_checked_black</item>
+        <item name="android:fontFamily">@font/public_sans_semibold</item>
+        <item name="android:textSize">@dimen/sp_11</item>
+        <item name="android:textColor">@color/txt_normal</item>
+    </style>
+
+    <style name="navTextInactive">
+        <item name="android:fontFamily">@font/public_sans_semibold</item>
+        <item name="android:textSize">@dimen/sp_11</item>
+    </style>
+
+    <style name="navTextActive">
+        <item name="android:fontFamily">@font/public_sans_semibold</item>
+        <item name="android:textSize">@dimen/sp_11</item>
+    </style>
+
+    <style name="roundedImageViewItem" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/dp_8</item>
+    </style>
+
+    <style name="roundedImageViewAd" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">@dimen/dp_12</item>
+    </style>
+
+    <style name="PrepareLoadingAdDialogStyle" parent="Theme.AppCompat.Dialog">
+        <!-- Remove the title bar -->
+        <item name="android:windowNoTitle">true</item>
+        <!-- Set background to transparent -->
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <!-- Prevent dismissing dialog by touching outside -->
+        <item name="android:windowCloseOnTouchOutside">false</item>
+        <!--
+         Setting windowIsFloating to false makes the dialog window potentially
+         fill the screen like a regular window, especially useful with a
+         transparent background and match_parent layout. This often helps
+        -->
+        <item name="android:windowIsFloating">false</item>
+    </style>
+
+    <style name="MinSapBottomSheetDialogTheme" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/BottomSheetStyle</item>
+    </style>
+
+    <style name="BottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/bg_bottom_sheet</item>
+        <item name="android:windowIsFloating">false</item>
+    </style>
+
+    <style name="KeyboardInputStyle" parent="MinSapBottomSheetDialogTheme">
+        <item name="android:windowIsFloating">false</item>
+        <item name="background">@android:color/transparent</item>
+        <item name="backgroundColor">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowSoftInputMode">adjustResize|stateHidden</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <style name="MaterialAlertDialogCustom" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="buttonBarPositiveButtonStyle">@style/PositiveButtonStyle</item>
+        <item name="buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>
+    </style>
+
+    <style name="PositiveButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="NegativeButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/black</item>
+    </style>
+</resources>

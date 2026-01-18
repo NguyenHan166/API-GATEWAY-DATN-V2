@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/template_fragment">
+
+    <fragment
+        android:id="@+id/collage_fragment"
+        android:name="com.asoft.artsal.photo.ui.collage.fragment.CollageFragment"
+        android:label="Collage"
+        tools:layout="@layout/fragment_collage">
+    </fragment>
+
+    <fragment
+        android:id="@+id/my_photo_fragment"
+        android:name="com.asoft.artsal.photo.ui.myphoto.fragment.MyPhotoFragment"
+        android:label="My Photo"
+        tools:layout="@layout/fragment_my_photo">
+    </fragment>
+
+    <fragment
+        android:id="@+id/template_fragment"
+        android:name="com.asoft.artsal.photo.ui.template.fragment.TemplateFragment"
+        android:label= "Template"
+        tools:layout="@layout/fragment_template">
+    </fragment>
+</navigation>

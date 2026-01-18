@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_content_bottom_sheet"
+    android:paddingHorizontal="@dimen/dp_16"
+    android:paddingBottom="@dimen/dp_20">
+
+    <LinearLayout
+        android:id="@+id/radioContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_8"
+        android:gravity="start|bottom"
+        android:orientation="horizontal"
+        android:weightSum="6"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/btnCustom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/imgCustom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/dp_8"
+                app:layout_constraintBottom_toTopOf="@id/tvCustom"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:srcCompat="@drawable/ic_custom_crop" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvCustom"
+                style="@style/BaseTheme.TextSemiBold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_8"
+                android:text="@string/custom"
+                android:textColor="@color/txt_normal"
+                android:textSize="@dimen/sp_12"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@id/imgCustom"
+                app:layout_constraintStart_toStartOf="@id/imgCustom" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/btnRadio11"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:alpha="0.5">
+
+            <View
+                android:id="@+id/viewRadio11"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/dp_28"
+                android:layout_marginBottom="@dimen/dp_8"
+                android:background="@drawable/bg_type_crop"
+                app:layout_constraintBottom_toTopOf="@id/tvRadio11"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:srcCompat="@drawable/ic_custom_crop" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvRadio11"
+                style="@style/BaseTheme.TextSemiBold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_8"
+                android:text="1:1"
+                android:textColor="@color/txt_normal"
+                android:textSize="@dimen/sp_12"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@id/viewRadio11"
+                app:layout_constraintStart_toStartOf="@id/viewRadio11" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/btnRadio34"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:alpha="0.5">
+
+            <View
+                android:id="@+id/viewRadio34"
+                android:layout_width="@dimen/dp_26"
+                android:layout_height="0dp"
+                android:background="@drawable/bg_type_crop"
+                app:layout_constraintDimensionRatio="H,3:4"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_custom_crop" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvRadio34"
+                style="@style/BaseTheme.TextSemiBold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_8"
+                android:text="3:4"
+                android:textColor="@color/txt_normal"
+                android:textSize="@dimen/sp_12"
+                app:layout_constraintEnd_toEndOf="@id/viewRadio34"
+                app:layout_constraintStart_toStartOf="@id/viewRadio34"
+                app:layout_constraintTop_toBottomOf="@id/viewRadio34" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/btnRadio32"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:alpha="0.5">
+
+            <View
+                android:id="@+id/viewRadio32"
+                android:layout_width="@dimen/dp_32"
+                android:layout_height="0dp"
+                android:background="@drawable/bg_type_crop"
+                app:layout_constraintDimensionRatio="H,3:2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_custom_crop" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvRadio32"
+                style="@style/BaseTheme.TextSemiBold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_8"
+                android:text="3:2"
+                android:textColor="@color/txt_normal"
+                android:textSize="@dimen/sp_12"
+                app:layout_constraintEnd_toEndOf="@id/viewRadio32"
+                app:layout_constraintStart_toStartOf="@id/viewRadio32"
+                app:layout_constraintTop_toBottomOf="@id/viewRadio32" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/btnRadio169"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:alpha="0.5">
+
+            <View
+                android:id="@+id/viewRadio169"
+                android:layout_width="@dimen/dp_40"
+                android:layout_height="0dp"
+                android:background="@drawable/bg_type_crop"
+                app:layout_constraintDimensionRatio="H,16:9"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_custom_crop" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvRadio169"
+                style="@style/BaseTheme.TextSemiBold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_8"
+                android:text="16:9"
+                android:textColor="@color/txt_normal"
+                android:textSize="@dimen/sp_12"
+                app:layout_constraintEnd_toEndOf="@id/viewRadio169"
+                app:layout_constraintStart_toStartOf="@id/viewRadio169"
+                app:layout_constraintTop_toBottomOf="@id/viewRadio169" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/btnRadio916"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:alpha="0.5">
+
+            <View
+                android:id="@+id/viewRadio916"
+                android:layout_width="@dimen/dp_32"
+                android:layout_height="0dp"
+                android:background="@drawable/bg_type_crop"
+                app:layout_constraintDimensionRatio="H,9:16"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_custom_crop" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvRadio916"
+                style="@style/BaseTheme.TextSemiBold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_8"
+                android:text="16:9"
+                android:textColor="@color/txt_normal"
+                android:textSize="@dimen/sp_12"
+                app:layout_constraintEnd_toEndOf="@id/viewRadio916"
+                app:layout_constraintStart_toStartOf="@id/viewRadio916"
+                app:layout_constraintTop_toBottomOf="@id/viewRadio916" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/btn_rotate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/radioContainer">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imgCrop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_rotate" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            style="@style/BaseTheme.TextMedium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dp_8"
+            android:text="@string/rotate"
+            android:textSize="@dimen/sp_14"
+            app:layout_constraintBottom_toBottomOf="@id/imgCrop"
+            app:layout_constraintStart_toEndOf="@id/imgCrop"
+            app:layout_constraintTop_toTopOf="@id/imgCrop" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

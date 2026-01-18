@@ -1,0 +1,487 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_main"
+    tools:context="com.asoft.artsal.photo.ui.ai.fragment.RelightFragment">
+
+    <!-- Header -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/dp_16"
+        android:paddingTop="@dimen/dp_6"
+        android:paddingBottom="@dimen/dp_12"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/btnBack"
+            android:layout_width="@dimen/dp_24"
+            android:layout_height="@dimen/dp_24"
+            android:tint="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_back" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitle"
+            style="@style/BaseTheme.TextSemiBold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Relight Portrait"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_16"
+            app:layout_constraintBottom_toBottomOf="@id/btnBack"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/btnBack" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        android:isScrollContainer="true"
+        app:layout_constraintBottom_toTopOf="@id/btnRelight"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/dp_16"
+            android:paddingBottom="@dimen/dp_16">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/imageContainer"
+                android:layout_width="@dimen/dp_328"
+                android:layout_height="@dimen/dp_200"
+                android:layout_marginTop="@dimen/dp_16"
+                android:background="@drawable/bg_upload_portrait">
+
+                <!-- Image View - Always visible, will show uploaded or result image -->
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/imgView"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:padding="@dimen/dp_4"
+                    android:scaleType="fitCenter"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:shapeAppearance="@style/roundedImageViewItem" />
+
+                <!-- Upload placeholder - Hidden when image is selected -->
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/btnSelectImage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_42"
+                    android:background="@drawable/bg_camera_icon"
+                    android:padding="@dimen/dp_12"
+                    android:tint="@color/white"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_add_image" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvUploadText"
+                    style="@style/BaseTheme.TextSemiBold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_16"
+                    android:text="Original Image"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_16"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/btnSelectImage" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvUploadHint"
+                    style="@style/BaseTheme.TextRegular"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_16"
+                    android:text="@string/tap_to_select_a_photo_from_your_gallery"
+                    android:textColor="@color/txt_normal_grey"
+                    android:textSize="@dimen/sp_12"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvUploadText" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Light Prompt Section -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_24">
+
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvPromptLabel"
+                    style="@style/BaseTheme.TextSemiBold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/light_prompt"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_14"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_12"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvPromptLabel">
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/etPrompt"
+                        style="@style/BaseTheme.TextRegular"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_rounded_grey"
+                        android:gravity="top|start"
+                        android:hint="@string/describe_your_light_idea"
+                        android:inputType="textMultiLine|textCapSentences"
+                        android:minHeight="@dimen/dp_100"
+                        android:paddingHorizontal="@dimen/dp_16"
+                        android:paddingVertical="@dimen/dp_12"
+                        android:textColor="@color/white"
+                        android:textColorHint="@color/white_50"
+                        android:textSize="@dimen/sp_14"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Direction Section -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_24"
+                android:visibility="gone">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/iconDirection"
+                    android:layout_width="@dimen/dp_20"
+                    android:layout_height="@dimen/dp_20"
+                    android:tint="@color/white"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="ContentDescription" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvDirectionLabel"
+                    style="@style/BaseTheme.TextSemiBold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dp_8"
+                    android:text="Direction"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_14"
+                    app:layout_constraintBottom_toBottomOf="@id/iconDirection"
+                    app:layout_constraintStart_toEndOf="@id/iconDirection"
+                    app:layout_constraintTop_toTopOf="@id/iconDirection" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/btnReset"
+                    style="@style/BaseTheme.TextSemiBold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="RESET"
+                    android:textColor="@color/primary_gradient"
+                    android:textSize="@dimen/sp_12"
+                    app:layout_constraintBottom_toBottomOf="@id/tvDirectionLabel"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/tvDirectionLabel" />
+
+                <!-- Direction Buttons Grid -->
+                <GridLayout
+                    android:id="@+id/gridDirection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_12"
+                    android:columnCount="3"
+                    android:rowCount="3"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvDirectionLabel">
+
+
+                    <!-- Top -->
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnTop"
+                        style="@style/BaseTheme.TextRegular"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/dp_48"
+                        android:layout_row="0"
+                        android:layout_rowWeight="1"
+                        android:layout_column="1"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="@dimen/dp_4"
+                        android:background="@drawable/bg_button_purple_selected"
+                        android:drawableTop="@drawable/ic_top"
+                        android:paddingVertical="@dimen/dp_4"
+                        android:text="@string/top"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/sp_12"
+                        app:iconPadding="@dimen/dp_4"
+                        app:iconSize="@dimen/dp_16"
+                        app:iconTint="@color/white" />
+
+
+                    <!-- Left -->
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnLeft"
+                        style="@style/BaseTheme.TextRegular"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/dp_48"
+                        android:layout_row="1"
+                        android:layout_rowWeight="1"
+                        android:layout_column="0"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="@dimen/dp_4"
+                        android:background="@drawable/bg_button_purple_selected"
+                        android:drawableTop="@drawable/ic_left"
+                        android:text="Left"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/sp_12"
+                        app:icon="@drawable/ic_left"
+                        app:iconPadding="@dimen/dp_4"
+                        app:iconSize="@dimen/dp_16"
+                        app:iconTint="@color/white" />
+
+
+                    <!-- Right -->
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnRight"
+                        style="@style/BaseTheme.TextRegular"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/dp_48"
+                        android:layout_row="1"
+                        android:layout_rowWeight="1"
+                        android:layout_column="2"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="@dimen/dp_4"
+                        android:background="@drawable/bg_button_purple_selected"
+                        android:drawableTop="@drawable/ic_right"
+                        android:text="Right"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/sp_12"
+                        app:icon="@drawable/ic_right"
+                        app:iconPadding="@dimen/dp_4"
+                        app:iconSize="@dimen/dp_16"
+                        app:iconTint="@color/white" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnBottom"
+                        style="@style/BaseTheme.TextRegular"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/dp_48"
+                        android:layout_row="2"
+                        android:layout_rowWeight="1"
+                        android:layout_column="1"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="@dimen/dp_4"
+                        android:background="@drawable/bg_button_purple_selected"
+                        android:drawableTop="@drawable/ic_bottom"
+                        android:text="Bottom"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/sp_12"
+                        app:icon="@drawable/ic_bottom"
+                        app:iconGravity="textStart"
+                        app:iconPadding="@dimen/dp_4"
+                        app:iconSize="@dimen/dp_16"
+                        app:iconTint="@color/white" />
+                </GridLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Adjustments Section -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_24">
+
+                <!-- Output Quality -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layoutOutputQuality"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_16"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvAdjustmentsLabel">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tvOutputQualityLabel"
+                        style="@style/BaseTheme.TextRegular"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/output_quality"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/sp_14"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tvOutputQualityValue"
+                        style="@style/BaseTheme.TextSemiBold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="88%"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/sp_14"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/sliderOutputQuality"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/dp_4"
+                        android:value="25f"
+                        android:valueFrom="0f"
+                        android:valueTo="100f"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tvOutputQualityLabel" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- Steps -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layoutSteps"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_8"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/layoutOutputQuality">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tvStepsLabel"
+                        style="@style/BaseTheme.TextRegular"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/steps"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/sp_14"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tvStepsValue"
+                        style="@style/BaseTheme.TextSemiBold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="25"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/sp_14"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/sliderSteps"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/dp_4"
+                        android:value="25f"
+                        android:valueFrom="1f"
+                        android:valueTo="100f"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tvStepsLabel" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- CFG Scale -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layoutCfgScale"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_8"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/layoutSteps">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tvCfgScaleLabel"
+                        style="@style/BaseTheme.TextRegular"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/cfg_scale"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/sp_14"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tvCfgScaleValue"
+                        style="@style/BaseTheme.TextSemiBold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="7.5"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/sp_14"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/sliderCfgScale"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/dp_8"
+                        android:value="7.5f"
+                        android:valueFrom="1f"
+                        android:valueTo="32f"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tvCfgScaleLabel" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnRelight"
+        style="@style/BaseTheme.TextSemiBold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dp_30"
+        android:layout_marginBottom="@dimen/dp_44"
+        android:background="@drawable/bg_button"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:text="@string/generate"
+        android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:textSize="@dimen/sp_16"
+        app:backgroundTint="@null"
+        app:iconGravity="textStart"
+        android:alpha="0.5"
+        app:iconPadding="@dimen/dp_12"
+        app:iconTint="@null"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

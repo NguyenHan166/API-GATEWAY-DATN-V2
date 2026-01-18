@@ -1,0 +1,308 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_main"
+    tools:context="com.asoft.artsal.photo.ui.ai.fragment.GenerateStoryComicFragment">
+
+    <!-- Header -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/dp_16"
+        android:paddingTop="@dimen/dp_6"
+        android:paddingBottom="@dimen/dp_12"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/btnBack"
+            android:layout_width="@dimen/dp_24"
+            android:layout_height="@dimen/dp_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_back_white" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitle"
+            style="@style/BaseTheme.TextSemiBold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Generate Comic"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_16"
+            app:layout_constraintBottom_toBottomOf="@id/btnBack"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/btnBack" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ScrollView
+        android:id="@+id/scrollViewContent"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@+id/btnGenerate"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/dp_16"
+            android:paddingTop="@dimen/dp_16"
+            android:paddingBottom="@dimen/dp_12">
+
+            <!-- Section: Cốt truyện -->
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvStorylineLabel"
+                style="@style/BaseTheme.TextSemiBold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/prompt"
+                android:textColor="@color/white"
+                android:textSize="@dimen/sp_16" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_8"
+                android:background="@drawable/bg_radius_8"
+                android:backgroundTint="@color/bg_second"
+                android:minHeight="@dimen/dp_140"
+                android:padding="@dimen/dp_12">
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/etPrompt"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/dp_138"
+                    android:background="@android:color/transparent"
+                    android:gravity="top|start"
+                    android:hint="@string/describe_your_story_e_g_a_dragon_warrior_searches_for_a_magical_gem_in_an_ancient_neon_forest"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:maxLines="10"
+                    android:scrollbars="vertical"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/white_50"
+                    android:textSize="@dimen/sp_13"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvCharCount"
+                    style="@style/BaseTheme.TextRegular"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0/500"
+                    android:textColor="@color/white_50"
+                    android:textSize="@dimen/sp_12"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Section: Cấu hình -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_24">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvConfigurationLabel"
+                    style="@style/BaseTheme.TextMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/multil_page"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_14"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switchConfiguration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:thumbTint="@color/switch_thumb"
+                    app:track="@drawable/switch_track"
+                    app:trackTint="@color/switch_track" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- SỐ TRANG -->
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/viewSetupPage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+
+
+                <LinearLayout
+                    android:id="@+id/llPages"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:layout_marginTop="@dimen/dp_8"
+                    android:orientation="horizontal">
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tvPagesLabel"
+                        style="@style/BaseTheme.TextMedium"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/page_number"
+                        android:layout_weight="1"
+
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/sp_12" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnPages2"
+                        style="@style/BaseTheme.TextMedium"
+                        android:layout_width="@dimen/dp_76"
+                        android:layout_height="@dimen/dp_29"
+                        android:layout_marginEnd="@dimen/dp_16"
+                        android:background="@drawable/selector_bg_page_item"
+                        android:text="@string/_2_pages"
+                        android:textColor="@color/button_text_color_selector"
+                        android:textSize="@dimen/sp_12" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnPages3"
+                        style="@style/BaseTheme.TextMedium"
+                        android:layout_width="@dimen/dp_76"
+                        android:layout_height="@dimen/dp_29"
+                        android:background="@drawable/selector_bg_page_item"
+                        android:text="@string/_3_pages"
+                        android:textColor="@color/button_text_color_selector"
+                        android:textSize="@dimen/sp_12" />
+                </LinearLayout>
+
+
+
+                <LinearLayout
+                    android:id="@+id/llPanels"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_8"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tvPanelsLabel"
+                        style="@style/BaseTheme.TextMedium"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/frame_number"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/sp_12" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnPanels3"
+                        style="@style/BaseTheme.TextMedium"
+                        android:layout_width="@dimen/dp_76"
+                        android:layout_height="@dimen/dp_29"
+                        android:layout_marginEnd="@dimen/dp_16"
+                        android:background="@drawable/selector_bg_page_item"
+                        android:text="@string/_3_frames"
+                        android:textColor="@color/button_text_color_selector"
+                        android:textSize="@dimen/sp_12" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/btnPanels4"
+                        style="@style/BaseTheme.TextMedium"
+                        android:layout_width="@dimen/dp_76"
+                        android:layout_height="@dimen/dp_29"
+                        android:background="@drawable/selector_bg_page_item"
+                        android:text="@string/_4_frames"
+                        android:textColor="@color/button_text_color_selector"
+                        android:textSize="@dimen/sp_12" />
+                </LinearLayout>
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvQualityLabel"
+                style="@style/BaseTheme.TextMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_24"
+                android:text="CHẤT LƯỢNG MODEL"
+                android:textColor="@color/txt_normal"
+                android:textSize="@dimen/sp_12"
+                android:visibility="gone" />
+
+            <androidx.appcompat.widget.AppCompatSpinner
+                android:id="@+id/spinnerQualitySelector"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_40"
+                android:layout_marginTop="@dimen/dp_8"
+                android:background="@color/white"
+                android:paddingHorizontal="@dimen/dp_12"
+                android:visibility="gone" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_24">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvStyleLabel"
+                    style="@style/BaseTheme.TextSemiBold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/choose_style"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_16"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_8"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never"
+                android:scrollbars="none"
+                tools:listitem="@layout/item_style" />
+
+
+        </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnGenerate"
+        style="@style/BaseTheme.TextSemiBold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dp_30"
+        android:layout_marginBottom="@dimen/dp_60"
+        android:background="@drawable/bg_button"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:text="@string/generate"
+        android:textAllCaps="false"
+        android:textColor="@color/black"
+        android:textSize="@dimen/sp_16"
+        app:backgroundTint="@null"
+        app:iconGravity="textStart"
+        app:iconPadding="@dimen/dp_12"
+        app:iconTint="@null"
+        app:layout_constraintBottom_toBottomOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ui.TestCollageFragment">
+
+   <include
+       android:id="@+id/viewHeader"
+       layout="@layout/view_header_home"
+       android:layout_marginHorizontal="@dimen/dp_16"
+       android:layout_marginTop="@dimen/dp_6"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       app:layout_constraintTop_toTopOf="parent"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintStart_toStartOf="parent"
+       />
+
+   <com.google.android.material.tabs.TabLayout
+       android:id="@+id/tabLayout"
+       app:tabGravity="fill"
+       app:tabTextColor="@color/txt_nor_opacity_50"
+       app:tabTextAppearance="@style/BaseTheme.TextSemiBold"
+       app:tabSelectedTextColor="@color/txt_normal"
+       android:layout_marginHorizontal="@dimen/dp_16"
+       android:layout_marginTop="@dimen/dp_16"
+       app:tabMode="fixed"
+       app:tabPaddingStart="@dimen/dp_7"
+       app:tabPaddingEnd="@dimen/dp_7"
+       app:tabIndicatorHeight="0dp"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintTop_toBottomOf="@id/viewHeader"
+       app:tabRippleColor="@color/transparent"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content">
+
+   </com.google.android.material.tabs.TabLayout>
+
+   <androidx.recyclerview.widget.RecyclerView
+       android:id="@+id/rclFrameCollage"
+       app:layout_constraintTop_toBottomOf="@id/tabLayout"
+       app:layout_constraintBottom_toBottomOf="parent"
+       app:layout_constraintEnd_toEndOf="parent"
+       android:layout_marginTop="@dimen/dp_12"
+       android:background="@color/background_editor"
+       app:layout_constraintStart_toStartOf="parent"
+       android:paddingHorizontal="@dimen/dp_8"
+       android:clipToPadding="false"
+       android:paddingTop="@dimen/dp_4"
+       android:layout_width="match_parent"
+       android:layout_height="0dp"
+       />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

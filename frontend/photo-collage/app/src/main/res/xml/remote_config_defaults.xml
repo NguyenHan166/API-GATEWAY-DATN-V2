@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+
+    <entry>
+        <key>native_banner_splash_show</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>inter_splash_show</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>inter_splash_2nd_show</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>native_lfo1_show</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>native_lfo2_show</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>native_onb1_show</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>native_onb1_click_show</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>native_full1_show</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>native_full2_show</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>native_template_show</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>native_collage_show</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>banner_collage_show</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>banner_template_show</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>inter_save_collage</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>inter_save_template_show</key>
+        <value>true</value>
+    </entry>
+
+    <entry>
+        <key>native_result_show</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>banner_my_photo_show</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>banner_select_photo_show</key>
+        <value>true</value>
+    </entry>
+    <entry>
+        <key>native_home_show</key>
+        <value>true</value>
+    </entry>
+
+</defaultsMap>

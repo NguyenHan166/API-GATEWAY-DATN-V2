@@ -1,0 +1,40 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.asoft.artsal.photo.ui.myphoto.fragment.AllPhotoFragment">
+
+    <include
+        android:id="@+id/header"
+        layout="@layout/view_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvAllPhotos"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/dp_12"
+        app:layout_constraintBottom_toTopOf="@id/adsBanner"
+        app:layout_constraintTop_toBottomOf="@id/header" />
+    <include
+        android:id="@+id/emptyView"
+        layout="@layout/layout_photo_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dp_80"
+        android:layout_marginTop="@dimen/dp_100"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+
+        />
+
+    <include
+        android:id="@+id/adsBanner"
+        layout="@layout/layout_banner_control"
+        android:layout_width="match_parent"
+        android:visibility="invisible"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

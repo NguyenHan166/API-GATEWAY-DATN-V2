@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_main"
+    tools:context="com.asoft.artsal.photo.ui.ai.fragment.ReplaceBgFragment">
+
+    <!-- Header -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/dp_16"
+        android:paddingTop="@dimen/dp_6"
+        android:paddingBottom="@dimen/dp_12"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/btnBack"
+            android:layout_width="@dimen/dp_24"
+            android:layout_height="@dimen/dp_24"
+            android:tint="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_back" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitle"
+            style="@style/BaseTheme.TextSemiBold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chỉnh sửa Nền"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_16"
+            app:layout_constraintBottom_toBottomOf="@id/btnBack"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/btnBack" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        android:isScrollContainer="true"
+        app:layout_constraintBottom_toTopOf="@id/btnProcess"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/dp_20"
+            android:paddingBottom="@dimen/dp_16">
+
+            <!-- Mode Selection Buttons -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dp_16"
+                android:layout_marginTop="@dimen/dp_16"
+                android:background="@drawable/bg_selector_mode"
+                android:padding="@dimen/dp_4">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/btnRemoveMode"
+                    style="@style/BaseTheme.TextMedium"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/dp_8"
+                    android:background="@drawable/bg_button_replace"
+                    android:gravity="center"
+                    android:paddingVertical="@dimen/dp_5"
+                    android:text="@string/remove"
+                    android:textColor="@color/button_text_replace_bg_selector"
+                    android:textSize="@dimen/sp_12"
+                    app:layout_constraintEnd_toStartOf="@id/btnReplaceMode"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/btnReplaceMode"
+                    style="@style/BaseTheme.TextMedium"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dp_8"
+                    android:background="@drawable/bg_button_replace"
+                    android:gravity="center"
+                    android:paddingVertical="@dimen/dp_5"
+                    android:text="@string/replace"
+                    android:textColor="@color/button_text_color_selector"
+                    android:textSize="@dimen/sp_12"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/btnRemoveMode"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/imageContainer"
+                android:layout_width="@dimen/dp_328"
+                android:layout_height="@dimen/dp_200"
+                android:layout_marginTop="@dimen/dp_24"
+                android:background="@drawable/bg_upload_portrait">
+
+                <!-- Image View - Always visible, will show uploaded or result image -->
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/imgView"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:padding="@dimen/dp_4"
+                    android:scaleType="fitCenter"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:shapeAppearance="@style/roundedImageViewItem" />
+
+                <!-- Upload placeholder - Hidden when image is selected -->
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/btnSelectImage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_42"
+                    android:background="@drawable/bg_camera_icon"
+                    android:padding="@dimen/dp_12"
+                    android:tint="@color/white"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_add_image" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvUploadText"
+                    style="@style/BaseTheme.TextSemiBold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_16"
+                    android:text="Original Image"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_16"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/btnSelectImage" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvUploadHint"
+                    style="@style/BaseTheme.TextRegular"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_16"
+                    android:text="@string/tap_to_select_a_photo_from_your_gallery"
+                    android:textColor="@color/txt_normal_grey"
+                    android:textSize="@dimen/sp_12"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvUploadText" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+            <!-- Background Image Section (Only for Replace Mode) -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/bgImageSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_16"
+                android:visibility="visible">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvBgSectionTitle"
+                    style="@style/BaseTheme.TextSemiBold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_new_background"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_14"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <!-- Background Image Thumbnails -->
+                <HorizontalScrollView
+                    android:id="@+id/scrollViewBgThumbnails"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_12"
+                    android:scrollbars="none"
+                    android:visibility="visible"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvBgSectionTitle">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/btnUploadBg"
+                            android:layout_width="@dimen/dp_68"
+                            android:layout_height="@dimen/dp_68"
+                            android:layout_marginEnd="@dimen/dp_12"
+                            android:background="@drawable/bg_upload_portrait">
+
+                            <androidx.appcompat.widget.AppCompatImageView
+                                android:id="@+id/iconUploadBg"
+                                android:layout_width="@dimen/dp_32"
+                                android:layout_height="@dimen/dp_32"
+                                android:tint="@color/white"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent"
+                                app:srcCompat="@drawable/ic_new_background" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/imgBackgroundFg"
+                            android:layout_width="@dimen/dp_68"
+                            android:layout_height="@dimen/dp_68"
+                            android:layout_marginEnd="@dimen/dp_12"
+                            android:scaleType="centerCrop"
+                            android:visibility="gone"
+                            app:shapeAppearance="@style/roundedImageViewItem"
+                            tools:srcCompat="@drawable/img_bg_new1" />
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/imgBgPreview1"
+                            android:layout_width="@dimen/dp_68"
+                            android:layout_height="@dimen/dp_68"
+                            android:layout_marginEnd="@dimen/dp_12"
+                            android:scaleType="centerCrop"
+                            android:visibility="visible"
+                            app:shapeAppearance="@style/roundedImageViewItem"
+                            app:srcCompat="@drawable/img_bg_replace1" />
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/imgBgPreview2"
+                            android:layout_width="@dimen/dp_68"
+                            android:layout_height="@dimen/dp_68"
+                            android:layout_marginEnd="@dimen/dp_12"
+                            android:padding="@dimen/dp_2"
+                            android:scaleType="centerCrop"
+                            android:visibility="visible"
+                            app:shapeAppearance="@style/roundedImageViewItem"
+                            app:srcCompat="@drawable/img_bg_replace2" />
+
+                        <!-- Background Preview 3 -->
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/imgBgPreview3"
+                            android:layout_width="@dimen/dp_68"
+                            android:layout_height="@dimen/dp_68"
+                            android:scaleType="centerCrop"
+                            android:visibility="visible"
+                            app:shapeAppearance="@style/roundedImageViewItem"
+                            app:srcCompat="@drawable/img_bg_replace3" />
+                    </LinearLayout>
+                </HorizontalScrollView>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Adjustments Section -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_24">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvAdjustmentsLabel"
+                    style="@style/BaseTheme.TextSemiBold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/feather"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_14"
+
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvFeatherValue"
+                    style="@style/BaseTheme.TextSemiBold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="10"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_14"
+                    app:layout_constraintBottom_toBottomOf="@id/tvAdjustmentsLabel"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/tvAdjustmentsLabel" />
+
+                <!-- Feather Slider -->
+                <com.google.android.material.slider.Slider
+                    android:id="@+id/sliderFeather"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_12"
+                    android:value="10f"
+                    android:valueFrom="0f"
+                    android:valueTo="20f"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvAdjustmentsLabel" />
+
+                <!-- Shadow Section -->
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/iconShadow"
+                    android:layout_width="@dimen/dp_20"
+                    android:layout_height="@dimen/dp_20"
+                    android:layout_marginTop="@dimen/dp_24"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/sliderFeather"
+                    app:srcCompat="@drawable/ic_shadow_un_select"
+                    tools:ignore="ContentDescription" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvShadowLabel"
+                    style="@style/BaseTheme.TextSemiBold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dp_8"
+                    android:text="@string/shadow"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_14"
+                    app:layout_constraintBottom_toBottomOf="@id/iconShadow"
+                    app:layout_constraintStart_toEndOf="@id/iconShadow"
+                    app:layout_constraintTop_toTopOf="@id/iconShadow" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Process Button -->
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnProcess"
+        style="@style/BaseTheme.TextSemiBold"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_48"
+        android:layout_marginHorizontal="@dimen/dp_30"
+        android:layout_marginBottom="@dimen/dp_61"
+        android:background="@drawable/bg_button"
+        android:drawablePadding="@dimen/dp_8"
+        android:gravity="center"
+        android:alpha="0.5"
+        android:text="@string/generate"
+        android:textColor="@color/black"
+        android:textSize="@dimen/sp_16"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
